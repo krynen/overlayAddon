@@ -28,6 +28,10 @@ stream.bundle(function(err, buf) {
     var client = path.resolve("./client.html");
     var chrome = path.resolve(process.env.npm_package_config_chrome);
     var sandbox = "--user-data-dir=" + path.resolve(process.env.npm_package_config_sandbox);
-    require("child_process").execFile(chrome, [client, "--disable-web-security", sandbox, "--incognito"]);
+    const browser = require("child_process").spawn(
+      chrome,
+      [client, "--disable-web-security", sandbox, "--incognito"],
+      { detached:true, stdio: "ignore" } );
+     browser.unref();
   }
 });
