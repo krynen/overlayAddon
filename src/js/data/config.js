@@ -1,3 +1,5 @@
-module.exports = function() {
-	// IMPORT CONFIG FILE
+module.exports = function(uniformData) {
+  return new (function() {
+    return this;
+  })();
 };
