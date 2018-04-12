@@ -57,9 +57,47 @@ module.exports = function(uniformData) {
       }
       
       else if (arguments[0][0] == ":") {
+        arguments[0] = arguments[0].substring(1);
+
+        var name = arguments[0].split("!")[0];
+        
+        switch (arguments[1]) {
+        default:
+          throw ["ircWrongMessage"];
+        }
       }
       
       else if (arguments[0][0] == "@") {
+        arguments.removePrefix = function(num) {
+          for (var i=0; i<num; ++i) { this.shift(); }
+          this[0] = this[0].replace(/^:/, "");
+        };
+        
+        var subArguments = (function(args) {
+          var ret = [];
+          args.forEach( function(el) {
+            var kv = el.split("=");
+            ret[kv[0]] = kv[1];
+          } );
+          return ret;
+        })(arguments.shift().substring(1).split(";"));
+        
+        var message = {
+          name : subArguments["display-name"]
+        };
+        
+        switch (arguments[1]) {
+        case "PRIVMSG":
+          arguments.removePrefix(3);
+          Object.assign(message, {
+            text : arguments.join(" ")
+          } );
+          uniformData.objs.message.add(message);
+          break;
+          
+        default:
+          throw ["ircWrongMessage"];
+        }
       }
       
       else {
