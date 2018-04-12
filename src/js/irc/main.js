@@ -2,7 +2,7 @@ module.exports = function(uniformData) {
   return new (function() {
     /* 필드 초기화 */
     this.connect = function() {};
-    this.response = function() {};
+    this.response = function(line) {};
     this.ws = {};
     
     var CRLF = String.fromCharCode(13) + String.fromCharCode(10);
