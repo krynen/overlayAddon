@@ -12,21 +12,21 @@ module.exports = function(uniformData) {
       var channel = "";
       var data = {};
       try { channel = uniformData.data.config.channel; }
-      catch(event) { throw ["loadConfigFail", "Error"]; }
+      catch(event) { throw ["loadConfigFail"]; }
       try { data = uniformData.data.module.irc; }
-      catch(event) { throw ["loadDataFail", "Error"]; }
+      catch(event) { throw ["loadDataFail"]; }
       
       /* 메세지 모듈 로드 */
       var message = {};
       try { message = uniformData.objs.message; }
-      catch(event) { throw ["loadModuleMessageFail", "Error"]; }
+      catch(event) { throw ["loadModuleMessageFail"]; }
       
       /* 채널 이름 예외처리 */
-      if (channel==null || channel.match(/^[A-Za-z0-9_]+$/)==null) { throw ["ircWrongChannel", "Error"]; }
+      if (channel==null || channel.match(/^[A-Za-z0-9_]+$/)==null) { throw ["ircWrongChannel"]; }
       
       /* 웹소켓을 열고 초기 발신 메세지를 설정 */
       try { this.ws = new WebSocket(data.uri); }
-      catch(event) { throw ["ircConnectFail", "Error", event.message]; }
+      catch(event) { throw ["ircConnectFail", event.message]; }
       this.ws.onopen = function() {
         this.send("PASS " + data.pass + CRLF);
         this.send("NICK " + data.nick + CRLF);
@@ -44,7 +44,7 @@ module.exports = function(uniformData) {
       /* 브라우저가 켜져 있는 동안 항시 접속을 유지하므로,
          비정상적으로 연결이 해제되었을 경우엔 예외처리 */
       this.ws.onclose = function(event) {
-        throw ["ircClosed", "Error", "error code "+event.code];
+        throw ["ircClosed", event.code];
       };
     };
     
@@ -56,9 +56,15 @@ module.exports = function(uniformData) {
         this.ws.send("PONG" + CRLF);
       }
       
-      /*
-          PING 이외의 메세지에 대한 반응 추가해야 함
-      */
+      else if (arguments[0][0] == ":") {
+      }
+      
+      else if (arguments[0][0] == "@") {
+      }
+      
+      else {
+        throw ["ircWrongMessage"];
+      }
     };
     
     return this;

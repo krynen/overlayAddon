@@ -8,7 +8,7 @@ module.exports = function(uniformData) {
     this.init = function() {
       /* 데이터 로드 */
       try { this.data = uniformData.data.module.message; }
-      catch(event) { throw ["loadDataFail", "Error"]; }
+      catch(event) { throw ["loadDataFail"]; }
     };
     
     this.add = function(message) {
