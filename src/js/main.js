@@ -9,10 +9,12 @@ module.exports = new function() {
   };
   
   this.objs = {
-    message : {},
+    message : require("./message/main.js")(this),
     config  : require("./data/config.js")(this),
     irc     : require("./irc/main.js")(this)
   };
   
   return this;
 }();
+
+module.exports.objs.message.init();
