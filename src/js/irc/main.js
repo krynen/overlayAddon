@@ -63,7 +63,7 @@ module.exports = function(uniformData) {
         
         switch (arguments[1]) {
         default:
-          throw ["ircWrongMessage"];
+          throw ["ircWrongMessage", arguments[1]];
         }
       }
       
@@ -82,9 +82,7 @@ module.exports = function(uniformData) {
           return ret;
         })(arguments.shift().substring(1).split(";"));
         
-        var message = {
-          name : subArguments["display-name"]
-        };
+        var message = setSubArgs(subArguments);
         
         switch (arguments[1]) {
         case "PRIVMSG":
@@ -96,12 +94,12 @@ module.exports = function(uniformData) {
           break;
           
         default:
-          throw ["ircWrongMessage"];
+          throw ["ircWrongMessage", arguments[1]];
         }
       }
       
       else {
-        throw ["ircWrongMessage"];
+        throw ["ircWrongMessage", line];
       }
     };
     
