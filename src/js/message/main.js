@@ -31,18 +31,26 @@ var addRecursive = function(message, struct, parent) {
   }
   if (Array.isArray(struct.children)) {
     struct.children.forEach( function(el) {
-      switch(el) {
-      case "name":
-        parent.innerHTML = message.name;
-        break;
-        
-      case "text":
-        parent.innerHTML = message.text;
-        break;
-        
-      default :
-        addRecursive(message, el, parent);
-        break;
+      if (typeof el == "object") { addRecursive(message, el, parent); }
+      else {
+        switch(el) {
+        case "name":
+          parent.innerHTML += message.name;
+          break;
+          
+        case "text":
+          parent.innerHTML += message.text;
+          break;
+          
+        case "badges":
+          message.badges.forEach( function(el) {
+            parent.innerHTML += el;
+          } );
+          break;
+          
+        default :
+          break;
+        }
       }
     } );
   }

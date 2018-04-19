@@ -106,3 +106,14 @@ module.exports = function(uniformData) {
     return this;
   })();
 };
+
+var setSubArgs = function(subArguments) {
+  var ret = {};
+  
+  ret.name = subArguments["display-name"];
+  ret.badges = subArguments["badges"];
+  if (ret.badges && ret.badges.length>0) { ret.badges = ret.badges.split(","); }
+  else                                   { ret.badges = [] }
+  
+  return ret;
+}
