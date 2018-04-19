@@ -16,6 +16,8 @@ switch(process.argv[2]) {
 var stream = require("browserify")("./src/js/" + mode + ".js");
 
 stream.bundle(function(err, buf) {
+  if (err) { throw(err); return; }
+  
   var script = require("uglify-js").minify(buf.toString()).code;
 
   html = html.split("</body>");
