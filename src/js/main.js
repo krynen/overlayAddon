@@ -4,7 +4,7 @@ module.exports = new function() {
     config : {
       channel : "ninja"    // 테스트용 계정. 거의 항상 채팅하는 유저가 있어 유용.
     },
-    shared : {},
+    shared : require("./data/shared.js")(this),
     module : require("./data/module.js")(this)
   };
   
@@ -19,3 +19,4 @@ module.exports = new function() {
 
 module.exports.objs.message.init();
 module.exports.objs.irc.connect();
+module.exports.data.shared.loadApi("all");

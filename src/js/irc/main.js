@@ -24,6 +24,9 @@ module.exports = function(uniformData) {
       /* 채널 이름 예외처리 */
       if (channel==null || channel.match(/^[A-Za-z0-9_]+$/)==null) { throw ["ircWrongChannel"]; }
       
+      /* 채널 아이디 초기화 */
+      uniformData.data.shared.channel.id = null;
+      
       /* 웹소켓을 열고 초기 발신 메세지를 설정 */
       try { this.ws = new WebSocket(data.uri); }
       catch(event) { throw ["ircConnectFail", event.message]; }
@@ -56,6 +59,7 @@ module.exports = function(uniformData) {
         this.ws.send("PONG" + CRLF);
       }
       
+      /* IRC 기본 프로토콜을 포함한, :로 시작하는 메세지 처리 */
       else if (arguments[0][0] == ":") {
         arguments[0] = arguments[0].substring(1);
 
@@ -67,6 +71,7 @@ module.exports = function(uniformData) {
         }
       }
       
+      /* Twitch-specific commands를 포함한, @로 시작하는 메세지 처리 */
       else if (arguments[0][0] == "@") {
         arguments.removePrefix = function(num) {
           for (var i=0; i<num; ++i) { this.shift(); }
@@ -85,7 +90,13 @@ module.exports = function(uniformData) {
         var message = setSubArgs(subArguments);
         
         switch (arguments[1]) {
-        case "PRIVMSG":
+        case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등 여러 상황에서 호출
+          if (!uniformData.data.shared.channel.id && subArguments["room-id"]) {
+            uniformData.data.shared.channel.id = Number(subArguments["room-id"]);
+          }
+          break;
+          
+        case "PRIVMSG":                       // 일반 메세지 수신
           arguments.removePrefix(3);
           Object.assign(message, {
             text : arguments.join(" ")
