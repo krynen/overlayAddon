@@ -1,6 +1,7 @@
 module.exports = function(uniformData) {
   return new (function() {
     /* 필드 초기화 */
+    uniformData.objs.event.init(this);
     this.connect = function() {};
     this.response = function(line) {};
     this.ws = {};
@@ -93,6 +94,7 @@ module.exports = function(uniformData) {
         case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등 여러 상황에서 호출
           if (!uniformData.data.shared.channel.id && subArguments["room-id"]) {
             uniformData.data.shared.channel.id = Number(subArguments["room-id"]);
+            this.dispatchEvent(new Event("connect"));
           }
           break;
           

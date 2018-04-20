@@ -8,15 +8,18 @@ module.exports = new function() {
     module : require("./data/module.js")(this)
   };
   
-  this.objs = {
+  this.objs = { event : require("./event.js") };
+  Object.assign(this.objs, {
     message : require("./message/main.js")(this),
     config  : require("./data/config.js")(this),
     irc     : require("./irc/main.js")(this)
-  };
+  } );
+
+  this.objs.message.init();
+  this.objs.irc.addEventListener("connect", function(evt) {
+    this.data.shared.loadApi("all");
+  }.bind(this) );
+  this.objs.irc.connect();
   
   return this;
 }();
-
-module.exports.objs.message.init();
-module.exports.objs.irc.connect();
-module.exports.data.shared.loadApi("all");
