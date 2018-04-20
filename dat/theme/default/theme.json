@@ -1,6 +1,0 @@
-﻿{
-  id          : "default",
-  name        : "기본",
-  description : "Default theme",
-  uri         : "default.css",
-}
