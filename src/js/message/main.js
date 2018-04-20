@@ -46,6 +46,8 @@ module.exports = function(uniformData) {
                 if (data) {
                   var index = el.split("/")[1];
                   if (!data.versions[index]) {
+                    // 다른 서브뱃지가 없을경우 최소 뱃지를 대신 표시
+                    // 유저 구독뱃지를 로드하는데 실패했을 경우 기본뱃지를 대신 띄움
                     index = Math.min.apply(null, Object.keys(data.versions));
                   }
                   badge.src = data.versions[index]["image_url_1x"];

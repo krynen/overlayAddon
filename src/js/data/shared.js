@@ -22,19 +22,26 @@ module.exports = function(uniformData) {
       uri.forEach( function(el) {
         el = el.replace("{channel}", this.channel.id);
         var storageKey = "message."+el.split(/v\d\//)[1].split("/display")[0].replace("/",".");
-        var storage = sessionStorage.getItem(storageKey);
+        var storage = JSON.parse(sessionStorage.getItem(storageKey));
         
         if(storage) {
-          Object.assign(list, JSON.parse(storage)["badge_sets"]);
+          storage = storage["badge_sets"];
+          Object.keys(storage).forEach( function(key) {
+            if (list[key]) { Object.assign(list[key].versions, storage[key].versions); }
+            else { list[key] = storage[key]; }
+          } );
         } else {
           var request = new XMLHttpRequest();
           request.open("GET", el);
           request.onreadystatechange = function(evt) {
             if (evt.target.readyState == 4) {
               if (evt.target.status == 200) {
-                var storage = evt.target.responseText;
-                Object.assign(list, JSON.parse(storage)["badge_sets"]);
-                sessionStorage.setItem(storageKey, storage);
+                var storage = JSON.parse(evt.target.responseText)["badge_sets"];
+                Object.keys(storage).forEach( function(key) {
+                  if (list[key]) { Object.assign(list[key].versions, storage[key].versions); }
+                  else { list[key] = storage[key]; }
+                } );
+                sessionStorage.setItem(storageKey, evt.target.responseText);
               } else { throw["loadApiFail", "badges"]; }
             }
           };
