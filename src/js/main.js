@@ -1,9 +1,6 @@
 module.exports = new function() {
-
   this.data = {
-    config : {
-      channel : "ninja"    // 테스트용 계정. 거의 항상 채팅하는 유저가 있어 유용.
-    },
+    config : require("./data/config.js")(this),
     shared : require("./data/shared.js")(this),
     module : require("./data/module.js")(this)
   };
@@ -16,6 +13,10 @@ module.exports = new function() {
   } );
 
   this.objs.message.init();
+  window.addEventListener("error", function(evt) {
+    this.objs.message.debug(evt.error);
+  }.bind(this) );
+  
   this.objs.irc.addEventListener("connect", function(evt) {
     this.data.shared.loadApi("all");
   }.bind(this) );
