@@ -12,10 +12,34 @@ module.exports = function(uniformData) {
     };
     
     this.add = function(message) {
-      var root = document.getElementById(this.data.rootId);
-      if (!root) { throw ["messageNoRoot"]; }
+      var root = document.getElementById(this.data.root.id);
+      if (!root)
+      {
+        root = document.createElement(this.data.root.tag);
+        root.id = this.data.root.id;
+        document.body.appendChild(root);
+      }
+      
       addRecursive(message, this.data.struct, root);
     };
+    
+    this.debug = function(message) {
+      var root = document.getElementById(this.data.debug.root.id);
+      if (!root)
+      {
+        root = document.createElement(this.data.debug.root.tag);
+        root.id = this.data.debug.root.id;
+        document.body.appendChild(root);
+      }
+      
+      var debugMessage = {
+        name   : "DEBUG",
+        badges : ["moderator/1"],
+        text   : message[0]
+      };
+      
+      addRecursive(debugMessage, this.data.debug.struct, root);
+    }
     
     var addRecursive = function(message, struct, parent) {
       if (struct.tag) {

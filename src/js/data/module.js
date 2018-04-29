@@ -11,7 +11,10 @@ module.exports = function(uniformData) {
     };
     
     this.message = {
-      rootId    : "msg_wrap",
+      root      : {
+        tag       : "div",
+        id        : "root"
+      },
       struct    : {
         tag       : "div",
         classes   : ["msg"],
@@ -33,6 +36,18 @@ module.exports = function(uniformData) {
             children : ["text"]
           }
         ]
+      },
+      
+      debug     : {
+        root      : {
+          tag       : "div",
+          id        : "debugRoot"
+        },
+        struct    : {
+          tag       : "div",
+          classes   : ["msg"],
+          children  : ["text"]
+        }
       }
     };
     
