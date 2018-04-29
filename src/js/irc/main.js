@@ -67,6 +67,21 @@ module.exports = function(uniformData) {
         var name = arguments[0].split("!")[0];
         
         switch (arguments[1]) {
+        case "001":
+        case "002":
+        case "003":
+        case "004":
+        case "375":
+        case "372":
+        case "376": 
+        case "CAP":
+        case "366":                           // 접속시 고정 표시 메세지
+        case "JOIN":
+        case "PART":                          // 유저의 참가 및 퇴장
+        case "MODE":                          // 참가 및 퇴장 유저가 매니저인 경우
+        case "353":                           // 접속시 유저 목록
+          break;
+          
         default:
           throw ["ircWrongMessage", arguments[1]];
         }
