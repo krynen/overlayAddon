@@ -45,7 +45,7 @@ module.exports = function(uniformData) {
               } else { throw["loadApiFail", "badges"]; }
             }
           };
-          request.onerror = function() { throw ["loadApiFail", "badges"]; };
+          request.onerror = function() { uniformData.error("loadApiFail", "뱃지"); };
           request.send();
         }
       }, this);      

@@ -13,24 +13,26 @@ module.exports = function(uniformData) {
       var channel = "";
       var data = {};
       try { channel = uniformData.data.config.channel; }
-      catch(event) { throw ["loadConfigFail"]; }
+      catch(event) { uniformData.error("loadConfigFail"); return; }
       try { data = uniformData.data.module.irc; }
-      catch(event) { throw ["loadDataFail"]; }
+      catch(event) { uniformData.error("loadDataFail", "IRC"); return; }
       
       /* 메세지 모듈 로드 */
       var message = {};
       try { message = uniformData.objs.message; }
-      catch(event) { throw ["loadModuleMessageFail"]; }
+      catch(event) { uniformData.error("loadModuleFail", "메세지"); return; }
       
       /* 채널 이름 예외처리 */
-      if (channel==null || channel.match(/^[A-Za-z0-9_]+$/)==null) { throw ["ircWrongChannel"]; }
+      if (channel==null || channel.match(/^[A-Za-z0-9_]+$/)==null) {
+        uniformData.error("ircWrongChannel"); return;
+      }
       
       /* 채널 아이디 초기화 */
       uniformData.data.shared.channel.id = null;
       
       /* 웹소켓을 열고 초기 발신 메세지를 설정 */
       try { this.ws = new WebSocket(data.uri); }
-      catch(event) { throw ["ircConnectFail", event.message]; }
+      catch(event) { uniformData.error("ircConnectFail", event.message); return; }
       this.ws.onopen = function() {
         this.send("PASS " + data.pass + CRLF);
         this.send("NICK " + data.nick + CRLF);
@@ -48,7 +50,7 @@ module.exports = function(uniformData) {
       /* 브라우저가 켜져 있는 동안 항시 접속을 유지하므로,
          비정상적으로 연결이 해제되었을 경우엔 예외처리 */
       this.ws.onclose = function(event) {
-        throw ["ircClosed", event.code];
+        uniformData.error("ircClosed", event.code);
       };
     };
     
@@ -65,6 +67,7 @@ module.exports = function(uniformData) {
         arguments[0] = arguments[0].substring(1);
 
         var name = arguments[0].split("!")[0];
+        var text = arguments.join(" ").split(":")[1];
         
         switch (arguments[1]) {
         case "001":
@@ -83,7 +86,8 @@ module.exports = function(uniformData) {
           break;
           
         default:
-          throw ["ircWrongMessage", arguments[1]];
+          uniformData.error("ircWrongMessage", arguments[1]);
+          break;
         }
       }
       
@@ -122,12 +126,13 @@ module.exports = function(uniformData) {
           break;
           
         default:
-          throw ["ircWrongMessage", arguments[1]];
+          uniformData.error("ircWrongMessage", arguments[1]);
+          break;
         }
       }
       
       else {
-        throw ["ircWrongMessage", line];
+        uniformData.error("ircWrongMessage", line);
       }
     };
     
