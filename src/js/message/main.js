@@ -35,8 +35,16 @@ module.exports = function(uniformData) {
       var debugMessage = {
         name   : "DEBUG",
         badges : ["moderator/1"],
-        text   : message[0]
+        text   : uniformData.data.config.debugText[message[0]]
       };
+      
+      if(debugMessage.text) {
+        for(var i=0; i<message.length; ++i) {
+          debugMessage.text = debugMessage.text.replace("{"+i+"}", message[i]);
+        };
+      } else {
+        debugMessage.text = message[0];
+      }
       
       addRecursive(debugMessage, this.data.debug.struct, root);
     }
