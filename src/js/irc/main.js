@@ -48,10 +48,11 @@ module.exports = function(uniformData) {
       }).bind(this);
       
       /* 브라우저가 켜져 있는 동안 항시 접속을 유지하므로,
-         비정상적으로 연결이 해제되었을 경우엔 예외처리 */
+         비정상적으로 연결이 해제되었을 경우 */
       this.ws.onclose = function(event) {
         uniformData.error("ircClosed", event.code);
-      };
+        this.connect();
+      }.bind(this);
     };
     
     this.response = function(line) {
@@ -83,6 +84,10 @@ module.exports = function(uniformData) {
         case "PART":                          // 유저의 참가 및 퇴장
         case "MODE":                          // 참가 및 퇴장 유저가 매니저인 경우
         case "353":                           // 접속시 유저 목록
+          break;
+          
+        case "NOTICE":
+          uniformData.error("ircNotice", text);
           break;
           
         default:
