@@ -21,7 +21,9 @@ module.exports = function(uniformData) {
       } );
       uri.forEach( function(el) {
         el = el.replace("{channel}", this.channel.id);
-        var storageKey = "message."+el.split(/v\d\//)[1].split("/display")[0].replace("/",".");
+        var storageKey = "data.shared";
+        storageKey += el.split(/[^/]\/badges/)[1].split("/display")[0].replace("/channels","");
+        storageKey = storageKey.replace("/", ".");
         var storage = JSON.parse(sessionStorage.getItem(storageKey));
         
         if(storage) {
@@ -42,7 +44,7 @@ module.exports = function(uniformData) {
                   else { list[key] = storage[key]; }
                 } );
                 sessionStorage.setItem(storageKey, evt.target.responseText);
-              } else { throw["loadApiFail", "badges"]; }
+              }
             }
           };
           request.onerror = function() { uniformData.error("loadApiFail", "뱃지"); };
