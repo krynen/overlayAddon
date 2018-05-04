@@ -86,7 +86,7 @@ module.exports = function(uniformData) {
         case "353":                           // 접속시 유저 목록
           break;
           
-        case "NOTICE":
+        case "NOTICE":                        // 트위치 서버 문제로 접속이 불가능할 경우(Error logging in)
           uniformData.error("ircNotice", text);
           break;
           
@@ -100,7 +100,7 @@ module.exports = function(uniformData) {
       else if (arguments[0][0] == "@") {
         arguments.removePrefix = function(num) {
           for (var i=0; i<num; ++i) { this.shift(); }
-          this[0] = this[0].replace(/^:/, "");
+          if(this.length != 0) { this[0] = this[0].replace(/^:/, ""); }
         };
         
         var subArguments = (function(args) {
@@ -124,12 +124,24 @@ module.exports = function(uniformData) {
           
         case "PRIVMSG":                       // 일반 메세지 수신
           arguments.removePrefix(3);
-          Object.assign(message, {
-            text : arguments.join(" ")
-          } );
+          message.text = arguments.join(" ");
           uniformData.objs.message.add(message);
           break;
           
+        case "USERNOTICE":                    // 유저 구독
+          switch(subArguments["msg-id"]) {
+          case "sub":
+          case "resub":
+            /* subArguments에 정보가 모두 있으므로 이후 처리는 message에서 한다 */
+            message.text = "";
+            uniformData.objs.message.add(message);
+            break;
+          
+          default:
+            arguments.removePrefix(3);
+            uniformData.error("ircWrongMessage", arguments.join(" "));
+            break;
+          }
         default:
           uniformData.error("ircWrongMessage", arguments[1]);
           break;
