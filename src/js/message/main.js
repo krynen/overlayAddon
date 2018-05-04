@@ -35,7 +35,7 @@ module.exports = function(uniformData) {
       var debugMessage = {
         name   : "DEBUG",
         badges : ["moderator/1"],
-        text   : uniformData.data.config.debugText[message[0]]
+        text   : uniformData.data.config.contents.debugText[message[0]]
       };
       
       if(debugMessage.text) {

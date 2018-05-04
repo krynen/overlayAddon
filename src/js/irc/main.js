@@ -12,7 +12,7 @@ module.exports = function(uniformData) {
       /* 데이터 로드 */
       var channel = "";
       var data = {};
-      try { channel = uniformData.data.config.channel; }
+      try { channel = uniformData.data.config.contents.channel; }
       catch(event) { uniformData.error("loadConfigFail"); return; }
       try { data = uniformData.data.module.irc; }
       catch(event) { uniformData.error("loadDataFail", "IRC"); return; }
