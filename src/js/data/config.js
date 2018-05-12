@@ -20,6 +20,11 @@ module.exports = function(uniformData) {
             if (evt.target.status == 200 || (evt.target.status==0&&evt.target.responseText)) {
               var storage = JSON.parse(evt.target.responseText);
               sessionStorage.setItem(storageKey, evt.target.responseText);
+              var timeout = setTimeout(function() {
+                clearTimeout(timeout);
+                sessionStorage.removeItem(storageKey);
+              }, this.contents.storageTimeout*1000);
+              
               Object.assign(this.contents, storage);
               this.dispatchEvent(new Event("load"));
             }
@@ -33,8 +38,9 @@ module.exports = function(uniformData) {
     };
     
     this.contents = {
-      channel    : "",
-      debugText  : {
+      channel         : "",
+      storageTimeout  : 1800, // 각 sessionStorage 유효기간
+      debugText       : {
         "loadApiFail"     : "{1} API를 불러올 수 없었습니다.",
         "loadConfigFail"  : "설정을 불러오는 데 실패했습니다. 에러코드 {1}" +
                             "\n기본값을 사용합니다.",
@@ -47,7 +53,7 @@ module.exports = function(uniformData) {
         "ircConnectFail"  : "서버와의 접속에 실패했습니다.\n{1}",
         "ircWrongChannel" : "채널 접속에 실패했습니다."
       },
-      customText : {
+      customText      : {
       
       }
     };

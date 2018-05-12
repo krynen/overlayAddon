@@ -43,7 +43,12 @@ module.exports = function(uniformData) {
                   if (list[key]) { Object.assign(list[key].versions, storage[key].versions); }
                   else { list[key] = storage[key]; }
                 } );
+                
                 sessionStorage.setItem(storageKey, evt.target.responseText);
+                var timeout = setTimeout(function() {
+                  clearTimeout(timeout);
+                  sessionStorage.removeItem(storageKey);
+                }, uniformData.data.config.contents.storageTimeout*1000);
               }
             }
           };
