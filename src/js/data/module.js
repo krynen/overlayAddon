@@ -31,7 +31,19 @@ module.exports = function(uniformData) {
           },
           { tag      : "br" },
           {
+            cases    : ["type-donation"],
+            children : [
+              { 
+                tag      : "div",
+                classes  : ["donation"],
+                children : ["donationHeader"]
+              },
+              { tag      : "br" }
+            ]
+          },
+          {
             tag      : "span",
+            cases    : ["type-text"],
             classes  : ["text"],
             children : ["text"]
           }

@@ -11,7 +11,16 @@ module.exports = function(uniformData) {
       catch(event) { uniformData.error("loadDataFail", "메세지"); }
     };
     
+    /* 메세지 처리 */
     this.add = function(message) {
+      message.cases = [];
+      
+      /* 텍스트가 존재할 때 */
+      if (!message.text.match(/^[\s]*$/)) {
+        message.cases.push("type-text");
+      }
+    
+      /* 최상위요소 체크 및 생성 */
       var root = document.getElementById(this.data.root.id);
       if (!root)
       {
@@ -49,51 +58,56 @@ module.exports = function(uniformData) {
       addRecursive(debugMessage, this.data.debug.struct, root);
     }
     
+    /* DOM 재귀 생성 */
     var addRecursive = function(message, struct, parent) {
-      if (struct.tag) {
-        var dom = document.createElement(struct.tag);
-        if (Array.isArray(struct.classes)) { dom.classList.add(struct.classes); }
-        parent.appendChild(dom);
-        parent = dom;
+      var condition = (!struct.cases) || (struct.cases.length==0);
+      if (!condition) {
+        condition = message.cases.some(function(el) {
+          return struct.cases.indexOf(el) != -1;
+        });
       }
-      if (Array.isArray(struct.children)) {
-        struct.children.forEach( function(el) {
-          if (typeof el == "object") { addRecursive(message, el, parent); }
-          else {
-            switch(el) {
-            case "name":
-              parent.innerHTML += message.name;
-              break;
-              
-            case "text":
-              parent.innerHTML += message.text;
-              break;
-              
-            case "badges":
-              message.badges.forEach( function(el) {
-                var badge = document.createElement("img");
-                badge.classList.add(el);
-                
-                var data = uniformData.data.shared.badges.list[el.split("/")[0]];
-                if (data) {
-                  var index = el.split("/")[1];
-                  if (!data.versions[index]) {
-                    // 다른 서브뱃지가 없을경우 최소 뱃지를 대신 표시
-                    // 유저 구독뱃지를 로드하는데 실패했을 경우 기본뱃지를 대신 띄움
-                    index = Math.min.apply(null, Object.keys(data.versions));
+      
+      if (condition) {
+        if (struct.tag) {
+          var dom = document.createElement(struct.tag);
+          if (Array.isArray(struct.classes)) { dom.classList.add(struct.classes); }
+          parent.appendChild(dom);
+          parent = dom;
+        }
+        if (Array.isArray(struct.children)) {
+          struct.children.forEach( function(el) {
+            if (typeof el == "object") { addRecursive(message, el, parent); }
+            else {
+              switch(el) {case "badges":
+                message.badges.forEach( function(el) {
+                  var badge = document.createElement("img");
+                  badge.classList.add(el);
+                  
+                  var data = uniformData.data.shared.badges.list[el.split("/")[0]];
+                  if (data) {
+                    var index = el.split("/")[1];
+                    if (!data.versions[index]) {
+                      // 다른 서브뱃지가 없을경우 최소 뱃지를 대신 표시
+                      // 유저 구독뱃지를 로드하는데 실패했을 경우 기본뱃지를 대신 띄움
+                      index = Math.min.apply(null, Object.keys(data.versions));
+                    }
+                    badge.src = data.versions[index]["image_url_1x"];
                   }
-                  badge.src = data.versions[index]["image_url_1x"];
-                }
-                parent.appendChild(badge);
-              } );
-              break;
-              
-            default :
-              break;
+                  parent.appendChild(badge);
+                } );
+                break;
+                
+              case "name":
+              case "text":
+              default:
+                if (message[el]) { parent.innerHTML += message[el]; }
+                break;
+              }
             }
-          }
-        } );
+          } );
+        }
       }
+      
       return parent;
     };
     
