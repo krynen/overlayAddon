@@ -43,8 +43,9 @@ module.exports = function(uniformData) {
       /* 메세지 수신부 설정 */
       this.ws.onmessage = (function(event) {
         var lines = event.data.toString().split(/\r\n|\r|\n/);
-        if (lines[lines.length-1].length == 0) { lines.pop(); }
-        lines.forEach( function(line) { this.response(line); }, this);
+        lines.forEach( function(line) {
+          if (!line.match(/^[\s]*$/)) { this.response(line); }
+        }, this);
       }).bind(this);
       
       /* 브라우저가 켜져 있는 동안 항시 접속을 유지하므로,
@@ -84,6 +85,7 @@ module.exports = function(uniformData) {
         case "PART":                          // 유저의 참가 및 퇴장
         case "MODE":                          // 참가 및 퇴장 유저가 매니저인 경우
         case "353":                           // 접속시 유저 목록
+        case "HOSTTARGET":                    // 타 채널로 호스팅(중계)
           break;
           
         case "NOTICE":                        // 트위치 서버 문제로 접속이 불가능할 경우(Error logging in)
@@ -115,7 +117,7 @@ module.exports = function(uniformData) {
         var message = setSubArgs(subArguments);
         
         switch (arguments[1]) {
-        case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등 여러 상황에서 호출
+        case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등
           if (!uniformData.data.shared.channel.id && subArguments["room-id"]) {
             uniformData.data.shared.channel.id = Number(subArguments["room-id"]);
             this.dispatchEvent(new Event("connect"));
@@ -128,20 +130,60 @@ module.exports = function(uniformData) {
           uniformData.objs.message.add(message);
           break;
           
-        case "USERNOTICE":                    // 유저 구독
+        case "CLEARCHAT":
+          break;
+          
+        case "USERNOTICE":                    // 유저 구독 등
           switch(subArguments["msg-id"]) {
           case "sub":
-          case "resub":
-            /* subArguments에 정보가 모두 있으므로 이후 처리는 message에서 한다 */
+          case "resub":                       // 구독 및 재구독(2개월 이상 연속구독)
+            message.type = "sub";
+            arguments.removePrefix(3);
+            message.text = arguments.join(" ");
+            uniformData.objs.message.add(message);
+            break;
+            
+          case "subgift":
+            message.type = "subgift";
+            message.target = subArguments["msg-param-recipient-display-name"];
             message.text = "";
             uniformData.objs.message.add(message);
             break;
+            
+          case "raid":                        // 타 채널의 레이드(채팅을 포함한 호스팅)
+            message.type = "raid";
+            message.text = "";
+            uniformData.objs.message.add(message);
+            break;
+            
           
           default:
             arguments.removePrefix(3);
             uniformData.error("ircWrongMessage", arguments.join(" "));
             break;
           }
+          break;
+          
+        case "NOTICE":                        // 방 상태 변경
+          switch(subArguments["msg-id"]) {
+          case "subs_on":                       // 구독자 전용 채팅 모드
+          case "subs_off":
+          case "host_on":
+          case "host_target_went_offline":
+          case "host_off":                      // 타 채널 호스팅
+          case "emote_only_on":                 // 이모티콘 채팅만 허용
+          case "emote_only_off":
+          case "slow_on":                       // 채팅 딜레이 모드
+          case "slow_off":
+            break;
+            
+          default:
+            arguments.removePrefix(3);
+            uniformData.error("ircWrongMessage", arguments.join(" "));
+            break;
+          }
+          break;
+          
         default:
           uniformData.error("ircWrongMessage", arguments[1]);
           break;
@@ -160,6 +202,7 @@ module.exports = function(uniformData) {
 var setSubArgs = function(subArguments) {
   var ret = {};
   
+  ret.id = subArguments["user-id"];
   ret.name = subArguments["display-name"];
   ret.badges = subArguments["badges"];
   if (ret.badges && ret.badges.length>0) { ret.badges = ret.badges.split(","); }
