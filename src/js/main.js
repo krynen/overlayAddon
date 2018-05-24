@@ -1,49 +1,42 @@
 module.exports = new function() {
-  this.error = function() {
-    arguments = Array.prototype.slice.call(arguments)
-    if (this.objs && this.objs.message && this.objs.message.debug) {
-      this.objs.message.debug(arguments);
-      return false;
-    } else {
-      /* 에러 메세지 표시 함수가 준비되기도 전에 오류가 발생했을 경우 */
-      var error = document.createElement("div");
-      Object.assign(error.style, { background:"red", color:"white", fontWeight:"bold" });
-      error.innerHTML = arguments;
-      document.body.appendChild(error);
-      return true;
-    }
-  }.bind(this);
+  /* * 데이터 모듈 불러오기
+   *
+   * config  : 기본 설정과 설정 파일을 불러오는 메서드를 포함
+   *           api 모듈에 종속
+   *
+   * shared  : 여러 모듈들에서 사용되는 데이터를 포함
+   *           api 모듈에 종속
+   *
+   * */
+  this.config  = require("./data/config.js");
+  this.shared  = require("./data/shared.js");
   
-  this.objs = { event : require("./event.js") };
-  this.data = {
-    config : require("./data/config.js")(this),
-    shared : require("./data/shared.js")(this),
-    module : require("./data/module.js")(this)
-  };
+  /* * 오브젝트 모듈 불러오기
+   *
+   * api     : 웹에 제공된 API를 이용해 데이터를 불러올 때 이용하는 메서드를 포함
+   *
+   * irc     : 트위치 채팅 IRC서버와 연결하고 메세지를 주고받고 가공하는 모듈
+   *
+   * message : 받은 메세지를 종류에 따라 처리해 DOM으로 생성하는 모듈
+   *
+   * */
+  this.api     = require("./api.js");
+  this.message = require("./message.js");
+  this.irc     = require("./irc.js");
   
-  Object.assign(this.objs, {
-    message : require("./message/main.js")(this),
-    config  : require("./data/config.js")(this),
-    irc     : require("./irc/main.js")(this)
-  } );
-
-  /*
-    1. 메세지 모듈을 초기화해 이후 모듈에서 오류가 나도 제대로 표시되도록 하고
-    2. 설정을 불러와 접속할 채널을 정한 뒤
-    3. IRC에 접속해 api에 필요한 채널 id를 받아오고
-    4. API를 로드
-  */
-  this.objs.message.init();
+  /* 각 모듈 초기화 및 로드 */
+  require("./event.js").method.apply(this);
   
-  this.data.config.addEventListener("load", function(evt) {
-    this.objs.irc.connect();
+  this.message.method.load(this);
+  this.irc.method.load(this);
+  
+  this.config.addEventListener("load", function(evt) {
+    this.irc.addEventListener("connect", function(evt) {
+      this.shared.method.load(this);
+    }.bind(this) );
+    this.irc.method.connect();
   }.bind(this) );
-
-  this.objs.irc.addEventListener("connect", function(evt) {
-    this.data.shared.loadApi("all");
-  }.bind(this) );
-  
-  this.data.config.load();
+  this.config.method.load(this);
   
   return this;
 }();

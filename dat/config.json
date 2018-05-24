@@ -1,3 +1,10 @@
 {
-  "channel" : "ninja"
+  "channel" : {
+    "name"    : "ninja"
+  },
+  "api"     : {
+    "session" : {
+      "timeout" : 1800
+    }
+  }
 }
