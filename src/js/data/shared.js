@@ -41,11 +41,11 @@ var data = {
         classes   : ["msg"],
         children  : [
           {
-            tag     : "span",
+            tag      : "span",
             variable : {
               color    : { type:["style", "color"], value:"{color}" }
             },
-            classes : ["name"],
+            classes  : ["name"],
             children : ["name"]
           },
           {

@@ -14,8 +14,8 @@ var data = {
   },
   message : {
     moderator  : {                // 에러 메세지를 표시할 유저명
-      "name"       : "DEBUG",
-      "badges"     : ["moderator/1"]
+      "name"            : "DEBUG",
+      "badges"          : ["moderator/1"]
     },
     color      : {
       "userColor"       : true,   // 유저 색 활성화

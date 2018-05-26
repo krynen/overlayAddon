@@ -105,7 +105,7 @@ var addRecursive = function(object, struct, parent) {
                 if (!data.versions[index]) {
                   index = Math.min.apply(null, Object.keys(data.versions));
                 }
-                badge.src = data.versions[index]["image_url_4x"];
+                badge.src = data.versions[index]["image_url_1x"];
               }
               parent.appendChild(badge);
             } );

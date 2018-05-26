@@ -118,14 +118,16 @@ var method = {
       }
       subArgs = Object.assign({}, subArgs);
 
+      /* object 기본 구성 */
       var object = {
-        id     : subArgs["user-id"],
+        id     : Number(subArgs["user-id"]),
         name   : subArgs["display-name"],
         badges : subArgs["badges"],
         color  : subArgs["color"]
       };
       if ((object.badges||{}).length||0 > 0) { object.badges = object.badges.split(","); }
       else                                   { object.badges = [] }
+      
       
       switch(arguments[1]) {
       case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등
