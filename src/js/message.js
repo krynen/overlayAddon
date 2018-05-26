@@ -6,6 +6,18 @@ var badges  = null;           // load()를 통해 uniformData와 연결
 
 
 /* 내부 메서드 정의 */
+var getColor = function(object) {
+  /* 설정값에 따라 유저 이름 색을 가져옴 */
+  if (config.color.userColor) {
+    if (config.color.customColor && object.color!="") {
+      return object.color;
+    } else {
+      var list = config.color.defaultColor;
+      return list[object.id % list.length];
+    }
+  } else { return null; }
+}
+
 var addRecursive = function(object, struct, parent) {
   var condition = (!Array.isArray(struct.cases) || struct.cases.length==0);
   /* struct에 cases가 존재할 경우 메세지 출력 조건을 판단 */
@@ -20,6 +32,57 @@ var addRecursive = function(object, struct, parent) {
       /* tag가 존재할 경우 DOM을 생성 */
       var dom = document.createElement(struct.tag);
       if (Array.isArray(struct.classes)) { dom.classList.add(struct.classes); }
+      if (struct.variable) {
+        Object.keys(struct.variable).forEach( function(name) {
+          var type = struct.variable[name].type;
+          var value = struct.variable[name].value;
+          
+          /* value의 {name} 수정 */
+          value.match(/{[^}]+}/g).forEach( function(match) {
+            switch(match.replace(/[{}]/g,"")) {
+            /* 이름 색상 */
+            case "color":
+              var color = getColor(object);
+              if (color) { value = value.replace(match, color); }
+              else       { value = ""; }
+              break;
+
+            /* 색채팅시 이름 색상(채팅색과 이름색이 같으므로) */
+            case "meColor":
+              var cond = config.color.meColored.some( function(el) {
+                if (el == "all") { return true; }
+                return object.badges.some( function(badge) {
+                  return (badge.indexOf(el) == 0);
+                } );
+              } );
+              cond &= object.me == 1;
+              
+              if (cond) {
+                var color = getColor(object);
+                if (color) { value = value.replace(match, color); }
+                else       { value = ""; }
+              }
+              break;
+              
+            default:
+              value = null;
+              break;
+            }
+          } );
+          
+          /* 각 value를 type에 적용 */
+          if (value) {
+            switch(type[0]) {
+            case "style":
+              dom.style[type[1]] = value;
+              break;
+              
+            default:
+              break;
+            }
+          }
+        } );
+      }
       parent.appendChild(dom);
       parent = dom;
     }
@@ -101,6 +164,12 @@ var method = {
     if (!object.text.match(/^[\s]*$/)) { object.cases.push("type-text"); }
     /* 응원이 있는 메세지 처리 */
     if (Number(object.bits)>0) { object.cases.push(["type-donation", "type-cheer"]); }
+    /* 색채팅 처리 */
+    if (object.text.match(/ACTION [^]+/)) {
+      object.text = object.text.replace(/ACTION ([^]+)/, "$1");
+      object.cases.push(["type-me"]);
+      object.me = 1;
+    }
     
     /* DOM생성 및 등록 */
     var root = document.getElementById((((theme||{}).normal||{}).root||{}).id);

@@ -17,6 +17,21 @@ var data = {
       "name"       : "DEBUG",
       "badges"     : ["moderator/1"]
     },
+    color      : {
+      "userColor"       : true,   // 유저 색 활성화
+      "customColor"     : true,   // 유저 고유 색 사용
+      "defaultColor"    : [       // 고유 색 미사용시 사용할 색 리스트  
+          "#FF0000", "#0000FF", "#008000", "#B22222", "#FF7F50",
+          "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E",
+          "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F"
+      ],
+      "meVisible"       : [       // 색채팅(/me) 사용을 허용할 뱃지(유저 등급)
+        "all"
+      ],
+      "meColored"       : [       // 색채팅 사용을 허용할 뱃지(유저 등급)
+        "broadcaster", "moderator"
+      ]
+    },
     errorText  : {                // 오류 메세지의 텍스트
       "loadConfigFail"  : "설정을 불러올 수 없었습니다.",
       "loadDataFail"    : "{data} 데이터를 불러올 수 없었습니다.",

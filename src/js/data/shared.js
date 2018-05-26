@@ -42,6 +42,9 @@ var data = {
         children  : [
           {
             tag     : "span",
+            variable : {
+              color    : { type:["style", "color"], value:"{color}" }
+            },
             classes : ["name"],
             children : ["name"]
           },
@@ -64,6 +67,10 @@ var data = {
           },
           {
             tag      : "span",
+            variable : {
+              color     : { type:["style", "color"], value:"{meColor}" },
+              border    : { type:["style", "border"], value:"1px solid {meColor}" }
+            },
             cases    : ["type-text"],
             classes  : ["text"],
             children : ["text"]

@@ -121,7 +121,8 @@ var method = {
       var object = {
         id     : subArgs["user-id"],
         name   : subArgs["display-name"],
-        badges : subArgs["badges"]
+        badges : subArgs["badges"],
+        color  : subArgs["color"]
       };
       if ((object.badges||{}).length||0 > 0) { object.badges = object.badges.split(","); }
       else                                   { object.badges = [] }
@@ -175,7 +176,7 @@ var method = {
         break;
         
       case "NOTICE":                        // 방 상태 변경
-          switch(subArguments["msg-id"]) {
+          switch(subArgs["msg-id"]) {
           case "subs_on":                       // 구독자 전용 채팅 모드
           case "subs_off":
           case "host_on":
