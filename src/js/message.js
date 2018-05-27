@@ -16,7 +16,7 @@ var getColor = function(object) {
       return list[object.id % list.length];
     }
   } else { return null; }
-}
+};
 
 var addRecursive = function(object, struct, parent) {
   var condition = (!Array.isArray(struct.cases) || struct.cases.length==0);
