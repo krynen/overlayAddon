@@ -32,13 +32,14 @@ var addRecursive = function(object, struct, parent) {
       /* tag가 존재할 경우 DOM을 생성 */
       var dom = document.createElement(struct.tag);
       if (Array.isArray(struct.classes)) { dom.classList.add(struct.classes); }
-      if (struct.variable) {
-        Object.keys(struct.variable).forEach( function(name) {
-          var type = struct.variable[name].type;
-          var value = struct.variable[name].value;
-          
+      if (Array.isArray(struct.variable)) {
+        struct.variable.forEach( function(target) {
+          var type = target.type;
+          var value = new String(target.value);
+          var matches = value.match(/{[^}]+}/g);
+
           /* value의 {name} 수정 */
-          value.match(/{[^}]+}/g).forEach( function(match) {
+          (matches||[]).forEach( function(match) {
             switch(match.replace(/[{}]/g,"")) {
             /* 이름 색상 */
             case "color":
@@ -49,19 +50,35 @@ var addRecursive = function(object, struct, parent) {
 
             /* 색채팅시 이름 색상(채팅색과 이름색이 같으므로) */
             case "meColor":
-              var cond = config.color.meColored.some( function(el) {
-                if (el == "all") { return true; }
-                return object.badges.some( function(badge) {
-                  return (badge.indexOf(el) == 0);
-                } );
-              } );
-              cond &= object.me == 1;
-              
-              if (cond) {
+              if (object.me) {
                 var color = getColor(object);
                 if (color) { value = value.replace(match, color); }
                 else       { value = ""; }
               }
+              break;
+            
+            /* 수치 범위에서 랜덤 */
+            case "random":
+              if (target.min && target.max && target.interval) {
+                var num = Math.random();
+                num *= Math.ceil((target.max-target.min)/target.interval) *
+                       target.interval;
+                num += target.min - num%target.interval;
+                
+                /* 정수간격이거나 digit이 존재할 경우 부동소수점을 처리 */
+                if (Number.isInteger(target.interval)) { num = parseInt(num); }
+                else if (target.digit) { num = num.toFixed(target.digit); }
+                
+                value = value.replace(match, num);
+              } else { value = null; }
+              break;
+              
+            /* 목록에서 랜덤 */
+            case "listRandom":
+              if (Array.isArray(target.list)) {
+                var index = Math.floor(Math.random()*target.list.length);
+                value = value.replace(match, target.list[index]);
+              } else { value = null; }
               break;
               
             default:
@@ -73,8 +90,16 @@ var addRecursive = function(object, struct, parent) {
           /* 각 value를 type에 적용 */
           if (value) {
             switch(type[0]) {
+            case "data":
+              dom.setAttribute(type[1], value);
+              break;
+              
             case "style":
               dom.style[type[1]] = value;
+              break;
+              
+            case "class":
+              dom.classList.add(value);
               break;
               
             default:
@@ -167,14 +192,38 @@ var method = {
     /* 색채팅 처리 */
     if (object.text.match(/ACTION [^]+/)) {
       object.text = object.text.replace(/ACTION ([^]+)/, "$1");
-      object.cases.push(["type-me"]);
-      object.me = 1;
+      
+      var cond = config.color.meVisible.some( function(el) {
+        if (el == "all") { return true; }
+        return object.badges.some( function(badge) {
+          return (badge.indexOf(el) == 0);
+        } );
+      } );
+      if (!cond) { return; }
+      
+      cond =  config.color.meColored.some( function(el) {
+      if (el == "all") { return true; }
+      return object.badges.some( function(badge) {
+        return (badge.indexOf(el) == 0);
+      } );
+      } );
+      
+      if (cond) {
+        object.cases.push("type-me");
+        object.me = 1;
+      }
     }
     
     /* DOM생성 및 등록 */
     var root = document.getElementById((((theme||{}).normal||{}).root||{}).id);
     if (root) {
-      addRecursive(object, theme.normal.struct, root);
+      var struct = JSON.parse(JSON.stringify(theme.normal.struct));
+      if (!struct.variable) { struct.variable = []; }
+      object.cases.forEach( function(el) {
+        struct.variable.push({ type:["data", el], value:"1" });
+      } );
+
+      addRecursive(object, struct, root);
     } else {
       message.method.error("loadDataFail", { data:"테마" });
     }
