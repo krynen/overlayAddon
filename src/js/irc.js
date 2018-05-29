@@ -143,7 +143,14 @@ var method = {
         message.add(object);
         break;
         
-      case "CLEARCHAT":
+      case "CLEARCHAT":                     // 채팅 삭제나 유저 차단
+        if (subArgs["ban-reason"] || subArgs["ban-duration"]) {
+          /* 유저 차단 */
+          // command.ban(subArgs["target-user-id"]);
+        } else {
+          /* moderator에 의한 채팅 삭제 */
+          // command.clear();
+        }
         break;
         
       case "USERNOTICE":                    // 유저 구독 등
