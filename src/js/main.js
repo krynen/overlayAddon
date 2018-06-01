@@ -1,6 +1,8 @@
 module.exports = new function() {
   /* * 데이터 모듈 불러오기
    *
+   * uri     : uri에서 파라미터를 불러오기 위한 모듈
+   *
    * config  : 기본 설정과 설정 파일을 불러오는 메서드를 포함
    *           api 모듈에 종속
    *
@@ -8,6 +10,7 @@ module.exports = new function() {
    *           api 모듈에 종속
    *
    * */
+  this.uri     = require("./data/uri.js");
   this.config  = require("./data/config.js");
   this.shared  = require("./data/shared.js");
   
@@ -27,6 +30,7 @@ module.exports = new function() {
   /* 각 모듈 초기화 및 로드 */
   require("./event.js").method.apply(this);
   
+  this.uri.method.load(this);
   this.message.method.load(this);
   this.irc.method.load(this);
   

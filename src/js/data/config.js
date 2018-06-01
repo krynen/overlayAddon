@@ -51,8 +51,11 @@ var data = {
 /* 내부 메서드 정의 */
 var method = {
   load    : function(uniformData) {    
+    /* uri data의 config와 내부 데이터에서 호출할 파일 URI를 선택 */
+    var targetUri = (((uniformData||{}).uri||{}).data||{}).config || uri;
+    
     /* api.method.load()를 호출 */
-    uniformData.api.method.load("config.data", uri, 0, function(storage) {
+    uniformData.api.method.load("config.data", targetUri, 0, function(storage) {
       if (storage) {
         /* config.data.session.timeout이 바뀌었을 수 있으므로 타임아웃을 따로 지정 */
         if (((storage.api||{}).session||{}).timeout >0) {
@@ -71,6 +74,12 @@ var method = {
           }
         } );
         Object.assign(uniformData.config.data, storage);
+        
+        /* uri data의 channel이 존재할 경우 덮어쓰기 */
+        if ((((uniformData||{}).uri||{}).data||{}).channel) {
+          uniformData.config.data.channel.name = uniformData.uri.data.channel;
+        }
+        
         uniformData.config.dispatchEvent(new Event("load"));
       } else {
         /* 받아온 storage가 null일 때 */
