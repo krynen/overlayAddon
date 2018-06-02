@@ -195,31 +195,33 @@ var method = {
       var cond = object.text && object.text[0] && object.text[0].match(/^ACTION$/);
       cond &= tail && tail.match(/$/);
       
-    if (cond) {
-      var cond = config.color.meVisible.some( function(el) {
-        if (el == "all") { return true; }
-        return object.badges.some( function(badge) {
-          return (badge.indexOf(el) == 0);
+      if (cond) {
+        /* 색채팅 표시 여부 체크 */
+        cond = config.color.meVisible.some( function(el) {
+          if (el == "all") { return true; }
+          return object.badges.some( function(badge) {
+            return (badge.indexOf(el) == 0);
+          } );
         } );
-      } );
-      if (!cond) { return; }
-      
-      cond =  config.color.meColored.some( function(el) {
-      if (el == "all") { return true; }
-      return object.badges.some( function(badge) {
-        return (badge.indexOf(el) == 0);
-      } );
-      } );
-        
+        if (!cond) { return; }
+          
+        /* 색채팅 강조 여부 체크 */
+        cond =  config.color.meColored.some( function(el) {
+          if (el == "all") { return true; }
+          return object.badges.some( function(badge) {
+            return (badge.indexOf(el) == 0);
+          } );
+        } );
+          
         object.text.shift();
         object.text[object.text.length-1] = tail.replace(/$/, "");
         object.text = object.text.replace(/ACTION ([^]+)/, "$1");
-      
-      if (cond) {
-        object.cases.push("type-me");
-        object.me = 1;
+        
+        if (cond) {
+          object.cases.push("type-me");
+          object.me = 1;
+        }
       }
-    }
     }
     
     /* text 데이터를 문자열로 변환 */

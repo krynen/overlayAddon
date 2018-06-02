@@ -25,6 +25,7 @@ var method = {
 /* 정의된 엘리먼트 적용 */
 module.exports = new function() {
   this.method = method;
+  this.data = data;
 
   return this;
 }();

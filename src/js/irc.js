@@ -213,7 +213,7 @@ var method = {
       return;
     }
     
-    message.error("ircWrongMessage", line);
+    message.error("ircWrongMessage", { error:line });
   }
 };
 
