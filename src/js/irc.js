@@ -12,8 +12,11 @@ var send = function(txt) {    // ws.send()에 CRLF 추가
 };
 var removePrefix = function(target, num) {
   target.splice(0, num);
-  if (target.length != 0) { return target.join(" ").replace(/^:/, ""); }
-  else { return ""; }
+  if (target.length != 0) {
+    target[0] = target[0].replace(/^:/, "");
+    return target;
+  }
+  else { return []; }
 }
 
 /* 모듈 메서드 정의 */
@@ -166,20 +169,20 @@ var method = {
           case "subgift":                   // 타 유저의 구독 선물
             object.type = "subgift";
             object.target = subArgs["msg-param-recipient-display-name"];
-            /* 구독 선물은 메세지를 추가할 수 없으므로 빈 문자열로 */
-            object.text = "";
+            /* 구독 선물은 메세지를 추가할 수 없으므로 빈 배열로 */
+            object.text = [];
             message.add(object);
             break;
             
           case "raid":                      // 타 채널의 레이드(채팅을 포함한 호스팅)
             object.type = "raid";
             /* 레이드도 메세지를 추가할 수 없는것으로 보임 */
-            object.text = "";
+            object.text = [];
             message.add(object);
             break;
             
           default:
-            message.error("ircWrongMessage", { error:removePrefix(arguments, 2) });
+            message.error("ircWrongMessage", { error:removePrefix(arguments, 2).join(" ") });
             break;
         }
         break;
@@ -198,7 +201,7 @@ var method = {
             break;
             
           default:
-            message.error("ircWrongMessage", { error:removePrefix(arguments, 2) });
+            message.error("ircWrongMessage", { error:removePrefix(arguments, 2).join(" ") });
             break;
           }
           break;

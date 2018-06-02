@@ -185,14 +185,17 @@ var method = {
   add   : function(object) {
     object.cases = [];
     
-    /* 텍스트가 있는 메세지 처리 */
-    if (!object.text.match(/^[\s]*$/)) { object.cases.push("type-text"); }
-    /* 응원이 있는 메세지 처리 */
-    if (Number(object.bits)>0) { object.cases.push(["type-donation", "type-cheer"]); }
-    /* 색채팅 처리 */
-    if (object.text.match(/ACTION [^]+/)) {
-      object.text = object.text.replace(/ACTION ([^]+)/, "$1");
+    /* 텍스트를 어절별로 처리 */
+    if (Number(object.bits)>0) {         // 응원 메세지
+      object.cases.push(["type-donation", "type-cheer"]);
+    }
+    {                                    // 색채팅 처리
+      /* 색채팅 여부 체크 */
+      var tail = object.text[object.text.length-1];
+      var cond = object.text && object.text[0] && object.text[0].match(/^ACTION$/);
+      cond &= tail && tail.match(/$/);
       
+    if (cond) {
       var cond = config.color.meVisible.some( function(el) {
         if (el == "all") { return true; }
         return object.badges.some( function(badge) {
@@ -207,11 +210,24 @@ var method = {
         return (badge.indexOf(el) == 0);
       } );
       } );
+        
+        object.text.shift();
+        object.text[object.text.length-1] = tail.replace(/$/, "");
+        object.text = object.text.replace(/ACTION ([^]+)/, "$1");
       
       if (cond) {
         object.cases.push("type-me");
         object.me = 1;
       }
+    }
+    }
+    
+    /* text 데이터를 문자열로 변환 */
+    object.text = object.text.join(" ");
+    
+    /* 텍스트를 전체적으로 처리 */
+    if (!object.text.match(/^[\s]*$/)) { // 길이가 0이 아닌 메세지
+      object.cases.push("type-text");
     }
     
     /* DOM생성 및 등록 */

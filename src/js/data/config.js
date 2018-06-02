@@ -25,10 +25,10 @@ var data = {
           "#9ACD32", "#FF4500", "#2E8B57", "#DAA520", "#D2691E",
           "#5F9EA0", "#1E90FF", "#FF69B4", "#8A2BE2", "#00FF7F"
       ],
-      "meVisible"       : [       // 색채팅(/me) 사용을 허용할 뱃지(유저 등급)
+      "meVisible"       : [       // 색채팅(/me) 표시를 허용할 뱃지(유저 등급)
         "all"
       ],
-      "meColored"       : [       // 색채팅 사용을 허용할 뱃지(유저 등급)
+      "meColored"       : [       // 색채팅 강조를 허용할 뱃지(유저 등급)
         "broadcaster", "moderator"
       ]
     },
