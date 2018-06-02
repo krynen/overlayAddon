@@ -192,9 +192,8 @@ var method = {
     {                                    // 색채팅 처리
       /* 색채팅 여부 체크 */
       var tail = object.text[object.text.length-1];
-      var cond = object.text && object.text[0] && object.text[0].match(/^ACTION$/);
-      cond &= tail && tail.match(/$/);
-      
+      var cond = object.text && object.text[0] && object.text[0]=="ACTION";
+      cond = cond && tail && (tail.match(/$/)!=null);
       if (cond) {
         /* 색채팅 표시 여부 체크 */
         cond = config.color.meVisible.some( function(el) {
@@ -215,7 +214,6 @@ var method = {
           
         object.text.shift();
         object.text[object.text.length-1] = tail.replace(/$/, "");
-        object.text = object.text.replace(/ACTION ([^]+)/, "$1");
         
         if (cond) {
           object.cases.push("type-me");
