@@ -30,7 +30,9 @@ var addRecursive = function(object, struct, parent) {
     if (struct.tag) {
       /* tag가 존재할 경우 DOM을 생성 */
       var dom = document.createElement(struct.tag);
-      if (Array.isArray(struct.classes)) { dom.classList.add(struct.classes); }
+      if (Array.isArray(struct.classes)) {
+        struct.classes.forEach( function(el) { dom.classList.add(el); } );
+      }
       if (Array.isArray(struct.variable)) {
         struct.variable.forEach( function(target) {
           var type = target.type;
