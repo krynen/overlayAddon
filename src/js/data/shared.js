@@ -55,17 +55,6 @@ var data = {
           },
           { tag      : "br" },
           {
-            cases    : ["type-donation"],
-            children : [
-              { 
-                tag      : "div",
-                classes  : ["donation"],
-                children : ["donationHeader"]
-              },
-              { tag      : "br" }
-            ]
-          },
-          {
             tag      : "div",
             variable : [
               { type:["style", "color"], value:"{meColor}" },
@@ -73,7 +62,18 @@ var data = {
             ],
             cases    : ["type-text"],
             classes  : ["text"],
-            children : ["text"]
+            children : [
+              {
+                tag      : "span",
+                cases    : ["type-donation"],
+                classes  : ["donation", "header"],
+                children : [
+                  "donationHeader",
+                  { tag    : "br" }
+                ]
+              },
+              "text"
+            ]
           }
         ]
       }

@@ -136,6 +136,12 @@ var addRecursive = function(object, struct, parent) {
             } );
             break;
             
+          case "donationHeader":
+            if (object.cases.indexOf("type-donation") && object.header) {
+              parent.innerHTML += object.header;
+            }
+            break;
+            
           case "name":
           case "text":
           default:
@@ -226,6 +232,9 @@ var method = {
     object.text = object.text.join(" ");
     
     /* 텍스트를 전체적으로 처리 */
+    if (module.twip && !module.twip.method.apply(object)) {   // 트윕 후원 메세지
+      return;
+    }
     if (!object.text.match(/^[\s]*$/)) { // 길이가 0이 아닌 메세지
       object.cases.push("type-text");
     }
@@ -268,9 +277,16 @@ var method = {
 };
 
 
+/* 하위 모듈 정의 */
+var lowerModule = {
+  twip : null
+};
+
+
 /* 정의된 엘리먼트 적용 */
 module.exports = new function() {
   this.method = method;
+  this.module = lowerModule;
   
   return this;
 }();

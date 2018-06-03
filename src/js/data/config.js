@@ -43,6 +43,15 @@ var data = {
       "ircWrongChannel" : "{channel}은 올바르지 않은 채널입니다."
     },
     customText : {                // 여러 상황에서의 텍스트
+    },
+    module     : {                // 메세지 모듈에서 사용하는 설정
+      twip              : {
+        "visible"         : true,
+        "replaceName"     : true,
+        "originalFormat"  : "{닉네임}님이 {금액}원 후원! - {메시지}",
+        "accentFormat"    : "{닉네임}님이 {금액}원 후원!",
+        "textFormat"      : "{메시지}"
+      }
     }
   }
 };

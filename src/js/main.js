@@ -27,6 +27,13 @@ module.exports = new function() {
   this.message = require("./message.js");
   this.irc     = require("./irc.js");
   
+  /* * 오브젝트 하위 모듈 불러오기
+   *
+   * message/twip.js : 트윕(Twipkr)을 통한 후원 메세지를 처리하는 모듈
+   *
+   * */
+  this.message.module.twip = require("./message/twip.js");
+  
   /* 각 모듈 초기화 및 로드 */
   require("./event.js").method.apply(this);
   
@@ -35,6 +42,8 @@ module.exports = new function() {
   this.irc.method.load(this);
   
   this.config.addEventListener("load", function(evt) {
+    this.message.module.twip.method.load(this);
+    
     this.irc.addEventListener("connect", function(evt) {
       this.shared.method.load(this);
     }.bind(this) );
