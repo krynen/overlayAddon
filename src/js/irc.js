@@ -19,6 +19,7 @@ var removePrefix = function(target, num) {
   else { return []; }
 }
 
+
 /* 모듈 메서드 정의 */
 var method = {
   load       : function(uniformData) {

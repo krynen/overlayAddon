@@ -17,7 +17,6 @@ var getColor = function(object) {
     }
   } else { return null; }
 };
-
 var addRecursive = function(object, struct, parent) {
   var condition = (!Array.isArray(struct.cases) || struct.cases.length==0);
   /* struct에 cases가 존재할 경우 메세지 출력 조건을 판단 */
@@ -209,9 +208,9 @@ var method = {
           } );
         } );
         if (!cond) { return; }
-          
+        
         /* 색채팅 강조 여부 체크 */
-        cond =  config.color.meColored.some( function(el) {
+        cond = config.color.meColored.some( function(el) {
           if (el == "all") { return true; }
           return object.badges.some( function(badge) {
             return (badge.indexOf(el) == 0);
@@ -227,10 +226,12 @@ var method = {
         }
       }
     }
+
     
     /* text 데이터를 문자열로 변환 */
     object.text = object.text.join(" ");
     
+
     /* 텍스트를 전체적으로 처리 */
     if (module.twip && !module.twip.method.apply(object)) {   // 트윕 후원 메세지
       return;
