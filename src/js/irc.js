@@ -182,6 +182,9 @@ var method = {
             message.add(object);
             break;
             
+          case "ritual":                    // 채널에 처음으로 온 시청자가 있을 경우
+            break;
+            
           default:
             message.error("ircWrongMessage", { error:removePrefix(arguments, 2).join(" ") });
             break;

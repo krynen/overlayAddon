@@ -179,7 +179,7 @@ var method = {
             rootDOM = document.createElement(root.tag);
             rootDOM.id = root.id;
             if (Array.isArray(root.classes)) {
-              rootDOM.classList.add(root.classes);
+              root.classes.forEach( function(el) { rootDOM.classList.add(el); } );
             }
             document.body.appendChild(rootDOM);
           }
@@ -191,10 +191,10 @@ var method = {
     object.cases = [];
     
     /* 텍스트를 어절별로 처리 */
-    if (Number(object.bits)>0) {         // 응원 메세지
+    if (Number(object.bits)>0) {                                      // 응원 메세지
       object.cases.push(["type-donation", "type-cheer"]);
     }
-    {                                    // 색채팅 처리
+    {                                                                 // 색채팅 처리
       /* 색채팅 여부 체크 */
       var tail = object.text[object.text.length-1];
       var cond = object.text && object.text[0] && object.text[0]=="ACTION";
@@ -233,10 +233,10 @@ var method = {
     
 
     /* 텍스트를 전체적으로 처리 */
-    if (module.twip && !module.twip.method.apply(object)) {   // 트윕 후원 메세지
+    if (lowerModule.twip && !lowerModule.twip.method.apply(object)) { // 트윕 후원 메세지
       return;
     }
-    if (!object.text.match(/^[\s]*$/)) { // 길이가 0이 아닌 메세지
+    if (!object.text.match(/^[\s]*$/)) {                              // 길이가 0이 아닌 메세지
       object.cases.push("type-text");
     }
     
