@@ -13,16 +13,21 @@ var method = {
         if (evt.target.readyState == 4) {
           if ((evt.target.status==200) || (evt.target.status==0&&evt.target.responseText)) {
             var storage = evt.target.responseText;
-            sessionStorage.setItem(key, storage);
+
+            if (storage.length <= 500000) {
+              sessionStorage.setItem(key, storage);              
+              callback(JSON.parse(storage));
+            } else {
+              /* 세션 스토리지 용량을 초과할 가능성이 있는 경우 */
+              callback(storage);
+            }
             
             if (lifetime > 0) {
               var timeout = setTimeout(function() {
                 clearTimeout(timeout);
-                sessionStorage.removeItem(key);
+                if (sessionStorage[key]) { sessionStorage.removeItem(key); }
               }, lifetime*1000);
             }
-            
-            callback(JSON.parse(storage));
           }
         }
       });

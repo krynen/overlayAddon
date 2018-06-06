@@ -13,7 +13,7 @@ var data = {
   },
   
   badges    : {
-    uris : [
+    "uris"     : [
       "https://badges.twitch.tv/v1/badges/global/display",
       "https://badges.twitch.tv/v1/badges/channels/{channel}/display"
     ],
@@ -94,16 +94,20 @@ var data = {
 var loadBadge = function() {
   /* uri 채널 아이디, storageKey 지정 */
   data.badges.uris.forEach( function(uri) {
-    uri = uri.replace("{channel}", data.channel.id);
-    var key = uri.split(/[^/]\/badges/)[1]
-      .split("/display")[0]
-      .replace("channels", "")
-      .replace("/", ".");
+    var key = "shared.data.badges";
+    if (uri.indexOf("{channel}") != -1) {
+      uri = uri.replace("{channel}", data.channel.id);
+      key += "." + data.channel.id;
+    } else {
+      key += ".global";
+    }
     
     /* api.method.load()를 호출 */
     var lifetime = config.api.session.timeout;
     api.load(key, uri, lifetime, function(storage) {
       if (storage) {
+        if (typeof storage == "string") { storage = JSON.parse(storage); }
+        
         /* 불필요한 부분 제거 */
         if (storage["badge_sets"]) {
           storage = storage["badge_sets"];
@@ -140,6 +144,7 @@ var method = {
       loadBadge();
       break;
       
+    case "all":
     default:
       loadBadge();
       break;

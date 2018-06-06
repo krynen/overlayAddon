@@ -28,10 +28,16 @@ var method = {
     var matches = object.text.match(data.regExp);
     if (matches) {
       matches.shift();
-      
-      /* 이름 변조 */
-      if (config.replaceName && data.indexes.indexOf("{닉네임}")!=-1) {  
-        object.name = matches[data.indexes.indexOf("{닉네임}")];
+      if (data.indexes.indexOf("{닉네임}")!=-1) {
+        var ind = data.indexes.indexOf("{닉네임}");
+        
+        /* 익명 처리 */
+        if (matches[ind] == "") { matches[ind] = "익명"; }
+        
+        /* 이름 변조 */
+        if (config.raplaceName) {
+          object.name = matches[ind];
+        }
       }
       
       /* 텍스트 변조 및 헤더 추가 */
