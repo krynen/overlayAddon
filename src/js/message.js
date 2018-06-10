@@ -2,6 +2,7 @@
 var message = null;
 var config  = null;
 var theme   = null;
+var etmoes  = null;
 var badges  = null;           // load()를 통해 uniformData와 연결
 
 
@@ -58,6 +59,20 @@ var addRecursive = function(object, struct, parent) {
               }
               break;
             
+            /* 이모티콘 uri */
+            case "emoteImg":
+              if (object.emoteImg) {
+                value = value.replace(match, object.emoteImg);
+              }
+              break;
+              
+            /* 이모티콘 텍스트 */
+            case "emoteName":
+              if (object.emoteName) {
+                value = value.replace(match, object.emoteName);
+              }
+              break;
+              
             /* 비트 이미지 uri */
             case "bitImg":
               if (object.bitImg) {
@@ -167,6 +182,13 @@ var addRecursive = function(object, struct, parent) {
   
   return parent;
 };
+var getDom = function(data, struct) {
+  var dom = document.createElement("span");
+  addRecursive(data, struct, dom);
+  var ret = dom.innerHTML;
+  delete dom;
+  return ret;
+}
 
 
 /* 모듈 메서드 정의 */
@@ -176,6 +198,7 @@ var method = {
     message = uniformData.message;
     config  = uniformData.config.data.message;
     theme   = uniformData.shared.data.theme;
+    emotes  = uniformData.shared.data.emotes;
     badges  = uniformData.shared.data.badges;
     
     if (!config) {
@@ -206,7 +229,29 @@ var method = {
     /* 텍스트를 어절별로 처리 */
     var processes = new Array(object.text.length);
     
-    if (Number(object.bits)>0) {                                      // 응원 메세지
+    if (object.emotes.length > 0) {                                   // 트위치 이모티콘 처리
+      var emotesData = [];
+      object.emotes.forEach( function(el) {
+        var index = Number(el.split(":")[1].split("-")[0]);
+        
+        emotesData.push( {
+          name : object.text.join(" ").slice(index).split(" ")[0],
+          id   : el.split(":")[0]
+        } );
+      } );
+      
+      emotesData.forEach( function(el) {
+        object.text.forEach( function(txt, ind, arr) {
+          if (processes[ind] != undefined) { return; }
+          if (txt == el.name) {
+            var uri = emotes.uri.replace("{id}", el.id);
+            arr[ind] = getDom({ emoteImg:uri, emoteName:el.name }, theme.normal.emotes);
+            processes[ind] = "emote";
+          }
+        } );
+      } );
+    }
+    if (Number(object.bits) > 0) {                                    // 응원 메세지
       if (lowerModule.cheer) {
         var list = lowerModule.cheer.method.get(object, processes);
       }
@@ -214,7 +259,7 @@ var method = {
       /* 각 어절을 변환 */
       if (list) {
         list.forEach( function(el) {
-          lowerModule.cheer.method.apply(object, el, addRecursive);
+          object.text[el[0]] = getDom({ text:el[1], bitImg:el[2] }, theme.normal.bits);
           processes[el[0]] = "cheer";
         } );
       }
@@ -306,6 +351,7 @@ var method = {
 
 /* 하위 모듈 정의 */
 var lowerModule = {
+  emote : null,
   twip  : null,
   cheer : null
 };
