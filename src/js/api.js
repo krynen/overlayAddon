@@ -1,6 +1,6 @@
 /* 내부 메서드 정의 */
 var method = {
-  load : function(key, uri, lifetime, callback) {
+  load : function(key, uri, lifetime, id, callback) {
     var storage = sessionStorage.getItem(key);
     
     if (storage && storage!="") {
@@ -9,9 +9,16 @@ var method = {
       var request = new XMLHttpRequest();
       request.open("GET", uri);
       
+      /* id가 null이 아닐 경우 헤더에 클라이언트 아이디 입력 */
+      if (id) { request.setRequestHeader("Client-ID", id); }
+      
       request.onreadystatechange = (function(evt) {
         if (evt.target.readyState == 4) {
-          if ((evt.target.status==200) || (evt.target.status==0&&evt.target.responseText)) {
+          var cond = evt.target.status == 200;
+          cond = cond || (evt.target.status==0 && evt.target.responseText);
+          cond = cond || (evt.target.status==400);
+          
+          if (cond) {
             var storage = evt.target.responseText;
 
             if (storage.length <= 500000) {

@@ -127,10 +127,12 @@ var method = {
         id     : Number(subArgs["user-id"]),
         name   : subArgs["display-name"],
         badges : subArgs["badges"],
-        color  : subArgs["color"]
+        color  : subArgs["color"],
+        bits   : subArgs["bits"]
       };
       if ((object.badges||{}).length||0 > 0) { object.badges = object.badges.split(","); }
       else                                   { object.badges = [] }
+      if (object.bits == null) { object.bits = "0"; }
       
       
       switch(arguments[1]) {

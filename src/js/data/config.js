@@ -4,6 +4,7 @@ var uri = "./dat/config.json";
 
 /* 데이터 기본값(기본 설정) */
 var data = {
+  id      : "",                 // 클라이언트 ID
   channel : {
     "name"     : ""             // 접속할 IRC 채널 이름
   },
@@ -31,6 +32,9 @@ var data = {
       "meColored"       : [       // 색채팅 강조를 허용할 뱃지(유저 등급)
         "broadcaster", "moderator"
       ]
+    },
+    cheer      : {
+      "accentFormat"    : "{name}님이 {bits}비트 후원!"
     },
     errorText  : {                // 오류 메세지의 텍스트
       "loadConfigFail"  : "설정을 불러올 수 없었습니다.",
@@ -64,7 +68,7 @@ var method = {
     var targetUri = (((uniformData||{}).uri||{}).data||{}).config || uri;
     
     /* api.method.load()를 호출 */
-    uniformData.api.method.load("config.data", targetUri, 0, function(storage) {
+    uniformData.api.method.load("config.data", targetUri, 0, null, function(storage) {
       if (storage) {
         /* config.data.session.timeout이 바뀌었을 수 있으므로 타임아웃을 따로 지정 */
         if (((storage.api||{}).session||{}).timeout >0) {

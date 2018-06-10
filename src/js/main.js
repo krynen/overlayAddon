@@ -29,27 +29,32 @@ module.exports = new function() {
   
   /* * 오브젝트 하위 모듈 불러오기
    *
-   * message/twip.js : 트윕(Twipkr)을 통한 후원 메세지를 처리하는 모듈
+   * message/twip.js  : 트윕(Twipkr)을 통한 후원 메세지를 처리하는 모듈
+   * message/cheer.js : 트위치 기본 후원 기능을 통한 후원 메세지를 처리하는 모듈
    *
    * */
-  this.message.module.twip = require("./message/twip.js");
+  this.message.module.twip  = require("./message/twip.js");
+  this.message.module.cheer = require("./message/cheer.js");
   
   /* 각 모듈 초기화 및 로드 */
   require("./event.js").method.apply(this);
   
-  this.uri.method.load(this);
-  this.message.method.load(this);
-  this.irc.method.load(this);
-  
-  this.config.addEventListener("load", function(evt) {
-    this.message.module.twip.method.load(this);
+  with (this) {
+    uri.method.load(this);
+    message.method.load(this);
+    irc.method.load(this);
     
-    this.irc.addEventListener("connect", function(evt) {
-      this.shared.method.load(this);
+    config.addEventListener("load", function(evt) {
+      message.module.twip.method.load(this);
+      message.module.cheer.method.load(this);
+      
+      irc.addEventListener("connect", function(evt) {
+        shared.method.load(this);
+      }.bind(this) );
+      irc.method.connect();
     }.bind(this) );
-    this.irc.method.connect();
-  }.bind(this) );
-  this.config.method.load(this);
+    config.method.load(this);
+  }
   
   return this;
 }();

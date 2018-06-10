@@ -20,6 +20,11 @@ var data = {
     "list"     : {}                                    // load("badges")로 로드
   },
   
+  cheers    : {
+    "uri"      : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={channel}",
+    "list"     : {}                                    // load("cheers")로 로드
+  },
+  
   irc       : {
     "uri"      : "wss://irc-ws.chat.twitch.tv:443",    // 트위치 IRC 서버
     "nick"     : "justinfan" + Math.random().toString().slice(2,7),
@@ -76,6 +81,17 @@ var data = {
             ]
           }
         ]
+      },
+      "bits"       : {
+        tag       : "span",
+        classes   : ["bitNum"],
+        children  : [
+          {
+            tag      : "img",
+            variable  : [ { type:["src"], value:"{bitImg}" } ]
+          },
+          "text"
+        ]
       }
     },
     error      : {
@@ -104,7 +120,7 @@ var loadBadge = function() {
     
     /* api.method.load()를 호출 */
     var lifetime = config.api.session.timeout;
-    api.load(key, uri, lifetime, function(storage) {
+    api.load(key, uri, lifetime, null, function(storage) {
       if (storage) {
         if (typeof storage == "string") { storage = JSON.parse(storage); }
         
@@ -128,6 +144,34 @@ var loadBadge = function() {
     } );
   } );
 };
+var loadCheer = function() {
+  var uri = data.cheers.uri;
+  
+  if (uri.indexOf("{channel}") != -1) {
+    uri = uri.replace("{channel}", data.channel.id);
+    var key = "shared.data.cheers." + data.channel.id;
+    var lifetime = config.api.session.timeout;
+    
+    api.load(key, uri, lifetime, config.id, function(storage) {
+      if (storage) {
+        if (typeof storage ==  "string") { storage = JSON.parse(storage); }
+        
+        if (storage["actions"]) {
+          storage = storage["actions"];
+          sessionStorage.setItem(key, JSON.stringify(storage));
+        }
+      
+        if (storage["error"] == undefined) {
+          data.cheers.list = storage;
+          return;
+        }
+      }
+      message.error("loadDataFail", { data:"응원 이모티콘" });
+    } );
+  } else {
+    message.error("loadDataFail", { data:"응원 이모티콘" });
+  }
+}
   
 
 /* 모듈 메서드 정의 */
@@ -144,9 +188,14 @@ var method = {
       loadBadge();
       break;
       
+    case "cheers":
+      loadCheer();
+      break;
+      
     case "all":
     default:
       loadBadge();
+      loadCheer();
       break;
     }
   }

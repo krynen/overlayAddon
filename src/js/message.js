@@ -58,6 +58,13 @@ var addRecursive = function(object, struct, parent) {
               }
               break;
             
+            /* 비트 이미지 uri */
+            case "bitImg":
+              if (object.bitImg) {
+                value = value.replace(match, object.bitImg);
+              }
+              break;
+            
             /* 수치 범위에서 랜덤 */
             case "random":
               if (target.min && target.max && target.interval) {
@@ -101,6 +108,10 @@ var addRecursive = function(object, struct, parent) {
               
             case "class":
               dom.classList.add(value);
+              break;
+              
+            case "src":
+              dom.src = value;
               break;
               
             default:
@@ -193,8 +204,20 @@ var method = {
     object.cases = [];
     
     /* 텍스트를 어절별로 처리 */
+    var processes = new Array(object.text.length);
+    
     if (Number(object.bits)>0) {                                      // 응원 메세지
-      object.cases.push(["type-donation", "type-cheer"]);
+      if (lowerModule.cheer) {
+        var list = lowerModule.cheer.method.get(object, processes);
+      }
+      
+      /* 각 어절을 변환 */
+      if (list) {
+        list.forEach( function(el) {
+          lowerModule.cheer.method.apply(object, el, addRecursive);
+          processes[el[0]] = "cheer";
+        } );
+      }
     }
     {                                                                 // 색채팅 처리
       /* 색채팅 여부 체크 */
@@ -220,6 +243,7 @@ var method = {
         } );
           
         object.text.shift();
+        processes.shift();
         object.text[object.text.length-1] = tail.replace(/$/, "");
         
         if (cond) {
@@ -282,7 +306,8 @@ var method = {
 
 /* 하위 모듈 정의 */
 var lowerModule = {
-  twip : null
+  twip  : null,
+  cheer : null
 };
 
 
