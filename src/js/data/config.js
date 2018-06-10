@@ -83,7 +83,7 @@ var method = {
           if (uniformData.config.data[name]) {
             Object.assign(uniformData.config.data[name], storage[name]);
           } else {
-            uniformData.config.data[name] = stroage[name];
+            uniformData.config.data[name] = storage[name];
           }
         } );
         Object.assign(uniformData.config.data, storage);

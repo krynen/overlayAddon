@@ -149,7 +149,7 @@ var addRecursive = function(object, struct, parent) {
             break;
             
           case "donationHeader":
-            if (object.cases.indexOf("type-donation") && object.header) {
+            if ((object.cases.indexOf("type-donation")!=-1) && object.header) {
               parent.innerHTML += object.header;
             }
             break;
@@ -241,7 +241,7 @@ var method = {
             return (badge.indexOf(el) == 0);
           } );
         } );
-          
+
         object.text.shift();
         processes.shift();
         object.text[object.text.length-1] = tail.replace(/$/, "");
@@ -292,7 +292,7 @@ var method = {
     
     var root = document.getElementById(theme.error.id);
     if (root) {
-      addReculsive(object, theme.error.struct, root);
+      addRecursive(object, theme.error.struct, root);
     } else {
       /* message.load()가 없어 root가 생성되지 않았을 때 예외처리 */
       var error = document.createElement("div");

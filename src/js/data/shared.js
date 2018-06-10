@@ -8,29 +8,29 @@ var method  = null;          // load()를 통해 uniformData와 연결
 
 /* 데이터 기본값(기본 설정) */
 var data = {
-  channel   : {
-    "id"       : null                                  // IRC 접속으로 재정의
+  channel : {
+    "id"     : null                                    // IRC 접속으로 재정의
   },
   
-  badges    : {
-    "uris"     : [
+  badges  : {
+    "uris"   : [
       "https://badges.twitch.tv/v1/badges/global/display",
       "https://badges.twitch.tv/v1/badges/channels/{channel}/display"
     ],
-    "list"     : {}                                    // load("badges")로 로드
+    "list"   : {}                                      // load("badges")로 로드
   },
   
-  cheers    : {
-    "uri"      : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={channel}",
-    "list"     : {}                                    // load("cheers")로 로드
+  cheers  : {
+    "uri"    : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={channel}",
+    "list"   : {}                                      // load("cheers")로 로드
   },
   
   irc       : {
     "uri"      : "wss://irc-ws.chat.twitch.tv:443",    // 트위치 IRC 서버
     "nick"     : "justinfan" + Math.random().toString().slice(2,7),
                                                        // IRC에 접속할 게스트 닉네임
-    "pass"     : Math.random().toString().slice(2,10), // 암호로는 아무 텍스트나 사용 가능
-    "capabilities" : [                                 // 해당 이벤트의 메세지를 수신케 함
+    "pass"   : Math.random().toString().slice(2,10),   // 암호로는 아무 텍스트나 사용 가능
+    "caps"   : [ /* capabilities */                    // 해당 이벤트의 메세지를 수신케 함
       "twitch.tv/tags",
       "twitch.tv/commands",
       "twitch.tv/membership"

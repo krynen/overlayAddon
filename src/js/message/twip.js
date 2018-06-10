@@ -35,7 +35,7 @@ var method = {
         if (matches[ind] == "") { matches[ind] = "익명"; }
         
         /* 이름 변조 */
-        if (config.raplaceName) {
+        if (config.replaceName) {
           object.name = matches[ind];
         }
       }

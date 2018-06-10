@@ -48,7 +48,7 @@ var method = {
     ws.onopen = function() {      
       send("PASS " + shared.irc.pass);
       send("NICK " + shared.irc.nick);
-      send("CAP REQ :" + shared.irc.capabilities.join(" "));
+      send("CAP REQ :" + shared.irc.caps.join(" "));
       send("JOIN #" + channel);
     };
     
