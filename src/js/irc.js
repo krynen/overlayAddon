@@ -128,11 +128,14 @@ var method = {
         name   : subArgs["display-name"],
         badges : subArgs["badges"],
         color  : subArgs["color"],
+        emotes : subArgs["emotes"],
         bits   : subArgs["bits"]
       };
       if ((object.badges||{}).length||0 > 0) { object.badges = object.badges.split(","); }
       else                                   { object.badges = [] }
       if (object.bits == null) { object.bits = "0"; }
+      if ((object.emotes||"") != "") { object.emotes = object.emotes.split("/"); }
+      else                           { object.emotes = []; }
       
       
       switch(arguments[1]) {

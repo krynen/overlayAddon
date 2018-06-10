@@ -1,7 +1,6 @@
 /* 모듈 내부데이터 설정 */
 var config = null;
-var cheers = null;
-var theme  = null;            // load()를 통해 uniformData와 연결
+var cheers = null;            // load()를 통해 uniformData와 연결
 
 
 /* 모듈 메서드 정의 */
@@ -9,7 +8,6 @@ var method = {
   load  : function(uniformData) {
     config = uniformData.config.data.message.cheer;
     cheers = uniformData.shared.data.cheers;
-    theme  = uniformData.shared.data.theme.normal.bits;
   },
   get   : function(object, processes) {
     /* 헤더를 추가 */
@@ -54,14 +52,6 @@ var method = {
     /* 비트 어절의 인덱스와 금액, 인덱스에 해당하는 uri의 목록을 반환 */
     if (list.length != 0) { return list; }
     else                  { return null; }
-  },
-  apply : function(object, data, add) {
-    var dom = document.createElement("span");
-    var obj = { text:data[1], bitImg:data[2] };
-    
-    add(obj, theme, dom);
-    object.text[data[0]] = dom.innerHTML;
-    delete dom;
   }
 };
 
@@ -69,7 +59,6 @@ var method = {
 /* 정의된 엘리먼트 적용 */
 module.exports = new function() {
   this.method = method;
-  this.data = data;
 
   return this;
 }();

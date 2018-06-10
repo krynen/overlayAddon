@@ -12,6 +12,10 @@ var data = {
     "id"     : null                                    // IRC 접속으로 재정의
   },
   
+  emotes  : {
+    "uri"    : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0"
+  },
+  
   badges  : {
     "uris"   : [
       "https://badges.twitch.tv/v1/badges/global/display",
@@ -80,6 +84,13 @@ var data = {
               "text"
             ]
           }
+        ]
+      },
+      "emotes"     : {
+        tag       : "img",
+        variable  : [
+          { type:["src"], value:"{emoteImg}" },
+          { type:["class"], value:"{emoteName}" }
         ]
       },
       "bits"       : {
