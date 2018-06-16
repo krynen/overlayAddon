@@ -13,7 +13,8 @@ var data = {
   },
   
   emotes  : {
-    "uri"    : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0"
+    "uri"    : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{size}",
+    "sizes"  : [null, "1.0", "2.0", "3.0"]
   },
   
   badges  : {

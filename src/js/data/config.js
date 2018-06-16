@@ -33,6 +33,9 @@ var data = {
         "broadcaster", "moderator"
       ]
     },
+    emotes     : {
+      "size"            : 1,
+    },
     cheer      : {
       "accentFormat"    : "{name}님이 {bits}비트 후원!"
     },

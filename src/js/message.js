@@ -2,7 +2,7 @@
 var message = null;
 var config  = null;
 var theme   = null;
-var etmoes  = null;
+var emotes  = null;
 var badges  = null;           // load()를 통해 uniformData와 연결
 
 
@@ -244,7 +244,8 @@ var method = {
         object.text.forEach( function(txt, ind, arr) {
           if (processes[ind] != undefined) { return; }
           if (txt == el.name) {
-            var uri = emotes.uri.replace("{id}", el.id);
+            var size = emotes.sizes[config.emotes.size];
+            var uri = emotes.uri.replace("{id}", el.id).replace("{size}", size);
             arr[ind] = getDom({ emoteImg:uri, emoteName:el.name }, theme.normal.emotes);
             processes[ind] = "emote";
           }
