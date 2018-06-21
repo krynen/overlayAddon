@@ -33,6 +33,10 @@ var data = {
         "broadcaster", "moderator"
       ]
     },
+    orimg      : {
+      "prefix"          : "~",
+      "uri"             : "./dat/orimgs.json"
+    },
     emotes     : {
       "size"            : 1
     },

@@ -33,6 +33,7 @@ module.exports = new function() {
    * message/cheer.js : 트위치 기본 후원 기능을 통한 후원 메세지를 처리하는 모듈
    *
    * */
+  this.message.module.orimg = require("./message/orimg.js");
   this.message.module.twip  = require("./message/twip.js");
   this.message.module.cheer = require("./message/cheer.js");
   
@@ -45,6 +46,7 @@ module.exports = new function() {
     irc.method.load(this);
     
     config.addEventListener("load", function(evt) {
+      message.module.orimg.method.load(this);
       message.module.twip.method.load(this);
       message.module.cheer.method.load(this);
       

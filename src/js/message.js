@@ -1,4 +1,5 @@
 /* 모듈 내부데이터 설정 */
+var orimgCount = {};          // sequence method에 사용
 var message = null;
 var config  = null;
 var theme   = null;
@@ -66,10 +67,49 @@ var addRecursive = function(object, struct, parent) {
               }
               break;
               
+            /* 전용이미지 uri */
+            case "orImg":
+              if (object.orImg && object.orimgMethod) {
+                switch (object.orimgMethod) {
+                  case "normal":
+                    value = value.replace(match, object.orImg);
+                    break;
+                    
+                  case "random":
+                    var ind = Math.floor(Math.random() * object.orImg.length);
+                    value = value.replace(match, object.orImg[ind]);
+                    break;
+                    
+                  case "sequence":
+                    if (orimgCount[object.orimgName] != undefined) {
+                      ++orimgCount[object.orimgName];
+                    } else { orimgCount[object.orimgName] = 0; }
+                    var ind = orimgCount[object.orimgName] % object.orImg.length;
+                    value = value.replace(match, object.orImg[ind]);
+                    break;
+                    
+                  case "fixed":
+                    var ind = object.id % object.orImg.length;
+                    value = value.replace(match, object.orImg[ind]);
+                    break;
+                    
+                  default:
+                    break;
+                }
+              }
+              break;
+              
             /* 이모티콘 텍스트 */
             case "emoteName":
               if (object.emoteName) {
                 value = value.replace(match, object.emoteName);
+              }
+              break;
+            
+            /* 전용이미지 텍스트 */
+            case "orimgName":
+              if (object.orimgName) {
+                value = value.replace(match, object.orimgName);
               }
               break;
               
@@ -252,6 +292,19 @@ var method = {
         } );
       } );
     }
+    if (lowerModule.orimg && config.orimg) {                          // 전용이미지 처리
+      var list = lowerModule.orimg.method.get(object, processes);
+      
+      if (list) {
+        list.forEach( function(el) {
+          object.text[el.index] = getDom(
+            { id:object.id, orImg:el.uri, orimgName:el.name, orimgMethod:el.method },
+            theme.normal.orimgs
+          );
+          processes[el.index] = "orimg";
+        } );
+      }
+    }
     if (Number(object.bits) > 0) {                                    // 응원 메세지
       if (lowerModule.cheer) {
         var list = lowerModule.cheer.method.get(object, processes);
@@ -354,6 +407,7 @@ var method = {
 /* 하위 모듈 정의 */
 var lowerModule = {
   emote : null,
+  orimg : null,
   twip  : null,
   cheer : null
 };

@@ -91,7 +91,14 @@ var data = {
         tag       : "img",
         variable  : [
           { type:["src"], value:"{emoteImg}" },
-          { type:["class"], value:"{emoteName}" }
+          { type:["class"], value:"emote-{emoteName}" }
+        ]
+      },
+      "orimgs"     : {
+        tag       : "img",
+        variable  : [
+          { type:["src"], value:"{orImg}" },
+          { type:["class"], value:"orimg-{orimgName}" }
         ]
       },
       "bits"       : {
