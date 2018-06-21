@@ -255,14 +255,15 @@ var method = {
     if (Number(object.bits) > 0) {                                    // 응원 메세지
       if (lowerModule.cheer) {
         var list = lowerModule.cheer.method.get(object, processes);
-      }
-      
-      /* 각 어절을 변환 */
-      if (list) {
-        list.forEach( function(el) {
-          object.text[el[0]] = getDom({ text:el[1], bitImg:el[2] }, theme.normal.bits);
-          processes[el[0]] = "cheer";
-        } );
+
+        /* 각 어절을 변환 */
+        if (list) {
+          list.forEach( function(el) {
+            object.text[el.index] = getDom(
+              { text:el.value, bitImg:el.uri }, theme.normal.bits);
+            processes[el.index] = "cheer";
+          } );
+        }
       }
     }
     {                                                                 // 색채팅 처리

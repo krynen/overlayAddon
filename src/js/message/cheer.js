@@ -42,7 +42,7 @@ var method = {
             return false;
           } );
           
-          list.push([ind, value, uri]);
+          list.push({ index:ind, value:value, uri:uri });
           return false;
         }
         return true;

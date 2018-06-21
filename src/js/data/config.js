@@ -4,13 +4,13 @@ var uri = "./dat/config.json";
 
 /* 데이터 기본값(기본 설정) */
 var data = {
-  id      : "",                 // 클라이언트 ID
+  id      : "",                   // 클라이언트 ID
   channel : {
-    "name"     : ""             // 접속할 IRC 채널 이름
+    "name"     : ""               // 접속할 IRC 채널 이름
   },
   api     : {
     session    : {
-      "timeout"         : 1800  // 각 sessionStorage의 유효시간(초)
+      "timeout"         : 1800    // 각 sessionStorage의 유효시간(초)
     }
   },
   message : {
@@ -34,7 +34,7 @@ var data = {
       ]
     },
     emotes     : {
-      "size"            : 1,
+      "size"            : 1
     },
     cheer      : {
       "accentFormat"    : "{name}님이 {bits}비트 후원!"
@@ -48,8 +48,6 @@ var data = {
       "ircClosed"       : "서버와의 접속이 종료되었습니다.\n 에러코드 {error}",
       "ircConnectFail"  : "서버와의 접속에 실패했습니다.\n{error}",
       "ircWrongChannel" : "{channel}은 올바르지 않은 채널입니다."
-    },
-    customText : {                // 여러 상황에서의 텍스트
     },
     module     : {                // 메세지 모듈에서 사용하는 설정
       twip              : {
