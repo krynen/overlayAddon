@@ -1,9 +1,6 @@
 /* 모듈 내부데이터 설정 */
+var sequenceCount = {};       // setDomValue()에 사용
 var config = null;            // load()를 통해 uniformData와 연결
-
-
-/* 모듈 내부데이터 설정 */
-var config = null;
 
 
 /* 데이터 기본값 */
@@ -15,7 +12,7 @@ var data = {
 
 /* 모듈 메서드 정의 */
 var method = {
-  load  : function(uniformData) {
+  load        : function(uniformData) {
     config = uniformData.config.data.message.orimg;
     
     var key = "message.orimg.data.file";
@@ -64,7 +61,7 @@ var method = {
       }
     } );
   },
-  get   : function(object, processes) {
+  get         : function(object, processes) {
     /* 각 이미지 어절을 추출 */
     var list = [];
     object.text.forEach( function(el, ind, arr) {
@@ -87,6 +84,51 @@ var method = {
     /* 인덱스와 이름, uri의 목록을 반환 */
     if (list.length != 0) { return list; }
     else                  { return null; }
+  },
+  setDomValue : function(object, value) {
+    /* struct의 varaible에서 orimg 전용 value를 선처리 */
+    if (object.orimg == undefined)       { return value; }
+    if (object.orimg.method == "normal") { return value; }
+    
+    if (value.indexOf("{uri}") != -1) {
+      var length = object.uri.length;
+      var match = "{uri}";
+      
+      switch (object.orimg.method) {
+        case "random":
+          value = value.replace(
+            match,
+            object.uri[ Math.floor(Math.random() * length) ]
+          );
+          break;
+          
+        case "sequence":
+          var name = object.orimg.name;
+          if (sequenceCount[name] != undefined) {
+            sequenceCount[name] = (sequenceCount[name]+1) % length;
+          } else {
+            sequenceCount[name] = 0;
+          }
+          
+          value = value.replace(
+            match,
+            object.uri[ sequenceCount[name] ]
+          );
+          break;
+          
+        case "fixed":
+          value = value.replace(
+            match,
+            object.uri[ object.id % length ]
+          );
+          break;
+          
+        default:
+          break;
+      }
+    }
+    
+    return value;
   }
 };
 

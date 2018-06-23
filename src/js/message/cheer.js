@@ -5,11 +5,11 @@ var cheers = null;            // load()를 통해 uniformData와 연결
 
 /* 모듈 메서드 정의 */
 var method = {
-  load  : function(uniformData) {
+  load        : function(uniformData) {
     config = uniformData.config.data.message.cheer;
     cheers = uniformData.shared.data.cheers;
   },
-  get   : function(object, processes) {
+  get         : function(object, processes) {
     /* 헤더를 추가 */
     if (config.accentFormat && config.accentFormat.length>0) {
       object.cases.push("type-accent", "type-donation");
@@ -22,15 +22,15 @@ var method = {
     /* 각 비트 어절을 추출 */
     var list = [];
     object.text.forEach( function(el, ind, arr) {
-      if (processes[ind] != undefined) { return; } // 이미 처리된 어절 스킵
-      if (el.match(/\d+$/) == null)    { return; } // 숫자로 끝나지 않는 어절 스킵
+      if (processes[ind] != undefined) { return; }      // 이미 처리된 어절 스킵
+      if (el.match(/\d+$/) == null)    { return; }      // 숫자로 끝나지 않는 어절 스킵
       
-      var value = Number(el.match(/\d+$/)[0]);     // 해당 비트 어절의 금액
-      var prefix = el.replace(value, "");          // 비트 어절의 영문자
+      var value = Number(el.match(/\d+$/)[0]);          // 해당 비트 어절의 금액
+      var prefix = el.replace(value, "").toLowerCase(); // 비트 어절의 영문자
       
       /* 데이터에서 어절을 탐색 */
       var detected = cheers.list.every( function(cheer, index) {
-        if (cheer.prefix.toLowerCase() == prefix.toLowerCase()) {
+        if (cheer.prefix.toLowerCase() == prefix) {
           
           /* 탐색한 데이터에서 URI를 추출 */
           var uri = "";
@@ -42,7 +42,7 @@ var method = {
             return false;
           } );
           
-          list.push({ index:ind, value:value, uri:uri });
+          list.push({ index:ind, name:prefix, value:value, uri:uri });
           return false;
         }
         return true;
@@ -52,6 +52,10 @@ var method = {
     /* 비트 어절의 인덱스와 금액, 인덱스에 해당하는 uri의 목록을 반환 */
     if (list.length != 0) { return list; }
     else                  { return null; }
+  },
+  setDomValue : function(object, value) {
+    /* message의 하위모듈간 포맷을 맞추기 위한 더미 메서드 */
+    return value;
   }
 };
 

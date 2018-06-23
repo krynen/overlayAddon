@@ -91,23 +91,26 @@ var data = {
         tag       : "img",
         variable  : [
           { type:["src"], value:"{emoteImg}" },
-          { type:["class"], value:"emote-{emoteName}" }
+          { type:["class"], value:"emote-{name}" }
         ]
       },
       "orimgs"     : {
         tag       : "img",
         variable  : [
-          { type:["src"], value:"{orImg}" },
-          { type:["class"], value:"orimg-{orimgName}" }
+          { type:["src"], value:"{uri}" },
+          { type:["class"], value:"orimg-{name}" }
         ]
       },
-      "bits"       : {
+      "cheers"     : {
         tag       : "span",
-        classes   : ["bitNum"],
+        variable  : [
+          { type:["class"], value:"cheer-{name}" },
+          { type:["class"], value:"cheer-{text}" }
+        ],
         children  : [
           {
             tag      : "img",
-            variable  : [ { type:["src"], value:"{bitImg}" } ]
+            variable  : [ { type:["src"], value:"{uri}" } ]
           },
           "text"
         ]

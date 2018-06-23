@@ -188,6 +188,7 @@ var method = {
             break;
             
           case "ritual":                    // 채널에 처음으로 온 시청자가 있을 경우
+          case "rewardgift":                // 후원으로 인해 선물 나눔이 발생했을 경우
             break;
             
           default:

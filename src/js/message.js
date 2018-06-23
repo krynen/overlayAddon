@@ -1,5 +1,4 @@
 /* 모듈 내부데이터 설정 */
-var orimgCount = {};          // sequence method에 사용
 var message = null;
 var config  = null;
 var theme   = null;
@@ -39,9 +38,15 @@ var addRecursive = function(object, struct, parent) {
         struct.variable.forEach( function(target) {
           var type = target.type;
           var value = new String(target.value);
-          var matches = value.match(/{[^}]+}/g);
 
           /* value의 {name} 수정 */
+          if (lowerModule.orimg) {  // 전용이미지 선처리
+            value = lowerModule.orimg.method.setDomValue(object, value);
+          }
+          if (lowerModule.cheer) {  // 응원 선처리
+            value = lowerModule.orimg.method.setDomValue(object, value);
+          }
+          var matches = value.match(/{[^}]+}/g);
           (matches||[]).forEach( function(match) {
             switch(match.replace(/[{}]/g,"")) {
             /* 이름 색상 */
@@ -57,66 +62,27 @@ var addRecursive = function(object, struct, parent) {
                 var color = getColor(object);
                 if (color) { value = value.replace(match, color); }
                 else       { value = ""; }
+              } else { value = null; }
+              break;
+            
+            /* 유저 혹은 이모티콘이나 전용이미지의 이름 */
+            case "name":
+              if (object.name) {
+                value = value.replace(match, object.name);
               }
               break;
             
-            /* 이모티콘 uri */
-            case "emoteImg":
-              if (object.emoteImg) {
-                value = value.replace(match, object.emoteImg);
+            /* 메세지 텍스트 혹은 응원이모티콘의 금액 */
+            case "text":
+              if (object.text) {
+                value = value.replace(match, object.text);
               }
               break;
               
-            /* 전용이미지 uri */
-            case "orImg":
-              if (object.orImg && object.orimgMethod) {
-                switch (object.orimgMethod) {
-                  case "normal":
-                    value = value.replace(match, object.orImg);
-                    break;
-                    
-                  case "random":
-                    var ind = Math.floor(Math.random() * object.orImg.length);
-                    value = value.replace(match, object.orImg[ind]);
-                    break;
-                    
-                  case "sequence":
-                    if (orimgCount[object.orimgName] != undefined) {
-                      ++orimgCount[object.orimgName];
-                    } else { orimgCount[object.orimgName] = 0; }
-                    var ind = orimgCount[object.orimgName] % object.orImg.length;
-                    value = value.replace(match, object.orImg[ind]);
-                    break;
-                    
-                  case "fixed":
-                    var ind = object.id % object.orImg.length;
-                    value = value.replace(match, object.orImg[ind]);
-                    break;
-                    
-                  default:
-                    break;
-                }
-              }
-              break;
-              
-            /* 이모티콘 텍스트 */
-            case "emoteName":
-              if (object.emoteName) {
-                value = value.replace(match, object.emoteName);
-              }
-              break;
-            
-            /* 전용이미지 텍스트 */
-            case "orimgName":
-              if (object.orimgName) {
-                value = value.replace(match, object.orimgName);
-              }
-              break;
-              
-            /* 비트 이미지 uri */
-            case "bitImg":
-              if (object.bitImg) {
-                value = value.replace(match, object.bitImg);
+            /* 이모티콘 및 전용이미지 URI */
+            case "uri":
+              if (object.uri) {
+                value = value.replace(match, object.uri);
               }
               break;
             
@@ -286,7 +252,8 @@ var method = {
           if (txt == el.name) {
             var size = emotes.sizes[config.emotes.size];
             var uri = emotes.uri.replace("{id}", el.id).replace("{size}", size);
-            arr[ind] = getDom({ emoteImg:uri, emoteName:el.name }, theme.normal.emotes);
+            arr[ind] = getDom(
+              { uri:uri, name:el.name, emote:{} }, theme.normal.emotes);
             processes[ind] = "emote";
           }
         } );
@@ -298,7 +265,7 @@ var method = {
       if (list) {
         list.forEach( function(el) {
           object.text[el.index] = getDom(
-            { id:object.id, orImg:el.uri, orimgName:el.name, orimgMethod:el.method },
+            { id:object.id, uri:el.uri, name:el.name, orimg:{method:el.method} },
             theme.normal.orimgs
           );
           processes[el.index] = "orimg";
@@ -313,7 +280,7 @@ var method = {
         if (list) {
           list.forEach( function(el) {
             object.text[el.index] = getDom(
-              { text:el.value, bitImg:el.uri }, theme.normal.bits);
+              { name:el.name, text:el.value, uri:el.uri }, theme.normal.cheers);
             processes[el.index] = "cheer";
           } );
         }
