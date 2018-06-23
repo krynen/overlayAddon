@@ -90,7 +90,7 @@ var data = {
       "emotes"     : {
         tag       : "img",
         variable  : [
-          { type:["src"], value:"{emoteImg}" },
+          { type:["src"], value:"{uri}" },
           { type:["class"], value:"emote-{name}" }
         ]
       },
