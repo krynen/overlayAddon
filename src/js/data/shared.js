@@ -110,7 +110,12 @@ var data = {
         children  : [
           {
             tag      : "img",
-            variable  : [ { type:["src"], value:"{uri}" } ]
+            cases    : ["type-image"],
+            variable : [ { type:["src"], value:"{uri}" } ]
+          },
+          {
+            cases    : ["type-text"],
+            children : ["name"]
           },
           "text"
         ]

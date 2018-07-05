@@ -279,8 +279,10 @@ var method = {
         /* 각 어절을 변환 */
         if (list) {
           list.forEach( function(el) {
-            object.text[el.index] = getDom(
-              { name:el.name, text:el.value, uri:el.uri }, theme.normal.cheers);
+            var obj = { name:el.name, text:el.value, uri:el.uri };
+            if (config.cheer.moteVisible) { obj.cases = ["type-image"]; }
+            else                          { obj.cases = ["type-text"];  }
+            object.text[el.index] = getDom(obj, theme.normal.cheers);
             processes[el.index] = "cheer";
           } );
         }

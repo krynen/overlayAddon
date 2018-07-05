@@ -41,7 +41,8 @@ var data = {
       "size"            : 1
     },
     cheer      : {
-      "accentFormat"    : "{name}님이 {bits}비트 후원!"
+      "accentFormat"    : "{name}님이 {bits}비트 후원!",
+      "moteVisible"     : false   // cheermote를 표시할 지 여부
     },
     errorText  : {                // 오류 메세지의 텍스트
       "loadConfigFail"  : "설정을 불러올 수 없었습니다.",
