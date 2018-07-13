@@ -250,7 +250,7 @@ var method = {
         object.text.forEach( function(txt, ind, arr) {
           if (processes[ind] != undefined) { return; }
           if (txt == el.name) {
-            var size = emotes.sizes[config.emotes.size];
+            var size = emotes.sizes[config.emote.size];
             var uri = emotes.uri.replace("{id}", el.id).replace("{size}", size);
             arr[ind] = getDom(
               { uri:uri, name:el.name, emote:{} }, theme.normal.emotes);
@@ -258,35 +258,6 @@ var method = {
           }
         } );
       } );
-    }
-    if (lowerModule.orimg && config.orimg) {                          // 전용이미지 처리
-      var list = lowerModule.orimg.method.get(object, processes);
-      
-      if (list) {
-        list.forEach( function(el) {
-          object.text[el.index] = getDom(
-            { id:object.id, uri:el.uri, name:el.name, orimg:{method:el.method} },
-            theme.normal.orimgs
-          );
-          processes[el.index] = "orimg";
-        } );
-      }
-    }
-    if (Number(object.bits) > 0) {                                    // 응원 메세지
-      if (lowerModule.cheer) {
-        var list = lowerModule.cheer.method.get(object, processes);
-
-        /* 각 어절을 변환 */
-        if (list) {
-          list.forEach( function(el) {
-            var obj = { name:el.name, text:el.value, uri:el.uri };
-            if (config.cheer.moteVisible) { obj.cases = ["type-image"]; }
-            else                          { obj.cases = ["type-text"];  }
-            object.text[el.index] = getDom(obj, theme.normal.cheers);
-            processes[el.index] = "cheer";
-          } );
-        }
-      }
     }
     {                                                                 // 색채팅 처리
       /* 색채팅 여부 체크 */
@@ -320,6 +291,37 @@ var method = {
           object.me = 1;
         }
       }
+    }
+    if (Number(object.bits) > 0) {                                    // 응원 메세지
+      if (lowerModule.cheer) {
+        var list = lowerModule.cheer.method.get(object, processes);
+
+        /* 각 어절을 변환 */
+        if (list) {
+          list.forEach( function(el) {
+            var obj = { name:el.name, text:el.value, uri:el.uri };
+            if (config.cheer.moteVisible) { obj.cases = ["type-image"]; }
+            else                          { obj.cases = ["type-text"];  }
+            object.text[el.index] = getDom(obj, theme.normal.cheers);
+            processes[el.index] = "cheer";
+          } );
+        }
+      }
+    }
+    if (lowerModule.orimg && config.orimg) {                          // 전용이미지 처리
+      var list = lowerModule.orimg.method.get(object, processes);
+      
+      if (list) {
+        list.forEach( function(el) {
+          object.text[el.index] = getDom(
+            { id:object.id, uri:el.uri, name:el.name, orimg:{method:el.method} },
+            theme.normal.orimgs
+          );
+          processes[el.index] = "orimg";
+        } );
+      }
+    }
+    if ({
     }
 
     

@@ -12,17 +12,17 @@ var data = {
     "id"     : null                                    // IRC 접속으로 재정의
   },
   
-  emotes  : {
-    "uri"    : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{size}",
-    "sizes"  : [null, "1.0", "2.0", "3.0"]
-  },
-  
   badges  : {
     "uris"   : [
       "https://badges.twitch.tv/v1/badges/global/display",
       "https://badges.twitch.tv/v1/badges/channels/{channel}/display"
     ],
     "list"   : {}                                      // load("badges")로 로드
+  },
+  
+  emotes  : {
+    "uri"    : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{size}",
+    "sizes"  : [null, "1.0", "2.0", "3.0"]
   },
   
   cheers  : {

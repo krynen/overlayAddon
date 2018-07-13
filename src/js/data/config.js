@@ -18,6 +18,9 @@ var data = {
       "name"            : "DEBUG",
       "badges"          : ["moderator/1"]
     },
+    emote      : {
+      "size"            : 1
+    },
     color      : {
       "userColor"       : true,   // 유저 색 활성화
       "customColor"     : true,   // 유저 고유 색 사용
@@ -33,16 +36,14 @@ var data = {
         "broadcaster", "moderator"
       ]
     },
+    cheer      : {
+      "accentFormat"    : "{name}님이 {bits}비트 후원!",
+      "moteVisible"     : false   // cheermote를 표시할 지 여부
+    },
     orimg      : {
       "prefix"          : "~",
       "uri"             : "./dat/orimgs.json"
     },
-    emotes     : {
-      "size"            : 1
-    },
-    cheer      : {
-      "accentFormat"    : "{name}님이 {bits}비트 후원!",
-      "moteVisible"     : false   // cheermote를 표시할 지 여부
     },
     errorText  : {                // 오류 메세지의 텍스트
       "loadConfigFail"  : "설정을 불러올 수 없었습니다.",
@@ -54,7 +55,7 @@ var data = {
       "ircConnectFail"  : "서버와의 접속에 실패했습니다.\n{error}",
       "ircWrongChannel" : "{channel}은 올바르지 않은 채널입니다."
     },
-    module     : {                // 메세지 모듈에서 사용하는 설정
+    module     : {                // 메세지 모듈의 하위 모듈에서 사용하는 설정
       twip              : {
         "visible"         : true,
         "replaceName"     : true,
