@@ -20,16 +20,16 @@
   },
   "config": {
     "chrome": "C:/Program Files (x86)/Google/Chrome/Application/Chrome.exe",
-    "sandbox": "./test/chrome_sandbox"
+    "test": "./test"
   },
   "scripts": {
-    "install": "npm link browserify & npm link uglify-js",
+    "install": "npm link browserify & npm link uglify-es",
     "test": "node src/build/build.js debug",
-    "start": "node src/build/build.js main",
+    "start": "node src/build/build.js start",
     "stop": "node src/build/clean.js"
   },
   "dependencies": {
-    "browserify": "^15.0.0",
-    "uglify-js": "^3.3.20"
+    "browserify": "^16.2.0",
+    "uglify-es": "^3.3.9"
   }
 }
