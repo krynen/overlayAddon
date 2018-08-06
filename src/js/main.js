@@ -9,6 +9,122 @@
 /**
  * 메인 모듈 객체
  */
+var REQUIRE_MODULES = new function() {
+  this["Irc"]     = require("./irc.js");
+
+  return this;
+}();
+
+
+/**
+ * 문자열을 파스칼케이스PascalCase로 만듬
+ * @param {string} text
+ * @return {string}
+ */
+var Pascalize = function(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
+/**
+ * 문자열을 캐멀케이스camelCase로 만듬
+ * @param {string} text
+ * @return {string}
+ */
+var Camelize = function(text) {
+  return text.charAt(0).toLowerCase() + text.slice(1);
+};
+
+
+/**
+ * 파라미터가 {}로 닫힌 오브젝트인지를 확인
+ * @param {object} target 확인 대상 오브젝트
+ * @return {bool}
+ */
+var CheckObject = function(target) {
+  if (target === null)            { return false; }
+  if (target === undefined )      { return false; }
+  if (typeof target !== "object") { return false; }
+  return true;
+};
+
+/**
+ * 모듈 초기화 메서드
+ * return InitModule.call({}, methods, data);
+ * 각 모듈에서 실행하여 내부 메소드, 데이터를 모듈과 연결
+ * @param {obecjt} this call 메서드를 사용해 변경할 this context
+ * @param {object} methods 외부에서 접근 가능한 모듈 오브젝트
+ * @param {object} data 외부에서 접근 가능한 모듈 데이터
+ * @return {object}
+ */
+var InitModule = function(methods, data) {
+  // 하위 모듈 오브젝트가 있을 경우 ConnectModule에서 연결
+  // this.Module = {};
+
+  // 메소드 연결
+  if (CheckObject(methods)) {
+    Object.keys(methods).forEach( (el) => { this[Pascalize(el)] = methods[el]; }, this);
+  }
+
+  // 데이터 연결
+  if (CheckObject(data)) {
+    Object.keys(data).forEach( (el) => { this[Camelize(el)] = methods[el]; }, this);
+  }
+
+  return this;
+};
+
+
+/**
+ * require한 모듈을 reculsive하게 연결
+ * @param {object} modules modules[name]==require("./"+name+".js")를 충족하는 오브젝트
+ * @return {object}
+ */
+var ConnectModules = function(modules) {
+  // 각 모듈에 InitModule 메서드를 전달하고
+  // 경로의 깊이에 따라 분류
+  var list = [];
+  Object.keys(modules).forEach( function(el) {
+    // 메서드 전달
+    if (typeof modules[el] === "function") {
+      modules[el] = modules[el](InitModule);
+    }
+
+    // 깊이에 따라 분류
+    var len = el.split("/").length-1;
+    if (list[len] === undefined) { list[len] = []; }
+    list[len].push(el);
+  } );
+
+  // 깊이 0인 모듈을 연결
+  var ret = {};
+  list.shift().forEach( function(el) { ret[Pascalize(el)] = modules[el]; } );
+
+  // 깊이 1 이상의 모듈을 연결
+  list.forEach( function(len) {
+    len.forEach( function(el) {
+      // 각 이름의 첫글자를 대문자로
+      var name = el.split("/");
+      name.forEach( function(el) { el = Pascalize(el); } );
+
+      // 내부 오브젝트로 접근
+      var obj = ret;
+      while (name.length > 1) { obj = obj[name.shift()]; }
+
+      // 오브젝트에 모듈을 연결
+      if (obj.Module === undefined) { obj.Module = {}; }
+      obj.Module[name[0]] = modules[el];
+    } );
+  } );
+
+  return ret;
+};
+
+
+/**
+ * 메인 모듈 오브젝트
+ * 모듈 목록을 자기 자신에게 추가하고 반환
+ */
 module.exports = new function() {
+  Object.assign(this, ConnectModules(REQUIRE_MODULES));
+
   return this;
 }();
