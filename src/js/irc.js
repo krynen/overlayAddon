@@ -3,11 +3,17 @@
  *                   *
  *********************/ 
 
+// 모듈 인터페이스
 var methods = {};
-methods.test = function(){};
+var data = null;
 
-var data = {};
-data.test = 0;
+
+/**
+ * 테스트용 로드 메서드
+ * main.js에서 연결된 이후에 호출됨
+ * @param {object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {};
 
 
 /**

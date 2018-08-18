@@ -12,6 +12,9 @@
 var REQUIRE_MODULES = new function() {
   this["Irc"]     = require("./irc.js");
 
+  this["Data"]    = require("./data.js");
+  this["Api"]     = require("./api.js");
+
   return this;
 }();
 
@@ -120,11 +123,28 @@ var ConnectModules = function(modules) {
 
 
 /**
+ * 연결된 모듈의 Load 메서드를 호출
+ * @param {object} object 메인 모듈 오브젝트
+ * @param {object} modules ConnectModules에서 파라미터로 사용한 오브젝트
+ */
+var LoadModules = function(object, modules) {
+  Object.keys(modules).forEach( function(el) {
+    var name = el.split("/");
+    var target = object[name.shift()];
+
+    while (name.length>=1) { target = (target.Module||{})[name.shift()]; }
+    if ((target||{}).Load !== undefined) { target.Load(object); }
+  } );
+};
+
+
+/**
  * 메인 모듈 오브젝트
  * 모듈 목록을 자기 자신에게 추가하고 반환
  */
 module.exports = new function() {
   Object.assign(this, ConnectModules(REQUIRE_MODULES));
+  LoadModules(this, REQUIRE_MODULES);
 
   return this;
 }();
