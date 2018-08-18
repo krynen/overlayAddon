@@ -27,19 +27,23 @@ var fs = require("fs");
  */
 var WriteScript = function(entrance, isUglify) {
   // 진입점으로부터 browserify를 이용해 스크립트 생성
-  require("browserify")(entrance).bundle( function(err, buf) {
-    if (err) { return err; }
+  return new Promise( function(resolve, reject) {
+    require("browserify")(entrance).bundle( function(err, buf) {
+      if (err !== null) { reject(err); }
 
-    // 생성한 스크립트를 uglify
-    var script = buf;
-    if (isUglify) {
-      script = require("uglify-es").minify(script.toString()).code;
-    }
+      // 생성한 스크립트를 uglify
+      var script = buf;
+      if (isUglify) {
+        script = require("uglify-es").minify(script.toString()).code;
+      }
 
-    // uglify된 스크립트를 html에 끼워넣기
-    var html = fs.readFileSync(BUILD_OPTION.HTML_SOURCE_FILE, "utf8").split("</body>");
-    html[html.length-2] += "<script>" + script + "</script>";
-    fs.writeFileSync(BUILD_OPTION.HTML_TARGET_FILE, html.join("</body>"));
+      // uglify된 스크립트를 html에 끼워넣기
+      var html = fs.readFileSync(BUILD_OPTION.HTML_SOURCE_FILE, "utf8").split("</body>");
+      html[html.length-2] += "<script>" + script + "</script>";
+      fs.writeFileSync(BUILD_OPTION.HTML_TARGET_FILE, html.join("</body>"));
+
+      resolve(null);
+    } );
   } );
 };
 
@@ -97,14 +101,13 @@ var ExecuteBrowser = function() {
 (function() {
   switch (process.argv[2]) {
     case "debug":
-      var err = WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, false);
-      if (err) { throw(err); }
-
-      ExecuteBrowser();
+      WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, false)
+        .then( ExecuteBrowser, console.log );
       break;
 
     case "start":
-      WriteScript(BUILD_OPTION.BUILD_START_ENTRANCE_FILE, true);
+      WriteScript(BUILD_OPTION.BUILD_START_ENTRANCE_FILE, true)
+        .then( ()=>{}, console.log );
       break;
 
     default:
