@@ -25,11 +25,11 @@ methods.Get = async function(type, key) {
   // type에 따라 switch문 전개
   switch (type) {
     case "shared":  // 모듈 공용 데이터 로드
-      ret = require("./data/shared.json");
+      ret = require("../json/shared.json");
       break;
 
     case "default": // 기본 설정 로드
-      ret = require("./data/default.json");
+      ret = require("../json/default.json");
       break;
 
     case "config":  // URI로부터 설정 로드
@@ -40,7 +40,7 @@ methods.Get = async function(type, key) {
     case "session": // sessionStorage에 저장된 설정 로드
       Object.keys(sessionStorage).some( function(el) {
         if (el.match(key)) {
-          ret = sessionStorage.getItem(el);
+          ret = JSON.parse(sessionStorage.getItem(el));
           sessionStorage.removeItem(el);
           return true;
         }
@@ -51,7 +51,6 @@ methods.Get = async function(type, key) {
     default:
       break;
   }
-
   return ret;
 };
 
@@ -64,7 +63,7 @@ methods.Get = async function(type, key) {
 methods.Merge = function(target, source) {
   Object.keys(source).forEach( function(el) {
     // 존재하지 않았던 값 추가
-    if (typeof target[el] === undefined) {
+    if (typeof target[el] === undefined || target[el] === null) {
       // source[el]이 배열일 경우도 고려하여 추가함
       // 배열일 경우를 보증해줄 target[el]이 존재하지 않으므로 확실히 체크할 것
       var cond1 = typeof source[el].type === "string";
@@ -87,7 +86,7 @@ methods.Merge = function(target, source) {
 
         // 기존 값을 대체
         if (source[el].type === "replace") {
-          target[el] = source[el];
+          target[el] = source[el].value;
           return; 
         }
       }
