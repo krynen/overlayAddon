@@ -18,6 +18,7 @@ var BUILD_OPTION = require("./option.json");
 
 // 공통으로 사용되는 라이브러리를 로드
 var fs = require("fs");
+var through = require("through2");
 
 
 /** 
@@ -28,7 +29,34 @@ var fs = require("fs");
 var WriteScript = function(entrance, isUglify) {
   // 진입점으로부터 browserify를 이용해 스크립트 생성
   return new Promise( function(resolve, reject) {
-    require("browserify")(entrance).bundle( function(err, buf) {
+    // 제대로 읽을 수 없는 확장자를 읽기 위해 transform을 구현
+    var trans = [ function(filename) {
+      // 확장자를 파싱해 목록에 있는지 판별
+      var cond = (function(){
+        var match = filename.match(BUILD_OPTION.BUILD_TEXTIFY_REGEXP);
+        var exetension = (match||[])[1].toLowerCase();
+
+        var list = BUILD_OPTION.BUILD_TEXTIFY_EXETENSIONS.join(".").toLowerCase().split(".");
+        return (list.indexOf(exetension) !== -1);
+      })();
+      if (cond !== true) { return through( function(buf, enc, next) { next(null, buf); } ); }
+
+      // 목록에 있을 경우 텍스트 반환 모듈로 뜯어고쳐 읽게끔 함
+      return through(
+        function(buf, enc, next) { next(); },
+        function(end) {
+          this.push(
+            "module.exports=" +
+            JSON.stringify(fs.readFileSync(filename, "utf8")) +
+            ";"
+          );
+          end();
+        }
+      );
+    } ];
+
+    // browserify하여 클라이언트 html을 생성
+    require("browserify")(entrance, { "transform":trans }).bundle( function(err, buf) {
       if (err !== null) { reject(err); }
 
       // 생성한 스크립트를 uglify

@@ -5,6 +5,13 @@
 	"BUILD_START_ENTRANCE_FILE" : "./src/js/main.js",
 	"BUILD_DEBUG_ENTRANCE_FILE" : "./src/js/debug.js",
 
+	"BUILD_TEXTIFY_REGEXP" : "[\\w,\\s/]+\\.(\\w+)$",
+	"BUILD_TEXTIFY_EXETENSIONS" : [
+		"html",
+		"txt"
+	],
+
+
 	"CHROME_SANDBOX_DIRECTORY" : "chrome_sandbox",
 	"CHROME_PARAMETERS" : [
 		[ "--disable-web-security" ],
