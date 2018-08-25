@@ -69,7 +69,7 @@ var InitModule = function(methods, data) {
 
   // 데이터 연결
   if (CheckObject(data)) {
-    Object.keys(data).forEach( (el) => { this[Camelize(el)] = methods[el]; }, this);
+    Object.keys(data).forEach( (el) => { this[Camelize(el)] = data[el]; }, this);
   }
 
   return this;

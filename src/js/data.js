@@ -12,6 +12,11 @@ var data = {};
 // 포인터 정의
 var api = null;
 
+// 상수값
+var SHARED_DATA = require("../json/shared.json");
+var DEFAULT_CONFIG = require("../json/default.json");
+var SESSION_CONFIG_REGEX = /^data\/config\/*/;
+
 
 /**
  * 데이터 로드 메서드
@@ -25,15 +30,15 @@ methods.Get = async function(type, key) {
   // type에 따라 switch문 전개
   switch (type) {
     case "shared":  // 모듈 공용 데이터 로드
-      ret = require("../json/shared.json");
+      ret = SHARED_DATA;
       break;
 
     case "default": // 기본 설정 로드
-      ret = require("../json/default.json");
+      ret = DEFAULT_CONFIG;
       break;
 
     case "config":  // URI로부터 설정 로드
-      await api.Get( {uri:key}, false )
+      await api.Get( {uri:key} )
         .then( function(res) { ret = JSON.parse(res); } );
       break;
 
@@ -115,7 +120,7 @@ methods.Load = async function(uniformData) {
   this.config = await methods.Get("default");
 
   // 세션 설정을 연결
-  methods.Merge(this.config, await methods.Get("session", /^data\/config\/*/));
+  methods.Merge(this.config, await methods.Get("session", SESSION_CONFIG_REGEX));
 
   // 웹 설정을 로드
   var uris = JSON.parse( JSON.stringify(this.config.Data.Uris) );

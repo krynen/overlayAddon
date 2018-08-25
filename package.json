@@ -23,7 +23,6 @@
     "test": "./test"
   },
   "scripts": {
-    "install": "npm link browserify & npm link uglify-es",
     "test": "node src/build/build.js debug",
     "start": "node src/build/build.js start",
     "stop": "node src/build/clean.js"
