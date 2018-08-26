@@ -1,2 +1,11 @@
 {
+  "Irc" : {
+    "Uri"  : "wss://irc-ws.chat.twitch.tv:443",
+
+    "Caps" : [
+      "twitch.tv/tags",
+      "twitch.tv/commands",
+      "twitch.tv/membership"
+    ]
+  }
 }
