@@ -116,21 +116,21 @@ methods.Load = async function(uniformData) {
   api = uniformData.Api;
 
   // 내부 데이터를 연결
-  this.shared = await methods.Get("shared");
-  this.config = await methods.Get("default");
+  this.shared = data.shared = await methods.Get("shared");
+  this.config = data.config = await methods.Get("default");
 
   // 세션 설정을 연결
-  methods.Merge(this.config, await methods.Get("session", SESSION_CONFIG_REGEX));
+  methods.Merge(data.config, await methods.Get("session", SESSION_CONFIG_REGEX));
 
   // 웹 설정을 로드
-  var uris = JSON.parse( JSON.stringify(this.config.Data.Uris) );
+  var uris = JSON.parse( JSON.stringify(data.config.Data.Uris) );
   var webConfigs = await Promise.all( uris.map( async function(el) {
     return await methods.Get("config", el);
   } ) );
 
   // 로드한 웹 설정을 연결
   webConfigs.forEach( function(el) {
-    methods.Merge(this.config, el);
+    methods.Merge(data.config, el);
   }, this);
 };
 

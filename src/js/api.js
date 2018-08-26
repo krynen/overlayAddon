@@ -9,6 +9,17 @@
 var methods = {};
 var data = null;
 
+// 상수값
+var ERROR_STRING = {
+  0   : " Undefined Error",
+  400 : " Bad Request",
+  401 : " Unauthorized",
+  403 : " Forbidden",
+  404 : " Not Found",
+  408 : " Request Timeout",
+  429 : " Too Many Requests"
+}
+
 
 /**
  * 외부 API를 불러오는데 사용할 Http 리퀘스트 메서드
@@ -24,6 +35,7 @@ methods.Get = async function(data) {
 
     // 타임아웃 설정
     if (typeof data.timeout === "number") { request.timeout = data.timeout; }
+    else { request.timeout = 5000; }
 
     // 헤더 설정
     if (Array.isArray(data.header)) {
@@ -36,11 +48,11 @@ methods.Get = async function(data) {
     request.onload = function(evt) {
       if (request.readyState === 4) {
         if (request.status === 200) { resolve(request.responseText); }
-        else { return request.statusText; }
+        else { reject(request.status + ERROR_STRING[request.status]); }
       }
     };
-    request.onerror = function(err) { reject(request.statusText); }
-    request.ontimeout = function(err) { reject(err); }
+    request.onerror = function(err) { reject(request.status + ERROR_STRING[request.status]); }
+    request.ontimeout = function(err) { reject(408 + ERROR_STRING[408]); }
     request.send();
   } );
 };
