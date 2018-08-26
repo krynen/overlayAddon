@@ -2,5 +2,15 @@
   "Channel" : null,
   "Data"    : {
     "Uris"    : []
+  },
+
+  "Error" : {
+    "Message_No_NormalRoot" : "TemplateNormalRoot Template을 찾지 못했습니다.",
+    "Message_No_ErrorRoot"  : "TemplateErrorRoot와 TemplateNormalRoot Template을 찾지 못했습니다.",
+
+    "Data_Fail_Config" : "설정 파일을 불러오는데 실패했습니다.",
+    "Data_Fail_Theme"  : "테마 템플릿을 불러오는데 실패했습니다.",
+
+    "Irc_Wrong_Channel" : "잘못된 트위치 유저 아이디입니다."
   }
 }

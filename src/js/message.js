@@ -10,7 +10,7 @@ var methods = {};
 var data = {};
 
 // 포인터 정의
-var shared = null;
+var config = null;
 
 // 상수값
 var DEFAULT_THEME = require("../html/theme.html");
@@ -42,7 +42,7 @@ var GetRootEntry = function(type) {
   var theme = data.theme[`Template${type}Root`];
   if (theme === undefined && type === "Error") { theme = data.theme["TemplateNormalRoot"]; }
   if (theme === undefined) {
-    var messageTemplate = shared.Message.Template;
+    var messageTemplate = config.Error;
     if (type === "Error") {
       methods.NativeError(messageTemplate["Error_Message_No_ErrorRoot"]);
     } else { methods.NativeError(messageTemplate["Error_Mesage_No_NormalRoot"]); }
@@ -112,7 +112,7 @@ var AddSubElement = function(type, message) {
     default:
       break;
   }
-}
+};
 
 
 /**
@@ -171,20 +171,46 @@ methods.NativeError = function(message)  {
 /**
  * 오류, 디버그 메세지 출력 메서드
  * data.theme의 TemplateErrorMessage에 따라 메세지를 출력한다
- * try-catch문 이용으로 무슨 문제가 일어났는지 모를 일은 막음
- * @param {string} message 출력할 오류 및 디버그 문자열
+ * try-catch문 이용해 출력 실패시 NativeError로 재시도
+ * @param {string} message 출력할 오류의 종류
+ * @param {option} array 출력할 문자열에 추가할 수 있는 값
  */
-methods.Error = function(message) {
+methods.Error = function(message, option) {
   try {
+    // 메세지에 해당되는 문자열 불러오기
+    var str = "";
+    if (message === "custom") { str = message; }
+    else { str = config.Error[message]; }
+
+    // 문자열에 {\d}이 있을 경우 옵션을 해당부분에 치환시킴
+    var match = str.match(/{[^}]+}/g);
+    var indexes = [];
+    if (match !== null) {
+      match.forEach( function(el, ind) {
+        var num = Number.ParseInt(el.replace(/[{}]/g, ""));
+        indexes.push(num);
+        str = str.replace(el, option[ind]);
+      } );
+    }
+    // 치환되고 남은 옵션들을 개행 후 배열시킴
+    if (Array.isArray(option)) {
+      str += "\n";
+      option.forEach( function(el, ind) {
+        if (indexes.indexOf(ind) === -1) { str += el; }
+      } );
+      str = str.replace(/\n$/, "");
+    }
+
     // 최상위 Element의 존재를 파악
     var parent = GetRootEntry("Error");
     AddSubElement("ErrorMessage",
       {
         "parent" : parent,
-        "text"   : message
+        "text"   : str
       } );
   } catch(err) {
-    methods.NativeError(`${message}\n\n${err}`);
+    if (Array.isArray(option)) { methods.NativeError(`${message}\n${option}\n\n${err}`) }
+    else { methods.NativeError(`${message}\n\n${err}`); }
   }
 };
 
@@ -195,7 +221,7 @@ methods.Error = function(message) {
  * @param {object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
-  shared = uniformData.Data.shared;
+  config = uniformData.Data.config;
 
   data.theme = methods.ParseTheme(DEFAULT_THEME);
 };
