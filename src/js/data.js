@@ -11,6 +11,7 @@ var data = {};
 
 // 포인터 정의
 var api = null;
+var message = null;
 
 // 상수값
 var SHARED_DATA = require("../json/shared.json");
@@ -39,7 +40,10 @@ methods.Get = async function(type, key) {
 
     case "config":  // URI로부터 설정 로드
       await api.Get( {uri:key} )
-        .then( function(res) { ret = JSON.parse(res); } );
+        .then(
+          function(res) { ret = JSON.parse(res); },
+          function(err) { message.Error("Data_Fail_Config", [ err ]); }
+        );
       break;
 
     case "session": // sessionStorage에 저장된 설정 로드
@@ -55,7 +59,10 @@ methods.Get = async function(type, key) {
 
     case "theme":
       await api.Get( {uri:key} )
-        .then( function(res) { ret = message.ParseTheme(res); } );
+        .then(
+          function(res) { ret = message.ParseTheme(res); },
+          function(err) { message.Error("Data_Fail_Theme", [ err ]); }
+        );
       break;
 
     default:
@@ -119,10 +126,11 @@ methods.Merge = function(target, source) {
 methods.Load = async function(uniformData) {
   // 포인터를 연결
   api = uniformData.Api;
+  message = uniformData.Message;
 
   // 내부 데이터를 연결
-  this.shared = data.shared = await methods.Get("shared");
-  this.config = data.config = await methods.Get("default");
+  Object.assign(data.shared, await methods.Get("shared"));
+  Object.assign(data.config, await methods.Get("default"));
 
   // 세션 설정을 연결
   methods.Merge(data.config, await methods.Get("session", SESSION_CONFIG_REGEX));
@@ -138,6 +146,8 @@ methods.Load = async function(uniformData) {
     methods.Merge(data.config, el);
   }, this);
 };
+data.shared = {};
+data.config = {};
 
 
 /**
