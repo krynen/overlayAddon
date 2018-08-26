@@ -53,6 +53,11 @@ methods.Get = async function(type, key) {
       } );
       break;
 
+    case "theme":
+      await api.Get( {uri:key} )
+        .then( function(res) { ret = message.ParseTheme(res); } );
+      break;
+
     default:
       break;
   }

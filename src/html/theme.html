@@ -1,0 +1,22 @@
+<!--
+  * 각 템플릿은 name을 통해 포인트를 탐색한다
+
+  * TemplateNormalRoot, TemplateErrorRoot 템플릿의 경우
+    메세지를 추가할 Element에 TemplateMessageRoot를
+
+  * ID TemplateNormalMessage, TemplateErorrMessage 템플릿의 경우
+    메세지 텍스트를 추가할 Element에 TemplateTextRoot를
+
+    입력하여 탐색할 수 있도록 할 것
+--->
+
+<template id="TemplateErrorRoot">
+  <div id="errorRoot" class="Root" name="TemplateMessageRoot" />
+</template>
+
+<template id="TemplateErrorMessage">
+  <div class="Message Error_Message">
+    <div>DEBUG</div>
+    <span name="TemplateTextRoot" />
+  </div>
+</template>

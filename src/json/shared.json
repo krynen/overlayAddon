@@ -1,2 +1,8 @@
 {
+  "Message" : {
+    "Template" : {
+      "Error_Message_No_NormalRoot" : "TemplateNormalRoot Template을 찾지 못했습니다.",
+      "Error_Message_No_ErrorRoot"  : "TemplateErrorRoot와 TemplateNormalRoot Template을 찾지 못했습니다."
+    }
+  }
 }

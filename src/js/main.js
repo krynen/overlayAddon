@@ -11,6 +11,7 @@
  */
 var REQUIRE_MODULES = new function() {
   this["Irc"]     = require("./irc.js");
+  this["Message"] = require("./message.js");
 
   this["Data"]    = require("./data.js");
   this["Api"]     = require("./api.js");
