@@ -7,7 +7,10 @@
 
 // 모듈 인터페이스
 var methods = {};
-var data = {};
+var data = {
+  shared : {},  // 모듈들간의 공유 데이터
+  config : {}   // 사용자 설정 데이터
+};
 
 // 포인터 정의
 var api = null;
@@ -146,8 +149,6 @@ methods.Load = async function(uniformData) {
     methods.Merge(data.config, el);
   }, this);
 };
-data.shared = {};
-data.config = {};
 
 
 /**

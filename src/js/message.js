@@ -7,7 +7,10 @@
 
 // 모듈 인터페이스
 var methods = {};
-var data = {};
+var data = {
+  theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
+  entryPoint : {}  // GetRootEntry()에서 사용
+};
 
 // 포인터 정의
 var config = null;
@@ -62,7 +65,6 @@ var GetRootEntry = function(type) {
   data.entryPoint[type] = entry;
   return entry;
 };
-data.entryPoint = {};
 
 
 /**
@@ -223,7 +225,7 @@ methods.Error = function(message, option) {
 methods.Load = function(uniformData) {
   config = uniformData.Data.config;
 
-  data.theme = methods.ParseTheme(DEFAULT_THEME);
+  Object.assign(data.theme, methods.ParseTheme(DEFAULT_THEME));
 };
 
 

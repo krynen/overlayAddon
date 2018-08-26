@@ -12,6 +12,7 @@ var data = null;
 // 상수값
 var ERROR_STRING = {
   0   : " Undefined Error",
+  200 : " Zero Length Result", // 오류는 없으나 responseText.length == 0
   400 : " Bad Request",
   401 : " Unauthorized",
   403 : " Forbidden",
@@ -47,8 +48,16 @@ methods.Get = async function(data) {
     // Request 콜백 설정
     request.onload = function(evt) {
       if (request.readyState === 4) {
-        if (request.status === 200) { resolve(request.responseText); }
-        else { reject(request.status + ERROR_STRING[request.status]); }
+        switch(request.status) {
+          case 0:
+          case 200:
+            if (request.responseText.length > 0) { resolve(request.responseText); }
+            break;
+
+          default:
+            reject(request.status + ERROR_STRING[request.status]);
+            break;
+        }
       }
     };
     request.onerror = function(err) { reject(request.status + ERROR_STRING[request.status]); }
