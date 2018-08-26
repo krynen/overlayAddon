@@ -145,9 +145,7 @@ methods.Load = async function(uniformData) {
   } ) );
 
   // 로드한 웹 설정을 연결
-  webConfigs.forEach( function(el) {
-    methods.Merge(data.config, el);
-  }, this);
+  webConfigs.forEach( (el) => { methods.Merge(data.config, el); } );
 };
 
 

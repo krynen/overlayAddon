@@ -8,6 +8,10 @@ var methods = {};
 var data = null;
 
 
+methods.Connect = function() {
+};
+
+
 /**
  * 테스트용 로드 메서드
  * main.js에서 연결된 이후에 호출됨

@@ -128,14 +128,15 @@ var ConnectModules = function(modules) {
  * @param {object} object 메인 모듈 오브젝트
  * @param {object} modules ConnectModules에서 파라미터로 사용한 오브젝트
  */
-var LoadModules = function(object, modules) {
-  Object.keys(modules).forEach( function(el) {
-    var name = el.split("/");
+var LoadModules = async function(object, modules) {
+  var list = Object.keys(modules);
+  for (var i=0; i<list.length; ++i) {
+    var name = list[i].split("/");
     var target = object[name.shift()];
 
-    while (name.length>=1) { target = (target.Module||{})[name.shift()]; }
-    if ((target||{}).Load !== undefined) { target.Load(object); }
-  } );
+    while (name.length >= 1) { target = (target.Module||{})[name.shift()]; }
+    if ((target||{}).Load !== undefined) { await target.Load(object); }
+  }
 };
 
 
@@ -145,7 +146,9 @@ var LoadModules = function(object, modules) {
  */
 module.exports = new function() {
   Object.assign(this, ConnectModules(REQUIRE_MODULES));
-  LoadModules(this, REQUIRE_MODULES);
+
+  LoadModules(this, REQUIRE_MODULES)
+    .then( () => { this.Irc.Connect(); } );
 
   return this;
 }();
