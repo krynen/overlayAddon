@@ -40,8 +40,8 @@ var Camelize = function(text) {
 
 /**
  * 파라미터가 {}로 닫힌 오브젝트인지를 확인
- * @param {object} target 확인 대상 오브젝트
- * @return {bool}
+ * @param {Object} target 확인 대상 오브젝트
+ * @return {boolean}
  */
 var CheckObject = function(target) {
   if (target === null)            { return false; }
@@ -52,12 +52,10 @@ var CheckObject = function(target) {
 
 /**
  * 모듈 초기화 메서드
- * return InitModule.call({}, methods, data);
  * 각 모듈에서 실행하여 내부 메소드, 데이터를 모듈과 연결
- * @param {obecjt} this call 메서드를 사용해 변경할 this context
- * @param {object} methods 외부에서 접근 가능한 모듈 오브젝트
- * @param {object} data 외부에서 접근 가능한 모듈 데이터
- * @return {object}
+ * @param {Object} methods 외부에서 접근 가능한 모듈 오브젝트
+ * @param {Object} data 외부에서 접근 가능한 모듈 데이터
+ * @return {Object} 연결된 모듈을 반환
  */
 var InitModule = function(methods, data) {
   // 하위 모듈 오브젝트가 있을 경우 ConnectModule에서 연결
@@ -79,8 +77,8 @@ var InitModule = function(methods, data) {
 
 /**
  * require한 모듈을 reculsive하게 연결
- * @param {object} modules modules[name]==require("./"+name+".js")를 충족하는 오브젝트
- * @return {object}
+ * @param {Object} modules modules[name]==require("./"+name+".js")를 충족하는 오브젝트
+ * @return {Object}
  */
 var ConnectModules = function(modules) {
   // 각 모듈에 InitModule 메서드를 전달하고
@@ -125,8 +123,8 @@ var ConnectModules = function(modules) {
 
 /**
  * 연결된 모듈의 Load 메서드를 호출
- * @param {object} object 메인 모듈 오브젝트
- * @param {object} modules ConnectModules에서 파라미터로 사용한 오브젝트
+ * @param {Object} object 메인 모듈 오브젝트
+ * @param {Object} modules ConnectModules에서 파라미터로 사용한 오브젝트
  */
 var LoadModules = async function(object, modules) {
   var list = Object.keys(modules);

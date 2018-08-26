@@ -26,7 +26,7 @@ var ERROR_STRING = {
  * 외부 API를 불러오는데 사용할 Http 리퀘스트 메서드
  * @param {string} data.uri 요청할 URI
  * @param {number} [data.timeout] 요청 제한시간
- * @param {array} [data.header] 클라이언트 ID 등의 리퀘스트 헤더
+ * @param {Object[]} [data.header] 클라이언트 ID 등의 리퀘스트 헤더
  */
 methods.Get = async function(data) {
   return new Promise( async function(resolve, reject) {

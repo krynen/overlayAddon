@@ -26,7 +26,7 @@ var SESSION_CONFIG_REGEX = /^data\/config\/*/;
  * 데이터 로드 메서드
  * 로컬 파일과 URI로부터 데이터를 읽어옴
  * @param {string} type 불러올 데이터의 종류 혹은 출처의 구분
- * @param {object} [id] 로컬 파일의 종류, 웹 파일의 URI, 세션 파일의 정규 표현식 등
+ * @param {string|RegExp} [key] 로컬 파일의 종류, 웹 파일의 URI, 세션 파일의 정규 표현식 등
  */
 methods.Get = async function(type, key) {
   var ret = {};
@@ -77,8 +77,8 @@ methods.Get = async function(type, key) {
 
 /**
  * 추가로 불러온 설정을 기본 설정과 병합
- * @param {object} target 병합될 목적 오브젝트
- * @param {object} source 병합할 재료 오브젝트
+ * @param {Object} target 병합될 목적 오브젝트
+ * @param {Object} source 병합할 재료 오브젝트
  */
 methods.Merge = function(target, source) {
   Object.keys(source).forEach( function(el) {
@@ -124,7 +124,7 @@ methods.Merge = function(target, source) {
 /**
  * 모듈 Load, 핵심 메서드
  * 모듈에 하위 모듈들로부터 불러온 데이터를 추가
- * @param {object} uniformData 메인 모듈 오브젝트
+ * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = async function(uniformData) {
   // 포인터를 연결

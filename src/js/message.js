@@ -119,8 +119,8 @@ var AddSubElement = function(type, message) {
 
 /**
  * 테마 파일에서 템플릿을 불러오는 메서드
- * @param {string} response 읽어온 stringify된 html template
- * @param {object} 불러온 템플릿
+ * @param {string} response에서 읽어온 stringify된 html template
+ * @return {Object} 불러온 템플릿
  */
 methods.ParseTheme = function(response) {
   // 바탕이 될 DOM Element를 생성해 response를 추출
@@ -175,7 +175,7 @@ methods.NativeError = function(message)  {
  * data.theme의 TemplateErrorMessage에 따라 메세지를 출력한다
  * try-catch문 이용해 출력 실패시 NativeError로 재시도
  * @param {string} message 출력할 오류의 종류
- * @param {option} array 출력할 문자열에 추가할 수 있는 값
+ * @param {string[]} option 출력할 문자열에 추가할 수 있는 값
  */
 methods.Error = function(message, option) {
   try {
@@ -220,7 +220,7 @@ methods.Error = function(message, option) {
 /**
  * 모듈 Load 메서드
  * main.js에서 연결된 이후에 호출됨
- * @param {object} uniformData 메인 모듈 오브젝트
+ * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
   config = uniformData.Data.config;
