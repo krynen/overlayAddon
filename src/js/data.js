@@ -45,7 +45,7 @@ methods.Get = async function(type, key) {
       await api.Get( {uri:key} )
         .then(
           function(res) { ret = JSON.parse(res); },
-          function(err) { message.Error("Data_Fail_Config", [ err ]); }
+          function(err) { message.Error("Data_Fail_Config", err); }
         );
       break;
 
@@ -64,7 +64,7 @@ methods.Get = async function(type, key) {
       await api.Get( {uri:key} )
         .then(
           function(res) { ret = message.ParseTheme(res); },
-          function(err) { message.Error("Data_Fail_Theme", [ err ]); }
+          function(err) { message.Error("Data_Fail_Theme", err); }
         );
       break;
 

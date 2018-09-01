@@ -38,7 +38,7 @@ methods.Connect = function() {
 
   // 트위치 IRC서버로 접속을 시도
   try { this.socket = data.socket = new WebSocket(shared.Irc.Uri); }
-  catch(err) { message.Error("Irc_Fail_Connect", [err.message] ); return; }
+  catch(err) { message.Error("Irc_Fail_Connect", err.message); return; }
 
   // 접속 성공시 목표 채널 참가를 시도하고 Compability를 설정
   data.socket.onopen = function() {

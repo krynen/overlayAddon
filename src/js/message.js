@@ -175,7 +175,7 @@ methods.NativeError = function(message)  {
  * data.theme의 TemplateErrorMessage에 따라 메세지를 출력한다
  * try-catch문 이용해 출력 실패시 NativeError로 재시도
  * @param {string} message 출력할 오류의 종류
- * @param {string[]} option 출력할 문자열에 추가할 수 있는 값
+ * @param {string} option 출력할 문자열에 추가할 수 있는 값
  */
 methods.Error = function(message, option) {
   try {
@@ -184,23 +184,9 @@ methods.Error = function(message, option) {
     if (message === "custom") { str = message; }
     else { str = config.Error[message]; }
 
-    // 문자열에 {\d}이 있을 경우 옵션을 해당부분에 치환시킴
-    var match = str.match(/{[^}]+}/g);
-    var indexes = [];
-    if (match !== null) {
-      match.forEach( function(el, ind) {
-        var num = Number.ParseInt(el.replace(/[{}]/g, ""));
-        indexes.push(num);
-        str = str.replace(el, option[ind]);
-      } );
-    }
-    // 치환되고 남은 옵션들을 개행 후 배열시킴
-    if (Array.isArray(option)) {
-      str += "\n";
-      option.forEach( function(el, ind) {
-        if (indexes.indexOf(ind) === -1) { str += el; }
-      } );
-      str = str.replace(/\n$/, "");
+    // 상세표시 설정이 되어있을 경우 옵션들을 개행 후 배열시킴
+    if (config.Error.Detailed !== false && typeof option === "string") {
+      str += "\n" + option;
     }
 
     // 최상위 Element의 존재를 파악
