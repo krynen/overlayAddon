@@ -179,25 +179,23 @@ methods.NativeError = function(message)  {
  */
 methods.Error = function(message, option) {
   try {
-    // 메세지에 해당되는 문자열 불러오기
-    var str = "";
-    if (message === "custom") { str = message; }
-    else { str = config.Error[message]; }
+    // 문자열 불러오고 공백일 경우 더 이상 처리하지 않음
+    var str = config.Error[message];
+    if (str === "") { return; }
 
     // 상세표시 설정이 되어있을 경우 옵션들을 개행 후 배열시킴
     if (config.Error.Detailed !== false && typeof option === "string") {
       str += "\n" + option;
     }
 
-    // 최상위 Element의 존재를 파악
-    var parent = GetRootEntry("Error");
+    // 메세지 출력
     AddSubElement("ErrorMessage",
       {
-        "parent" : parent,
+        "parent" : GetRootEntry("Error"),
         "text"   : str
       } );
   } catch(err) {
-    if (Array.isArray(option)) { methods.NativeError(`${message}\n${option}\n\n${err}`) }
+    if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
   }
 };
