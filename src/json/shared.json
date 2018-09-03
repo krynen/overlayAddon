@@ -1,4 +1,5 @@
 {
+  "Id"  : null,
   "Irc" : {
     "Uri"  : "wss://irc-ws.chat.twitch.tv:443",
 
