@@ -158,6 +158,10 @@ methods.Response = function(line) {
         return;
 
       case "PRIVMSG":     // 일반 메세지
+          message.Add( {
+            "name"   : subArguments["display-name"],
+            "text"   : arguments.splice(3, arguments.length).join(" ").substring(1)
+          } );
         return;
 
       case "CLEARCHAT":   // 채팅 전체삭제 혹은 유저 차단

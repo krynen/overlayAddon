@@ -16,13 +16,25 @@
 #Root .Message .Text { display:block; }
   </style>
 </template>
+
+<template id="TemplateNormalRoot">
+  <div id="Root" class="Root" name="TemplateMessageRoot" />
+</template>
+
 <template id="TemplateErrorRoot">
   <div id="errorRoot" class="Root" name="TemplateMessageRoot" />
+</template>
+
+<template id="TemplateNormalMessage">
+  <div class="Message Normal_Message">
+    <div name="TemplateName" class="Name"></div>
+    <span name="TemplateText" class="Text" />
+  </div>
 </template>
 
 <template id="TemplateErrorMessage">
   <div class="Message Error_Message">
     <div class="Name">DEBUG</div>
-    <span name="TemplateTextRoot" />
+    <span name="TemplateText" class="Text" />
   </div>
 </template>

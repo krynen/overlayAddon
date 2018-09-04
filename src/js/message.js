@@ -71,22 +71,26 @@ var GetRootEntry = function(type) {
  * 하위 Element 생성 메서드
  * 덧붙일 Element를 만들어 상위 Element에 appendChild
  * @param {string} type Element의 종류.
- * @param {message.parent} object append할 부모 노드
- * @param {message.text} string 추가할 Element의 문자열 부분
+ * @param {Object} message.parent 추가할 부모 노드
+ * @param {Object} message 추가할 메세지의 정보
+ * @param {string} message.name 메세지를 보낸 유저의 이름
+ * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
+ * @param {string} message.text 추가할 메세지의 문자열
  */
 var AddSubElement = function(type, message) {
   switch(type) {
+    case "NormalMessage":
     case "ErrorMessage":
       // 생성
       var doc = document.implementation.createHTMLDocument();
-      data.theme["TemplateErrorMessage"].forEach( function(el) {
+      data.theme[`Template${type}`].forEach( function(el) {
         doc.body.appendChild(el.cloneNode(true));
       } );
 
       // 포인트를 뽑아내고 이름을 정리함
       var points = {
-        "Name": Array.from(doc.getElementsByName("TemplateNameRoot")),
-        "Text": Array.from(doc.getElementsByName("TemplateTextRoot"))
+        "Name"   : Array.from(doc.getElementsByName("TemplateName")),
+        "Text"   : Array.from(doc.getElementsByName("TemplateText"))
       };
       Object.keys(points).forEach( function(key)  {
         points[key].forEach( function(el) { el.removeAttribute("name"); } );
@@ -105,6 +109,10 @@ var AddSubElement = function(type, message) {
       doc.body.childNodes.forEach( function(el)  {
         message.parent.appendChild(el);
       } );
+      break;
+
+    case "Name":
+      message.parent.innerHTML += message.name;
       break;
 
     case "Text":
@@ -202,6 +210,22 @@ methods.Error = function(message, option) {
     if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
   }
+};
+
+
+/**
+ * 일반 메세지 출력 메서드
+ * data.theme의 TemplateNormalMessage에 따라 메세지를 출력한다
+ * @param {Object} message 출력할 메세지의 정보
+ * @param {string} message.name 메세지를 보낸 유저의 이름
+ * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
+ * @param {string} message.text 보낸 메세지의 문자열
+ */
+methods.Add = function(message) {
+  AddSubElement(
+    "NormalMessage",
+    Object.assign({"parent":GetRootEntry("Normal")}, message)
+  );
 };
 
 
