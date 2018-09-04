@@ -9,11 +9,14 @@
 var methods = {};
 var data = {
   theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
+  badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
   entryPoint : {}  // GetRootEntry()에서 사용
 };
 
 // 포인터 정의
+var api    = null;
 var config = null;
+var shared = null;
 
 // 상수값
 var DEFAULT_THEME = require("../html/theme.html");
@@ -90,6 +93,7 @@ var AddSubElement = function(type, message) {
       // 포인트를 뽑아내고 이름을 정리함
       var points = {
         "Name"   : Array.from(doc.getElementsByName("TemplateName")),
+        "Badges" : Array.from(doc.getElementsByName("TemplateBadges")),
         "Text"   : Array.from(doc.getElementsByName("TemplateText"))
       };
       Object.keys(points).forEach( function(key)  {
@@ -108,6 +112,31 @@ var AddSubElement = function(type, message) {
       // 생성한 Element를 추가
       doc.body.childNodes.forEach( function(el)  {
         message.parent.appendChild(el);
+      } );
+      break;
+
+    case "Badges":
+      // 뱃지가 로드되지 않았을 경우 생략
+      if (Object.keys(data.badges).length === 0) { break; }
+
+      // message.badges의 각 뱃지를 추가
+      message.badges.forEach( function(el){
+        var element = document.createElement("img");
+        var name = el.split("/")[0];
+        var version = el.split("/")[1];
+
+        element.classList.add(name, el);
+
+        var uri = (data.badges[name]||{}).versions||{};
+        // name/version이 실패하면 name/0, name/1을 순차적으로 시도
+        // name/0은 subscriber, name/1은 다른 경우의 예외처리가 됨
+        element.src = [version, "0", "1"].reduce( function(acc, cur) {
+          if (uri[cur] === undefined) { return acc; }
+          else { return uri[cur]; }
+        }, {} )["image_url_1x"];
+
+        if (typeof element.src !== "string" || element.src === "") { return; }
+        message.parent.appendChild(element);
       } );
       break;
 
@@ -230,12 +259,50 @@ methods.Add = function(message) {
 
 
 /**
+ * 뱃지 데이터 로드 메서드
+ * 유저 Id가 식별되어야하므로 IRC에 연결된 후 호출됨
+ */
+methods.Connect = function() {
+  // Promise.all에 쓰일 각 Promise 정의
+  var func = function(uri) {
+    return function(resolve) {
+      api.Get({ uri:uri }).then(
+        function(r) { resolve([true, JSON.parse(r)]); },
+        function(r) { resolve([false, r]); }
+      );
+    };
+  };
+
+  // 유저 뱃지와 글로벌 뱃지를 모두 로드
+  Promise.all( [
+    new Promise( func(shared.Message.GlobalUri) ),
+    new Promise( func(shared.Message.ChannelUri.replace(/{id}/g, shared.Id)) )
+  ] ).then( function(results) {
+    // 글로벌 뱃지가 로드
+    if (results[0][0] === false) {
+      methods.Error("Message_Fail_Badge", results[0][1]);
+      return;
+    }
+    Object.assign(data.badges, results[0][1]["badge_sets"]);
+
+    // 유저 뱃지가 로드
+    // 실패했을 때 혹은 유저 뱃지가 존재하지 않으면 그냥 글로벌 뱃지만 사용
+    if (results[1][0] === true) {
+      Object.assign(data.badges, results[1][1]["badge_sets"]);
+    }
+  } );
+};
+
+
+/**
  * 모듈 Load 메서드
  * main.js에서 연결된 이후에 호출됨
  * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
+  api = uniformData.Api;
   config = uniformData.Data.config;
+  shared = uniformData.Data.shared;
 
   Object.assign(data.theme, methods.ParseTheme(DEFAULT_THEME));
 };

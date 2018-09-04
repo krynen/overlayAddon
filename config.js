@@ -26,6 +26,7 @@ var value =
     "Detailed" : true,
 
     // 각 오류 메세지 문자열
+    "Message_Fail_Badge" : "뱃지 정보를 불러오는데 실패했습니다.",
     "Message_No_NormalRoot" : "TemplateNormalRoot Template을 찾지 못했습니다.",
     "Message_No_ErrorRoot"  : "TemplateErrorRoot와 TemplateNormalRoot Template을 찾지 못했습니다.",
 

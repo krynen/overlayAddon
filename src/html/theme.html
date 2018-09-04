@@ -12,7 +12,8 @@
 
 <template id="TemplateStyle">
   <style type="text/css">
-#Root .Message .Name { display:inline-block; }
+#Root .Message .Name,
+#Root .Message .Badges { display:inline-block; }
 #Root .Message .Text { display:block; }
   </style>
 </template>
@@ -28,6 +29,7 @@
 <template id="TemplateNormalMessage">
   <div class="Message Normal_Message">
     <div name="TemplateName" class="Name"></div>
+    <div name="TemplateBadges" class="Badges"></div>
     <span name="TemplateText" class="Text" />
   </div>
 </template>

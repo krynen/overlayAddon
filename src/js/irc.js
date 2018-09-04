@@ -128,7 +128,8 @@ methods.Response = function(line) {
 
           // 뱃지 데이터 정리
           case "badges":
-            acc[keyValue[0]] = keyValue[1].split(",");
+            if (keyValue[1] === "") { acc[keyValue[0]] = []; }
+            else { acc[keyValue[0]] = keyValue[1].split(","); }
             break;
 
           // 채널 아이디 (첫 접속 메세지에 필요)
@@ -154,12 +155,14 @@ methods.Response = function(line) {
         if (subArguments["room-id"] !== undefined) {
           shared.Id = subArguments["room-id"];
           message.Error("Irc_Success_Connect");
+          message.Connect();
         }
         return;
 
       case "PRIVMSG":     // 일반 메세지
           message.Add( {
             "name"   : subArguments["display-name"],
+            "badges" : subArguments["badges"],
             "text"   : arguments.splice(3, arguments.length).join(" ").substring(1)
           } );
         return;

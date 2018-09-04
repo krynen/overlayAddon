@@ -1,12 +1,16 @@
 {
-  "Id"  : null,
-  "Irc" : {
-    "Uri"  : "wss://irc-ws.chat.twitch.tv:443",
+  "Id"     : null,
+  "Irc"    : {
+    "Uri"   : "wss://irc-ws.chat.twitch.tv:443",
 
-    "Caps" : [
+    "Caps"  : [
       "twitch.tv/tags",
       "twitch.tv/commands",
       "twitch.tv/membership"
     ]
+  },
+  "Message" : {
+    "ChannelUri" : "https://badges.twitch.tv/v1/badges/channels/{id}/display",
+    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display"
   }
 }
