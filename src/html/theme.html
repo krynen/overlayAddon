@@ -10,13 +10,19 @@
     입력하여 탐색할 수 있도록 할 것
 --->
 
+<template id="TemplateStyle">
+  <style type="text/css">
+#Root .Message .Name { display:inline-block; }
+#Root .Message .Text { display:block; }
+  </style>
+</template>
 <template id="TemplateErrorRoot">
   <div id="errorRoot" class="Root" name="TemplateMessageRoot" />
 </template>
 
 <template id="TemplateErrorMessage">
   <div class="Message Error_Message">
-    <div>DEBUG</div>
+    <div class="Name">DEBUG</div>
     <span name="TemplateTextRoot" />
   </div>
 </template>

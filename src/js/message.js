@@ -145,6 +145,10 @@ methods.ParseTheme = function(response) {
 
     ret[child.id] = node.childNodes;
   }
+
+  // 스타일 템플릿을 페이지에 추가
+  ret["TemplateStyle"].forEach( function(el) { document.head.appendChild(el); } );
+
   return ret;
 };
 

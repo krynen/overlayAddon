@@ -52,6 +52,7 @@ methods.Get = async function(data) {
           case 0:
           case 200:
             if (request.responseText.length > 0) { resolve(request.responseText); }
+            else { reject(200 + ERROR_STRING[200]); }
             break;
 
           default:
