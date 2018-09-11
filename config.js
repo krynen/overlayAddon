@@ -21,7 +21,16 @@ var value =
     }
   },
 
+  "Message" : {
+    // 표시할 메세지의 최대 갯수 (0-100)
+    "Maximum" : 10,
+    // 메세지 자동 삭제 시간(초). 0으로 무제한
+    "Timeout" : 20
+  },
+
   "Error" : {
+    "Maximum" : 5,
+    "Timeout" : 5,
     // 오류 메세지 상세 정보 출력 여부
     "Detailed" : true,
 

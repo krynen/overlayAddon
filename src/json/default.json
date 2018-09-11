@@ -4,7 +4,14 @@
     "Uris"    : []
   },
 
+  "Message" : {
+    "Maximum" : 10,
+    "Timeout" : 20
+  },
+
   "Error" : {
+    "Maximum" : 5,
+    "Timeout" : 5,
     "Detailed" : true,
     
     "Message_Fail_Badge" : "뱃지 정보를 불러오는데 실패했습니다.",

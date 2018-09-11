@@ -10,7 +10,8 @@ var methods = {};
 var data = {
   theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
   badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
-  entryPoint : {}  // GetRootEntry()에서 사용
+  entryPoint : {}, // GetRootEntry()에서 사용
+  nodes      : {}, // Add()에서 사용
 };
 
 // 포인터 정의
@@ -110,10 +111,12 @@ var AddSubElement = function(type, message) {
       } );
 
       // 생성한 Element를 추가
+      var ret = [];
       doc.body.childNodes.forEach( function(el)  {
-        message.parent.appendChild(el);
+        ret.push(message.parent.appendChild(el));
       } );
-      break;
+
+      return ret;
 
     case "Badges":
       // 뱃지가 로드되지 않았을 경우 생략
@@ -131,9 +134,9 @@ var AddSubElement = function(type, message) {
         // name/version이 실패하면 name/0, name/1을 순차적으로 시도
         // name/0은 subscriber, name/1은 다른 경우의 예외처리가 됨
         element.src = [version, "0", "1"].reduce( function(acc, cur) {
-          if (uri[cur] === undefined) { return acc; }
-          else { return uri[cur]; }
-        }, {} )["image_url_1x"];
+          if (acc !== null || uri[cur] === undefined) { return acc; }
+          return uri[cur];
+        }, null )["image_url_1x"];
 
         if (typeof element.src !== "string" || element.src === "") { return; }
         message.parent.appendChild(element);
@@ -204,10 +207,47 @@ methods.NativeError = function(message)  {
 
     "whiteSpace" : "pre-wrap",
     "wordBreak"  : "keep-all"
-  });
+  } );
   err.innerHTML = message;
 
   document.body.appendChild(err);
+};
+
+
+/**
+ * 타입에 따른 메세지 출력 메서드
+ * @param {Object} message medthods.Add의 message
+ * @param {string} type 출력할 메세지의 타입(normal, error)
+ * @param {Object} config 출력할 메세지를 담당하는 설정 부분
+ */
+var AddType = function(message, type, config) {
+  var lower = type.toLowerCase();
+  var capital = lower[0].toUpperCase() + lower.slice(1);
+
+  var root = GetRootEntry(capital);
+  if (!Array.isArray(data.nodes[lower])) { data.nodes[lower] = []; }
+
+  // 메세지를 출력
+  var elements = AddSubElement(
+    `${capital}Message`,
+    Object.assign({"parent":root}, message)
+  );
+
+  // 메세지 삭제시간을 적용
+  data.nodes[lower].push(elements);
+  if (config.Timeout > 0) {
+    setTimeout( function() {
+      var index = data.nodes[lower].indexOf(elements);
+      if (index >= 0) {
+        data.nodes[lower].splice(index, 1)[0].forEach( function(el) { root.removeChild(el); } );
+      }
+    }, config.Timeout * 1000);
+  }
+
+  // 메세지가 많을 경우 FIFO로 element를 제거
+  if (data.nodes[lower].length > Math.min(config.Maximum, 100)) {
+    data.nodes[lower].shift().forEach( function(el) { root.removeChild(el); } );
+  }
 };
 
 
@@ -229,12 +269,8 @@ methods.Error = function(message, option) {
       str += "\n" + option;
     }
 
-    // 메세지 출력
-    AddSubElement("ErrorMessage",
-      {
-        "parent" : GetRootEntry("Error"),
-        "text"   : str
-      } );
+    // 메세지 추가
+    AddType({ "parent":root, "test":str }, "Error", config.Error);
   } catch(err) {
     if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
@@ -250,16 +286,11 @@ methods.Error = function(message, option) {
  * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
  * @param {string} message.text 보낸 메세지의 문자열
  */
-methods.Add = function(message) {
-  AddSubElement(
-    "NormalMessage",
-    Object.assign({"parent":GetRootEntry("Normal")}, message)
-  );
-};
+methods.Add = function(message) { AddType(message, "Normal", config.Message); };
 
 
 /**
- * 뱃지 데이터 로드 메서드
+ * 뱃지 데이터 로드 및 연결 메서드
  * 유저 Id가 식별되어야하므로 IRC에 연결된 후 호출됨
  */
 methods.Connect = function() {
