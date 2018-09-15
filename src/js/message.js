@@ -46,8 +46,8 @@ var GetRootEntry = function(type) {
   if (data.entryPoint[type] !== undefined) { return data.entryPoint[type];}
 
   // 최상위 Element가 생성되어있지 않을 경우 새로 생성
-  var theme = data.theme[`Template${type}Root`];
-  if (theme === undefined && type === "Error") { theme = data.theme["TemplateNormalRoot"]; }
+  var theme = data.theme[`${type}Root`];
+  if (theme === undefined && type === "Error") { theme = data.theme["NormalRoot"]; }
   if (theme === undefined) {
     var messageTemplate = config.Error;
     if (type === "Error") {
@@ -62,98 +62,12 @@ var GetRootEntry = function(type) {
   } );
 
   // 하위 Element를 생성할 포인트를 찾고 정리
-  entry = document.getElementsByName("TemplateMessageRoot")[0];
-  entry.removeAttribute("name");
+  entry = document.querySelectorAll("*[theme-type=Root]")[0];
+  entry.removeAttribute("theme-type");
 
   // 찾은 포인트를 data.entryPoint에 등록하고 반환
   data.entryPoint[type] = entry;
   return entry;
-};
-
-
-/**
- * 하위 Element 생성 메서드
- * 덧붙일 Element를 만들어 상위 Element에 appendChild
- * @param {string} type Element의 종류.
- * @param {Object} message.parent 추가할 부모 노드
- * @param {Object} message 추가할 메세지의 정보
- * @param {string} message.name 메세지를 보낸 유저의 이름
- * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
- * @param {string} message.text 추가할 메세지의 문자열
- */
-var AddSubElement = function(type, message) {
-  switch(type) {
-    case "NormalMessage":
-    case "ErrorMessage":
-      // 생성
-      var doc = document.implementation.createHTMLDocument();
-      data.theme[`Template${type}`].forEach( function(el) {
-        doc.body.appendChild(el.cloneNode(true));
-      } );
-
-      // 포인트를 뽑아내고 이름을 정리함
-      var points = {
-        "Name"   : Array.from(doc.getElementsByName("TemplateName")),
-        "Badges" : Array.from(doc.getElementsByName("TemplateBadges")),
-        "Text"   : Array.from(doc.getElementsByName("TemplateText"))
-      };
-      Object.keys(points).forEach( function(key)  {
-        points[key].forEach( function(el) { el.removeAttribute("name"); } );
-      } );
-
-      // 각 포인트로부터 parent만 바꾸어 재귀 호출
-      Object.keys(points).forEach( function(key) {
-        points[key].forEach( function(el) {
-          var childMessage = JSON.parse(JSON.stringify(message));
-          childMessage.parent = el;
-          AddSubElement(key, childMessage);
-        } );
-      } );
-
-      // 생성한 Element를 추가
-      var ret = [];
-      doc.body.childNodes.forEach( function(el)  {
-        ret.push(message.parent.appendChild(el));
-      } );
-
-      return ret;
-
-    case "Badges":
-      // 뱃지가 로드되지 않았을 경우 생략
-      if (Object.keys(data.badges).length === 0) { break; }
-
-      // message.badges의 각 뱃지를 추가
-      message.badges.forEach( function(el){
-        var element = document.createElement("img");
-        var name = el.split("/")[0];
-        var version = el.split("/")[1];
-
-        element.classList.add(name, el);
-
-        var uri = (data.badges[name]||{}).versions||{};
-        // name/version이 실패하면 name/0, name/1을 순차적으로 시도
-        // name/0은 subscriber, name/1은 다른 경우의 예외처리가 됨
-        element.src = [version, "0", "1"].reduce( function(acc, cur) {
-          if (acc !== null || uri[cur] === undefined) { return acc; }
-          return uri[cur];
-        }, null )["image_url_1x"];
-
-        if (typeof element.src !== "string" || element.src === "") { return; }
-        message.parent.appendChild(element);
-      } );
-      break;
-
-    case "Name":
-      message.parent.innerHTML += message.name;
-      break;
-
-    case "Text":
-      message.parent.innerHTML += message.text;
-      break;
-
-    default:
-      break;
-  }
 };
 
 
@@ -168,28 +82,130 @@ methods.ParseTheme = function(response) {
   element.innerHTML = response;
 
   // 최상위 template element 각각을 아이디에 따라 분류
-  var ret = [];
+  var ret = {};
   var length = element.content.children.length;
+  var someFunc = function(el)  {
+    if (el.nodeName !== "#text") { return true; }
+    if (el.nodeValue.match(/^\s*$/) === null) { return true; }
+
+    node.removeChild(el);
+    return false;
+  };
   for(var i=0; i<length; ++i) {
     var child = element.content.children[i];
     var node = child.content;
 
-    // 각 template 안의 양끝단의 공백 텍스트노드를 제거
-    var spaces = [ node.childNodes[0], node.childNodes[node.childNodes.length-1] ];
-    spaces.forEach( function(el) {
-      if (el.nodeName !== "#text") { return; }
-      if (el.nodeValue.match(/^\s*$/) === null) { return; }
-
-      node.removeChild(el);
+    // 각 template에서 주석을 제거
+    node.childNodes.forEach( function(el) {
+      if (el.nodeName === "#comment") { node.removeChild(el); }
     } );
+    // template 안의 양끝단의 공백 텍스트노드를 제거
+    var spaces = Array.from(node.childNodes).reverse();
+    spaces.some(someFunc);
+    spaces.reverse().some(someFunc);
 
-    ret[child.id] = node.childNodes;
+    if (child.id !== undefined) { ret[child.id] = node.childNodes; }
   }
 
   // 스타일 템플릿을 페이지에 추가
-  ret["TemplateStyle"].forEach( function(el) { document.head.appendChild(el); } );
+  if (ret["Style"] !== null) {
+    ret["Style"].forEach( function(el) { document.head.appendChild(el); } );
+  } 
 
   return ret;
+};
+
+
+/**
+ * 하위 Element 생성 메서드
+ * 덧붙일 Element를 만들어 상위 Element에 appendChild
+ * @param {string} type Element의 종류.
+ * @param {Object} message.parent 추가할 부모 노드
+ * @param {Object} message 추가할 메세지의 정보
+ * @param {string} message.name 메세지를 보낸 유저의 이름
+ * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
+ * @param {string} message.text 추가할 메세지의 문자열
+ */
+methods.AddSubElement = function(type, message) {
+  switch(type) {
+    case "Badges":
+      // 뱃지가 로드되지 않았을 경우 생략
+      if (Object.keys(data.badges).length === 0) { break; }
+
+      // message.badges의 각 뱃지를 추가
+      message.badges.forEach( function(el){
+        var element = document.createElement("img");
+        var name = el.split("/")[0];
+        var version = el.split("/")[1];
+
+        element.setAttribute("data-type", name);
+        element.setAttribute("data-tier", version);
+
+        var uris = (data.badges[name]||{}).versions||{};
+        // name/version이 실패하면 name/0, name/1을 순차적으로 시도
+        // name/0은 subscriber, name/1은 다른 경우의 예외처리가 됨
+        var uri = [version, "0", "1"].reduce( function(acc, cur) {
+          if (acc !== null || uris[cur] === undefined) { return acc; }
+          return uris[cur];
+        }, null );
+        element.src = (uri["image_url_4x"] || uri["image_url_2x"]) || uri["image_url_1x"];
+
+        if (typeof element.src !== "string" || element.src === "") { return; }
+        message.parent.appendChild(element);
+      } );
+      break;
+
+    case "Image":
+      var img = document.createElement("img");
+      img.src = message.image;
+      message.parent.appendChild(img);
+      break;
+
+    case "Name":
+      message.parent.innerHTML += message.name;
+      break;
+
+    case "Text":
+      message.parent.innerHTML += message.text;
+      break;
+
+    case "Root":
+      Object.keys(message.root).forEach( function(key) {
+        message.parent.setAttribute("data-"+key, message.root[key]);
+      } );
+      break;
+
+    case "NormalMessage":
+    case "ErrorMessage":
+    case "Cheermote":
+    default:
+      // 생성
+      var ret = [];
+      data.theme[type].forEach( function(el) {
+        ret.push(message.parent.appendChild(el.cloneNode(true)));
+      } );
+
+      // 포인트를 뽑아내고 이름을 정리함
+      // 사용되지 않는 이름은 undefined될 것
+      var points = ["Root", "Name", "Badges", "Image", "Text"].reduce( function(acc, cur) {
+        acc[cur] = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
+        return acc;
+      }, {});
+      Object.keys(points).forEach( function(key)  {
+        points[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
+      } );
+
+      // 각 포인트로부터 parent만 바꾸어 재귀 호출
+      Object.keys(points).forEach( function(key) {
+        points[key].forEach( function(el) {
+          var childMessage = JSON.parse(JSON.stringify(message));
+          childMessage.parent = el;
+          methods.AddSubElement(key, childMessage);
+        } );
+      } );
+
+      return ret;
+  }
 };
 
 
@@ -228,9 +244,9 @@ var AddType = function(message, type, config) {
   if (!Array.isArray(data.nodes[lower])) { data.nodes[lower] = []; }
 
   // 메세지를 출력
-  var elements = AddSubElement(
+  var elements = methods.AddSubElement(
     `${capital}Message`,
-    Object.assign({"parent":root}, message)
+    Object.assign({ "parent":root }, message)
   );
 
   // 메세지 삭제시간을 적용
@@ -270,7 +286,7 @@ methods.Error = function(message, option) {
     }
 
     // 메세지 추가
-    AddType({ "parent":root, "test":str }, "Error", config.Error);
+    AddType({ "text":str }, "Error", config.Error);
   } catch(err) {
     if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
@@ -286,18 +302,33 @@ methods.Error = function(message, option) {
  * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
  * @param {string} message.text 보낸 메세지의 문자열
  */
-methods.Add = function(message) { AddType(message, "Normal", config.Message); };
+methods.Add = function(message) {
+  // 메세지를 어절별로 분해
+  var text = message.text.split(" ");
+  var done = new Array(text.length);
+
+  // 하위 모듈 처리
+  if (message.Cheer !== undefined) { this.Module.cheer.Replace(text, done); }
+  
+  // 분해한 메세지 병합
+  message.text = text.join(" ");
+
+  // 나머지 하위 모듈 처리
+
+  // 메세지 추가
+  AddType(message, "Normal", config.Message);
+};
 
 
 /**
- * 뱃지 데이터 로드 및 연결 메서드
+ * 뱃지, 하위 모듈 데이터 로드 및 연결 메서드
  * 유저 Id가 식별되어야하므로 IRC에 연결된 후 호출됨
  */
 methods.Connect = function() {
   // Promise.all에 쓰일 각 Promise 정의
   var func = function(uri) {
     return function(resolve) {
-      api.Get({ uri:uri }).then(
+      api.Get({ "uri":uri }).then(
         function(r) { resolve([true, JSON.parse(r)]); },
         function(r) { resolve([false, r]); }
       );
@@ -322,6 +353,9 @@ methods.Connect = function() {
       Object.assign(data.badges, results[1][1]["badge_sets"]);
     }
   } );
+
+  // 응원 모듈 데이터 로드
+  this.Module.cheer.Connect();
 };
 
 

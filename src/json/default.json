@@ -1,5 +1,6 @@
 {
   "Channel" : null,
+  "Key"     : null,
   "Data"    : {
     "Uris"    : []
   },
@@ -14,7 +15,9 @@
     "Timeout" : 5,
     "Detailed" : true,
     
-    "Message_Fail_Badge" : "뱃지 정보를 불러오는데 실패했습니다.",
+    "Message_Fail_Badge"    : "뱃지 정보를 불러오는데 실패했습니다.",
+    "Message_Fail_Cheer"    : "응원 이모티콘 정보를 불러오는데 실패했습니다.",
+    "Message_Wrong_Cheer"   : "클라이언트 아이디가 없어 응원 정보를 읽지 않습니다.",
     "Message_No_NormalRoot" : "TemplateNormalRoot Template을 찾지 못했습니다.",
     "Message_No_ErrorRoot"  : "TemplateErrorRoot와 TemplateNormalRoot Template을 찾지 못했습니다.",
 

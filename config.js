@@ -12,6 +12,8 @@ var value =
 {
   // 접속할 채널 아이디
   "Channel" : "ninja",
+  // 트위치 어플리케이션 클라이언트 아이디
+  "Key"     : "",
 
   "Data"    : {
     // 추가로 불러올 (웹상의) json 설정 파일
@@ -35,7 +37,9 @@ var value =
     "Detailed" : true,
 
     // 각 오류 메세지 문자열
-    "Message_Fail_Badge" : "뱃지 정보를 불러오는데 실패했습니다.",
+    "Message_Fail_Badge"    : "뱃지 정보를 불러오는데 실패했습니다.",
+    "Message_Fail_Cheer"    : "응원 이모티콘 정보를 불러오는데 실패했습니다.",
+    "Message_Wrong_Cheer"   : "클라이언트 아이디가 없어 응원 정보를 읽지 않습니다.",
     "Message_No_NormalRoot" : "TemplateNormalRoot Template을 찾지 못했습니다.",
     "Message_No_ErrorRoot"  : "TemplateErrorRoot와 TemplateNormalRoot Template을 찾지 못했습니다.",
 

@@ -137,6 +137,11 @@ methods.Response = function(line) {
             if (shared.Id === null) { acc[keyValue[0]] = keyValue[1]; }
             break;
 
+          // 응원이 포함되어 있는 메세지 처리
+          case "bits":
+            acc[keyValue[0]] = true;
+            break;
+
           // 특별히 처리할 필요 없는 데이터 반영
           default:
             acc[keyValue[0]] = keyValue[1];
@@ -164,6 +169,9 @@ methods.Response = function(line) {
               "badges" : subArguments["badges"],
               "text"   : phrase.splice(3, phrase.length).join(" ").substring(1)
             };
+
+            // 하위 모듈에 사용하는 파라미터 추가
+            if (subArguments["bits"] !== undefined) { ret.Cheer = true; }
             return ret;
           })() );
         return;

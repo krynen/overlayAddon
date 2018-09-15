@@ -1,42 +1,76 @@
-<!--
-  * 각 템플릿은 name을 통해 포인트를 탐색한다
-
-  * TemplateNormalRoot, TemplateErrorRoot 템플릿의 경우
-    메세지를 추가할 Element에 TemplateMessageRoot를
-
-  * ID TemplateNormalMessage, TemplateErorrMessage 템플릿의 경우
-    메세지 텍스트를 추가할 Element에 TemplateTextRoot를
-
-    입력하여 탐색할 수 있도록 할 것
---->
-
-<template id="TemplateStyle">
+<template id="Style">
+  <!-- 스타일 -->
   <style type="text/css">
-#Root .Message .Name,
-#Root .Message .Badges { display:inline-block; }
-#Root .Message .Text { display:block; }
+#Root { position:absolute; bottom:0; left:0; right:0; }
+.NormalMessage { margin:2px 0; padding:3px; background:#000A; border:1px solid #FFFA; }
+#ErrorRoot { position:absolute; top:0; left:0; right:0; background:#000A; }
+.ErrorMessage { margin:2px 0; padding:3px; }
+
+.NormalMessage .NameBadges { display:flex; background:linear-gradient(to right, #AAAF, #0000); }
+.NormalMessage .Name {
+  display:flex; flex:1; margin:auto; 
+  text-shadow:    0  1px 0 #888,  1px  1px 0 #888,
+                1px    0 0 #888,  1px -1px 0 #888,
+                  0 -1px 0 #888, -1px -1px 0 #888,
+               -1px    0 0 #888, -1px  1px 0 #888;
+  padding:1px;
+}
+.NormalMessage .Badges { display:flex; }
+.NormalMessage .Badges img { border:1px solid #FFFA; margin:auto 1px; height:18px; }
+
+.Text {
+  color:#FFFF; padding:2px 1px 1px; text-align:right;
+  word-break: keep-all; word-wrap: break-word;
+}
+
+.Cheermote { display:inline-block; padding:1px 3px; margin:-1px; border:1px solid #FFFA; }
+.Cheermote .CheerImage img { height:1rem; }
   </style>
 </template>
 
-<template id="TemplateNormalRoot">
-  <div id="Root" class="Root" name="TemplateMessageRoot" />
+
+<template id="NormalRoot">
+  <!-- 일반 메세지 최상위 Element -->
+  <div theme-type="Root" id="Root" class="Root"></div>
 </template>
 
-<template id="TemplateErrorRoot">
-  <div id="errorRoot" class="Root" name="TemplateMessageRoot" />
+<template id="ErrorRoot">
+  <!-- 디버그 메세지 최상위 Element -->
+  <div theme-type="Root" id="ErrorRoot" class="Root"></div>
 </template>
 
-<template id="TemplateNormalMessage">
-  <div class="Message Normal_Message">
-    <div name="TemplateName" class="Name"></div>
-    <div name="TemplateBadges" class="Badges"></div>
-    <span name="TemplateText" class="Text" />
+<template id="NormalMessage">
+  <!-- NormalRoot의 Root에 추가되는 일반 메세지 템플릿
+    Name   : 유저 이름. 일반 문자열로 추가
+    Badges : 뱃지 목록. 각 뱃지는 data-type="[Name]" data-tier="[Tier]"가 포함된 img element
+    Text   : 메세지 문자열. 처리된 이모티콘 등도 포함됨
+  -->
+  <div class="Message NormalMessage">
+    <div class="NameBadges">
+      <span theme-type="Name" class="Name"></span>
+      <span theme-type="Badges" class="Badges"></span>
+    </div>
+    <div theme-type="Text" class="Text"></div>
   </div>
 </template>
 
-<template id="TemplateErrorMessage">
-  <div class="Message Error_Message">
-    <div class="Name">DEBUG</div>
-    <span name="TemplateText" class="Text" />
+<template id="ErrorMessage">
+  <!-- ErrorRoot의 Root에 추가되는 디버그 메세지 템플릿
+    Text : 메세지 문자열.
+  -->
+  <div class="Message ErrorMessage">
+    <span theme-type="Text" class="Text"></span>
   </div>
+</template>
+
+<template id="Cheermote">
+  <!-- NormalMessage의 Text 내부에 추가되는 응원 이모티콘 템플릿
+    Root  : 최상위 element로 data-type="[Name]" data-tier="[Tier]" data-value="[Value]"가 추가
+    Image : img element로 추가되는 응원 이모티콘 이미지
+    Text  : 응원 금액 문자열
+  -->
+  <span theme-type="Root" class="Cheermote">
+    <span theme-type="Image" class="CheerImage"></span>
+    <span theme-type="Text" class="CheerValue"></span>
+  </span>
 </template>

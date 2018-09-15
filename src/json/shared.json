@@ -13,6 +13,7 @@
 
   "Message" : {
     "ChannelUri" : "https://badges.twitch.tv/v1/badges/channels/{id}/display",
-    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display"
+    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display",
+    "CheerUri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
   }
 }
