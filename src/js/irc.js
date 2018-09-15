@@ -75,20 +75,20 @@ methods.Connect = function() {
  */
 methods.Response = function(line) {
   // 공백으로 각 구문을 구분
-  var arguments = line.split(/\s/);
+  var phrase = line.split(/\s/);
 
   // 핑에 자동응답하여 접속을 유지
-  if (arguments[0] === "PING") {
+  if (phrase[0] === "PING") {
     send("PONG");
     return;
   }
 
   // PING외의 모든 메세지는 :또는 @으로 시작하므로 구분
-  var prefix = arguments[0][0];
+  var prefix = phrase[0][0];
 
   // IRC 기본 프로토콜 메세지 처리
   if (prefix === ":") {
-    switch (arguments[1]) {
+    switch (phrase[1]) {
       // 접속시 고정 표시 메세지 무시
       case "001": case "002": case "003": case "004":
       case "375": case "372": case "376": case "366": case "CAP":
@@ -103,11 +103,11 @@ methods.Response = function(line) {
 
       // 트위치 내부 문제가 발생했을 때
       case "NOTICE":
-        message.Error("Irc_Notice", arguments.splice(3, arguments.length).join(" ").substring(1));
+        message.Error("Irc_Notice", phrase.splice(3, phrase.length).join(" ").substring(1));
         return;
 
       default:
-        message.Error("Irc_Wrong_Message", prefix+arguments[1]);
+        message.Error("Irc_Wrong_Message", prefix+phrase[1]);
         return;
     }
   }
@@ -115,7 +115,7 @@ methods.Response = function(line) {
   // Twitch-specific 메세지 처리
   if (prefix === "@") {
     // 메세지 데이터들을 파싱
-    var subArguments = arguments.shift().substring(1).split(";").reduce( function(acc, cur) {
+    var subArguments = phrase.shift().substring(1).split(";").reduce( function(acc, cur) {
       var keyValue = cur.split("=");
       if (keyValue[1] !== undefined) {
         switch(keyValue[0]) {
@@ -134,11 +134,8 @@ methods.Response = function(line) {
 
           // 채널 아이디 (첫 접속 메세지에 필요)
           case "room-id":
-            if (shared.Id === null) {
-              acc[keyValue[0]] = keyValue[1];
-            } else {
-              break;
-            }
+            if (shared.Id === null) { acc[keyValue[0]] = keyValue[1]; }
+            break;
 
           // 특별히 처리할 필요 없는 데이터 반영
           default:
@@ -150,7 +147,7 @@ methods.Response = function(line) {
       return acc;
     }, {});
 
-    switch (arguments[1]) {
+    switch (phrase[1]) {
       case "ROOMSTATE":   // 채널 접속 혹은 방의 상태 변경
         if (subArguments["room-id"] !== undefined) {
           shared.Id = subArguments["room-id"];
@@ -160,11 +157,15 @@ methods.Response = function(line) {
         return;
 
       case "PRIVMSG":     // 일반 메세지
-          message.Add( {
-            "name"   : subArguments["display-name"],
-            "badges" : subArguments["badges"],
-            "text"   : arguments.splice(3, arguments.length).join(" ").substring(1)
-          } );
+          message.Add( (function() {
+            // 기본 파라미터 설정
+            var ret = {
+              "name"   : subArguments["display-name"],
+              "badges" : subArguments["badges"],
+              "text"   : phrase.splice(3, phrase.length).join(" ").substring(1)
+            };
+            return ret;
+          })() );
         return;
 
       case "CLEARCHAT":   // 채팅 전체삭제 혹은 유저 차단
@@ -194,7 +195,7 @@ methods.Response = function(line) {
             return;
 
           default:
-            message.Error("Irc_Wrong_Message", prefix+arguments[1]+" "+subArguments["msg-id"]);
+            message.Error("Irc_Wrong_Message", prefix+phrase[1]+" "+subArguments["msg-id"]);
             return;
         }
 
@@ -202,7 +203,7 @@ methods.Response = function(line) {
         return;
 
       default:
-        message.Error("Irc_Wrong_Message", prefix+arguments[1]);
+        message.Error("Irc_Wrong_Message", prefix+phrase[1]);
         return;
     }
   }

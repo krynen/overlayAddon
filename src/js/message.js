@@ -11,7 +11,7 @@ var data = {
   theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
   badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
   entryPoint : {}, // GetRootEntry()에서 사용
-  nodes      : {}, // Add()에서 사용
+  nodes      : {}  // Add()에서 사용
 };
 
 // 포인터 정의

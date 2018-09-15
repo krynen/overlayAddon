@@ -82,8 +82,10 @@ methods.Get = async function(type, key) {
  */
 methods.Merge = function(target, source) {
   Object.keys(source).forEach( function(el) {
+    if ((target[el] === null) && (source[el] === null)) { return; }
+
     // 존재하지 않았던 값 추가
-    if (typeof target[el] === undefined || target[el] === null) {
+    if ((target[el] === undefined) || (target[el] === null)) {
       // source[el]이 배열일 경우도 고려하여 추가함
       // 배열일 경우를 보증해줄 target[el]이 존재하지 않으므로 확실히 체크할 것
       var cond1 = typeof source[el].type === "string";
