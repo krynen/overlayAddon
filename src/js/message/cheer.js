@@ -1,9 +1,9 @@
-/**********************************************************
- * 응원 하위모듈                                          *
- * 응원(트위치 자체 후원)이 포함된 메세지를 처리          *
- * 어절별로 분해된 텍스트를 받아 내용을 수정함            *
- *                                                        *
- **********************************************************/
+/*************************************************
+ * 응원 하위모듈                                 *
+ * 응원(트위치 자체 후원)이 포함된 메세지를 처리 *
+ * 어절별로 분해된 텍스트를 받아 내용을 수정함   *
+ *                                               *
+ *************************************************/
 
 // 모듈 인터페이스
 var methods = {};
@@ -15,16 +15,19 @@ var data = {
 var api     = null;
 var config  = null;
 var shared  = null;
-var message = null;
+var parent  = null;
 
 
 /**
  * 응원 문자열 대체 메서드
+ * @param {bool} message 출력할 메세지의 정보 (응원이 포함되어 있는지)
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  * @param {bool[]} done 각 어절의 처리 여부
  */
-methods.Replace = function(text, done) {
-  // 응원 어절을 추출
+methods.Replace = function(message, text, done) {
+  if (message !== true) { return;}
+
+  // 응원 어절을 추출해 변환
   text.forEach( function(el, ind) {
     if (done[ind] === true) { return; }              // 이미 처리된 어절 무시
 
@@ -51,7 +54,7 @@ methods.Replace = function(text, done) {
 
     done[ind] = true;
     var element = document.createElement("span");
-    message.AddSubElement(
+    parent.AddSubElement(
       "Cheermote",
       {
         "parent" : element,
@@ -90,11 +93,11 @@ methods.Connect = function() {
           }, {})
         );
       },
-      function(err) { message.Error("Message_Fail_Cheer", err); }
+      function(err) { parent.Error("Message_Fail_Cheer", err); }
     );
   } else {
     // 클라이언트 아이디가 입력되지 않으면 응원 모듈 기능을 비활성화
-    message.Error("Message_Wrong_Cheer");
+    parent.Error("Message_Wrong_Cheer");
     methods.Replace = function() {};
   }
 };
@@ -109,7 +112,7 @@ methods.Load = function(uniformData) {
   api     = uniformData.Api;
   config  = uniformData.Data.config;
   shared  = uniformData.Data.shared;
-  message = uniformData.Message;
+  parent = uniformData.Message;
 };
 
 

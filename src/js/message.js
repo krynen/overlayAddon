@@ -19,9 +19,6 @@ var api    = null;
 var config = null;
 var shared = null;
 
-// 상수값
-var DEFAULT_THEME = require("../html/theme.html");
-
 
 /**
  * 최상위 Element 설정 메서드
@@ -170,7 +167,7 @@ methods.AddSubElement = function(type, message) {
       break;
 
     case "Root":
-      Object.keys(message.root).forEach( function(key) {
+      Object.keys(message.root||{}).forEach( function(key) {
         message.parent.setAttribute("data-"+key, message.root[key]);
       } );
       break;
@@ -178,6 +175,7 @@ methods.AddSubElement = function(type, message) {
     case "NormalMessage":
     case "ErrorMessage":
     case "Cheermote":
+    case "Emote":
     default:
       // 생성
       var ret = [];
@@ -204,6 +202,29 @@ methods.AddSubElement = function(type, message) {
         } );
       } );
 
+      // virtual element를 변환
+      ret.forEach( function(el) {
+        if (el.nodeName === "#text") { return; }
+        Array.from(el.getElementsByTagName("virtual")).forEach( function(child) {
+          if (child.nodeName === "VIRTUAL") {
+            var attrs = Array.from(child.attributes);
+            Array.from(child.childNodes).forEach( function(grandChild) {
+              // child elements를 text자리로 이동
+              child.parentElement.insertBefore(grandChild, child);
+              if (grandChild.nodeName === "#text") { return; }
+
+              // attribute를 추가
+              attrs.forEach( function(attr) {
+                if (grandChild.getAttribute(attr.key) !== null) { return; }
+                grandChild.setAttribute(attr.name, attr.value);
+              } );
+            } );
+
+            // text element를 제거
+            child.parentElement.removeChild(child);
+          }
+        } );
+      } );
       return ret;
   }
 };
@@ -286,7 +307,7 @@ methods.Error = function(message, option) {
     }
 
     // 메세지 추가
-    AddType({ "text":str }, "Error", config.Error);
+    AddType({ "text":str, "root":{"type":message} }, "Error", config.Error);
   } catch(err) {
     if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
@@ -308,7 +329,9 @@ methods.Add = function(message) {
   var done = new Array(text.length);
 
   // 하위 모듈 처리
-  if (message.Cheer !== undefined) { this.Module.cheer.Replace(text, done); }
+  this.Module.emote.Replace(message.Emote, text, done);
+  this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+  this.Module.cheer.Replace(message.Cheer, text, done); // 응원 처리
   
   // 분해한 메세지 병합
   message.text = text.join(" ");
@@ -369,7 +392,7 @@ methods.Load = function(uniformData) {
   config = uniformData.Data.config;
   shared = uniformData.Data.shared;
 
-  Object.assign(data.theme, methods.ParseTheme(DEFAULT_THEME));
+  Object.assign(data.theme, methods.ParseTheme(uniformData.Theme));
 };
 
 

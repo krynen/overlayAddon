@@ -1,7 +1,9 @@
-/*********************
- * 테스트용 IRC 모듈 *
- *                   *
- *********************/ 
+/****************************************************
+ * IRC 모듈                                         *
+ * 트위치 IRC 채팅 서버에 접속해 채팅 내용을 불러옴 *
+ * 불러온 내용을 정리해 메세지 모듈에 전달          *
+ *                                                  *
+ ****************************************************/ 
 
 // 모듈 인터페이스
 var methods = {};
@@ -137,13 +139,13 @@ methods.Response = function(line) {
             if (shared.Id === null) { acc[keyValue[0]] = keyValue[1]; }
             break;
 
-          // 응원이 포함되어 있는 메세지 처리
-          case "bits":
-            acc[keyValue[0]] = true;
-            break;
-
           // 특별히 처리할 필요 없는 데이터 반영
           default:
+          /*
+          case "emotes":      // 이모티콘(트위치 자체, 구독자 전용)
+          case "emote-only": // 이모티콘만 포함된 메세지
+          case "bits":        // 응원이 포함된 메세지
+          */
             acc[keyValue[0]] = keyValue[1];
             break;
         }
@@ -172,6 +174,10 @@ methods.Response = function(line) {
 
             // 하위 모듈에 사용하는 파라미터 추가
             if (subArguments["bits"] !== undefined) { ret.Cheer = true; }
+            if (subArguments["emotes"] !== undefined) {
+              ret.Emote = { "index":subArguments["emotes"] };
+              if (subArguments["emote-only"] === "1") { ret.Emote.only = true; }
+            }
             return ret;
           })() );
         return;

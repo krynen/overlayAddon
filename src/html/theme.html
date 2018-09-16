@@ -1,3 +1,10 @@
+<!--
+  template#style에는 document.head에 추가할 스타일을,
+  나머지 template에는 각각의 경우에 생성할 Node Tree를 입력한다.
+
+  virtual element는 child elements에 attribute를 추가할 때 이용
+-->
+
 <template id="Style">
   <!-- 스타일 -->
   <style type="text/css">
@@ -23,6 +30,8 @@
   word-break: keep-all; word-wrap: break-word;
 }
 
+.Emote { width:56px; }
+[data-emote-only="1"] .Text { text-align:center; }
 .Cheermote { display:inline-block; padding:1px 3px; margin:-1px; border:1px solid #FFFA; }
 .Cheermote .CheerImage img { height:1rem; }
   </style>
@@ -41,11 +50,12 @@
 
 <template id="NormalMessage">
   <!-- NormalRoot의 Root에 추가되는 일반 메세지 템플릿
+    Root   : 최상위 element. data-emote-only="1"이 추가될 수 있음
     Name   : 유저 이름. 일반 문자열로 추가
     Badges : 뱃지 목록. 각 뱃지는 data-type="[Name]" data-tier="[Tier]"가 포함된 img element
     Text   : 메세지 문자열. 처리된 이모티콘 등도 포함됨
   -->
-  <div class="Message NormalMessage">
+  <div theme-type="Root" class="Message NormalMessage">
     <div class="NameBadges">
       <span theme-type="Name" class="Name"></span>
       <span theme-type="Badges" class="Badges"></span>
@@ -56,21 +66,33 @@
 
 <template id="ErrorMessage">
   <!-- ErrorRoot의 Root에 추가되는 디버그 메세지 템플릿
+    Root : 최상위 element. data-type="[Type]"이 추가
     Text : 메세지 문자열.
   -->
-  <div class="Message ErrorMessage">
+  <div theme-type="Root" class="Message ErrorMessage">
     <span theme-type="Text" class="Text"></span>
   </div>
 </template>
 
+<template id="Emote">
+  <!-- NormalMessage의 Text 내부에 추가되는 일반, 구독자 전용 이모티콘 템플릿
+    Root  : 최상위 element. data-type="[Name]" date-id="[Id]"이 추가
+    Image : 이모티콘 이미지가 img element로 추가
+    Text  : 이미지를 표현하지 않을 경우 사용. 변환 이전 문자열
+  -->
+  <virtual theme-type="Root" class="Emote">
+    <virtual theme-type="Image"></virtual>
+  </virtual>
+</template>
+
 <template id="Cheermote">
   <!-- NormalMessage의 Text 내부에 추가되는 응원 이모티콘 템플릿
-    Root  : 최상위 element로 data-type="[Name]" data-tier="[Tier]" data-value="[Value]"가 추가
-    Image : img element로 추가되는 응원 이모티콘 이미지
+    Root  : 최상위 element. data-type="[Name]" data-tier="[Tier]" data-value="[Value]"가 추가
+    Image : 응원 이모티콘 이미지가 img element로 추가
     Text  : 응원 금액 문자열
   -->
   <span theme-type="Root" class="Cheermote">
-    <span theme-type="Image" class="CheerImage"></span>
+    <virtual theme-type="Image" class="CheerImage"></virtual>
     <span theme-type="Text" class="CheerValue"></span>
   </span>
 </template>
