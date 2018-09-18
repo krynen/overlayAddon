@@ -23,14 +23,15 @@
 
 .NormalMessage .NameBadges {
   display:flex;
-  background:linear-gradient(to right, rgba(100,100,100,1), rgba(0,0,0,0));
+  background:linear-gradient(to right, rgba(160,160,160,.7), rgba(0,0,0,0));
 }
 .NormalMessage .Name {
   display:flex; flex:1; margin:auto; 
-  text-shadow:    0  1px 0 grey,  1px  1px 0 grey,
-                1px    0 0 grey,  1px -1px 0 grey,
-                  0 -1px 0 grey, -1px -1px 0 grey,
-               -1px    0 0 grey, -1px  1px 0 grey;
+  text-shadow:    0  1px 0 black,  1px  1px 0 black,
+                1px    0 0 black,  1px -1px 0 black,
+                  0 -1px 0 black, -1px -1px 0 black,
+               -1px    0 0 black, -1px  1px 0 black;
+  color:var(--data-color);
   padding:1px;
 }
 .NormalMessage .Badges { display:flex; }
@@ -42,6 +43,9 @@
 .Text {
   color:white; padding:2px 1px 1px; text-align:right;
   word-break: keep-all; word-wrap: break-word;
+}
+[data-color-chat="1"] .Text {
+  color:var(--data-color);
 }
 
 .Emote { width:56px; }
@@ -67,8 +71,8 @@
 
 <template id="NormalMessage">
   <!-- NormalRoot의 Root에 추가되는 일반 메세지 템플릿
-    Root   : 최상위 element. data-emote-only="1"이 추가될 수 있음
-    Name   : 유저 이름. 일반 문자열로 추가
+    Root   : 최상위 element. data-emote-only="1" data-color-chat="1"이 추가될 수 있음
+    Name   : 유저 이름. 스타일 --data-color:"[Color]"가 추가될 수 있음
     Badges : 뱃지 목록. 각 뱃지는 data-type="[Name]" data-tier="[Tier]"가 포함된 img element
     Text   : 메세지 문자열. 처리된 이모티콘 등도 포함됨
   -->

@@ -13,6 +13,7 @@ var REQUIRE_MODULES = new function() {
   this["Irc"] = require("./irc.js");
   this["Message"]       = require("./message.js");
   this["Message/cheer"] = require("./message/cheer.js");
+  this["Message/color"] = require("./message/color.js");
   this["Message/emote"] = require("./message/emote.js");
   this["Theme"]         = require("../html/theme.html");
   this["Data"]    = require("./data.js");

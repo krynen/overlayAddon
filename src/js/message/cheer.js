@@ -59,7 +59,7 @@ methods.Replace = function(message, text, done) {
       "Cheermote",
       {
         "parent" : element,
-        "root"   : { "type": prefix, "tier":data.list[prefix][index].id, "value":value },
+        "attr"   : { "type": prefix, "tier":data.list[prefix][index].id, "value":value },
         "image"  : image[key],
         "text"   : value
       }

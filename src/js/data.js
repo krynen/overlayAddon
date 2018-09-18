@@ -133,7 +133,7 @@ methods.Load = async function(uniformData) {
   // 세션 설정을 연결
   methods.Merge(
     data.config,
-    await methods.Get("session", data.shared.Data.SessionStorageForamt)
+    await methods.Get("session", new RegExp(data.shared.Data.SessionStorageForamt))
   );
 
   // 웹 설정을 로드
@@ -144,7 +144,7 @@ methods.Load = async function(uniformData) {
 
   // 로드한 웹 설정을 연결
   webConfigs.forEach( function(el) { methods.Merge(data.config, el); } );
-  
+
   done.Done("data");
 };
 

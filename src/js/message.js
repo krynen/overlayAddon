@@ -166,8 +166,12 @@ methods.AddSubElement = function(type, message) {
       break;
 
     case "Root":
-      Object.keys(message.root||{}).forEach( function(key) {
-        message.parent.setAttribute("data-"+key, message.root[key]);
+      // Attribute와 Style Variable을 추가
+      Object.keys(message.attr||{}).forEach( function(key) {
+        message.parent.setAttribute("data-"+key, message.attr[key]);
+      } );
+      Object.keys(message.var||{}).forEach( function(key) {
+        message.parent.style.setProperty(["--data-"+key], message.var[key]);
       } );
       break;
 
@@ -316,7 +320,7 @@ methods.Error = function(message, option) {
     }
 
     // 메세지 추가
-    AddType({ "text":str, "root":{"type":message} }, "Error", config.Error);
+    AddType({ "text":str, "attr":{"type":message} }, "Error", config.Error);
   } catch(err) {
     if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
@@ -338,8 +342,17 @@ methods.Add = function(message) {
   var done = new Array(text.length);
 
   // 하위 모듈 처리
+  message.Color = {
+    id : message.name,
+    badges : message.badges,
+//  isColorChat : false, // 모듈 내에서 처리
+    color : message.Color,
+  };
+
   this.Module.emote.Replace(message.Emote, text, done);
   this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+  this.Module.color.Replace(message.Color, text, done);
+  this.Module.color.Set(message.Color, message);        // 색 처리
   this.Module.cheer.Replace(message.Cheer, text, done); // 응원 처리
   
   // 분해한 메세지 병합

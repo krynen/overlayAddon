@@ -143,7 +143,8 @@ methods.Response = function(line) {
           default:
           /*
           case "emotes":      // 이모티콘(트위치 자체, 구독자 전용)
-          case "emote-only": // 이모티콘만 포함된 메세지
+          case "emote-only":  // 이모티콘만 포함된 메세지
+          case "color":       // 유저별 (이름)색상
           case "bits":        // 응원이 포함된 메세지
           */
             acc[keyValue[0]] = keyValue[1];
@@ -177,10 +178,13 @@ methods.Response = function(line) {
             };
 
             // 하위 모듈에 사용하는 파라미터 추가
-            if (subArguments["bits"] !== undefined) { ret.Cheer = true; }
             if (subArguments["emotes"] !== undefined) {
               ret.Emote = { "index":subArguments["emotes"] };
               if (subArguments["emote-only"] === "1") { ret.Emote.only = true; }
+            }
+            if (subArguments["bits"] !== undefined) { ret.Cheer = true; }
+            if (subArguments["color"] !== undefined) {
+              ret.Color = ret.Color = subArguments["color"];
             }
             return ret;
           })() );

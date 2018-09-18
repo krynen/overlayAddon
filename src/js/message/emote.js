@@ -15,21 +15,22 @@ var parent  = null;
 
 
 /**
- * 상위 모듈의 메세지 정보를 설정
+ * 상위 모듈의 메세지 정보를 설정 메서드
  * @param {Object} message Replace()와 동일한 message
  * @param {bool} message.only 메세지에 이모티콘 외의 텍스트가 없는지
  * @param {Object} parentMessage parent.AddSubElement()의 message
  */
 methods.Set = function(message, parentMessage) {
   if ((message||{}).only === true) {
-    if (parentMessage.root === undefined) { parentMessage.root = {}; }
-    parentMessage.root["emote-only"] = "1";
+    if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
+    parentMessage.attr["emote-only"] = "1";
   }
 };
 
+
 /**
  * 이모티콘 문자열 대체 메서드
- * @param {Object} message 출력할 메세지의 정보
+ * @param {Object} message 출력할 메세지의 이모티콘 정보
  * @param {string} message.index 이모티콘의 아이디와 위치. id:from-to,from-to/id:from-to ...
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  * @param {bool[]} done 각 어절의 처리 여부
@@ -37,10 +38,16 @@ methods.Set = function(message, parentMessage) {
 methods.Replace = function(message, text, done) {
   if (message === undefined) { return; }
 
-  // 색채팅을 배제하고 탐색
+  // 색채팅과 HTML 이스케이핑을 배제하고 탐색
   var textString = ( function() {
     var element = document.createElement("span");
-    element.innerHTML = text.join(" ").replace(/^ACTION ([^]+)$/, "$1");
+    element.innerHTML = text.join(" ").replace(
+      new RegExp(
+        "^" + shared.Message.ColorChatPrefix +
+        "([\\s\\S]+)" +
+        shared.Message.ColorChatPostFix + "$"
+      ), "$1"
+    );
     return element.innerText;
   } )();
 
@@ -72,7 +79,7 @@ methods.Replace = function(message, text, done) {
       "Emote",
       {
         "parent" : element,
-        "root"   : { "type":el, "id":ids[emoteIndex] },
+        "attr"   : { "type":el, "id":ids[emoteIndex] },
         "image"  : shared.Message.EmoteUri.replace("{id}", ids[emoteIndex]),
         "text"   : el
       }
