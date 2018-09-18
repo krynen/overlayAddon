@@ -68,6 +68,12 @@ methods.Replace = function(message, text, done) {
 
   // 뱃지로 권한을 확인해 색채팅 처리
   if (isColorChat) {
+    // 권한 목록에 빈 문자열이 있을 경우 무조건 통과
+    if (config.Message.Color.ColorChat.indexOf[""] > -1) {
+      message.isColorChat = true;
+      return;
+    }
+
     config.Message.Color.ColorChat.some( function(el) {
       var tier = Number(el.split("/")[1]);
       var name = el.split("/")[0];
