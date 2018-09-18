@@ -15,6 +15,7 @@ var REQUIRE_MODULES = new function() {
   this["Message/cheer"] = require("./message/cheer.js");
   this["Message/color"] = require("./message/color.js");
   this["Message/emote"] = require("./message/emote.js");
+  this["Message/orimg"] = require("./message/orimg.js");
   this["Theme"]         = require("../html/theme.html");
   this["Data"]    = require("./data.js");
   this["Default"] = require("../json/default.json");
@@ -150,7 +151,7 @@ var LoadModules = async function(object, modules) {
  */
 module.exports = new function() {
   Object.assign(this, ConnectModules(REQUIRE_MODULES));
-  this.Done.Register("data", "message", "cheer");
+  this.Done.Register("data", "message", "cheer", "orimg");
 
   LoadModules(this, REQUIRE_MODULES)
     .then( () => { this.Irc.Connect(); } );

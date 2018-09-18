@@ -96,14 +96,14 @@ var ExecuteBrowser = function() {
         if (ind==0) return acc;
 
         switch(cur.type) {
-        case "env":
-          return path.resolve(acc, process.env["npm_package_"+cur.value]);
-        
-        case "string":
-          return path.resolve(acc, cur.value);
+          case "env":
+            return path.resolve(acc, process.env["npm_package_"+cur.value]);
+          
+          case "string":
+            return path.resolve(acc, cur.value);
 
-        default:
-          return acc;
+          default:
+            return acc;
         }
       }, path.resolve("./"));
 

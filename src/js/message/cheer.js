@@ -26,7 +26,7 @@ var parent  = null;
  * @param {bool[]} done 각 어절의 처리 여부
  */
 methods.Replace = function(message, text, done) {
-  if (message !== true) { return;}
+  if (message !== true) { return; }
 
   // 응원 어절을 추출해 변환
   text.forEach( function(el, ind) {

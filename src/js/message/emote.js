@@ -74,6 +74,7 @@ methods.Replace = function(message, text, done) {
     var emoteIndex = values.indexOf(element.innerText);
     if (emoteIndex === -1) { return; }               // 이모티콘이 아닌것같으면 무시
 
+    done[ind] = true;
     element.innerHTML = "";
     parent.AddSubElement(
       "Emote",

@@ -21,6 +21,13 @@
       "ColorChat" : [
         "broadcaster/0", "moderator/0"
       ]
+    },
+
+    "Orimg"   : {
+      "Prefix"  : "~",
+      "UriBase" : "",
+      "Groups"  : [],
+      "Images"  : []
     }
   },
 
