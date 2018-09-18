@@ -177,6 +177,7 @@ methods.AddSubElement = function(type, message) {
 
     case "NormalMessage":
     case "ErrorMessage":
+    case "CheerRoot":
     case "Cheermote":
     case "Emote":
     case "Orimg":
@@ -195,16 +196,32 @@ methods.AddSubElement = function(type, message) {
       }, {});
       Object.keys(points).forEach( function(key)  {
         points[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
-      } );
 
       // 각 포인트로부터 parent만 바꾸어 재귀 호출
-      Object.keys(points).forEach( function(key) {
         points[key].forEach( function(el) {
           var childMessage = JSON.parse(JSON.stringify(message));
           childMessage.parent = el;
           methods.AddSubElement(key, childMessage);
         } );
       } );
+
+      // 루트포인트에서 위의 과정을 반복
+      if (message.root !== undefined) {
+        var rootPoints = Object.keys(message.root).reduce( function(acc, cur) {
+          acc[cur] = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
+          return acc;
+        }, {});
+        Object.keys(rootPoints).forEach( function(key) {
+          rootPoints[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
+
+          // message는 자신의 message대신 message.root[key]를 이용
+          rootPoints[key].forEach( function(el) {
+            var childMessage = message.root[key];
+            childMessage.parent = el;
+            methods.AddSubElement(key, childMessage);
+          } );
+        } );
+      }
 
       // virtual element를 변환
       ret.forEach( function(el) {
@@ -342,20 +359,32 @@ methods.Add = function(message) {
   var text = message.text.split(" ");
   var done = new Array(text.length);
 
+
   // 하위 모듈 처리
+  message.Emote = {
+    "index" : message.emotes,
+    "only"  : message["emote-only"] === "1"
+  };
+  delete message.emotes;
+  delete message["emote-only"];
+  this.Module.emote.Replace(message.Emote, text, done);
+  this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+
   message.Color = {
     id : message.name,
     badges : message.badges,
-//  isColorChat : false, // 모듈 내에서 처리
-    color : message.Color,
+    color : message.color
   };
-  message.Orimg = { id : message.name };
-
-  this.Module.emote.Replace(message.Emote, text, done);
-  this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+  delete message.color;
   this.Module.color.Replace(message.Color, text, done);
   this.Module.color.Set(message.Color, message);        // 색 처리
-  this.Module.cheer.Replace(message.Cheer, text, done); // 응원 처리
+
+  message.Cheer = Number(message.bits||0);
+  delete message.bits;
+  this.Module.cheer.Replace(message.Cheer, text, done);
+  this.Module.cheer.Set(message.Cheer, message);        // 응원 처리
+
+  message.Orimg = { id : message.name };
   this.Module.orimg.Replace(message.Orimg, text, done); // 전용 이미지 처리
   
   // 분해한 메세지 병합

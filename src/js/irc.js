@@ -171,21 +171,18 @@ methods.Response = function(line) {
               .replace(/&/g, '&amp;')
               .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
               .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
             var ret = {
               "name"   : subArguments["display-name"],
               "badges" : subArguments["badges"],
-              "text"   : text
-            };
+              "text"   : text,
 
-            // 하위 모듈에 사용하는 파라미터 추가
-            if (subArguments["emotes"] !== undefined) {
-              ret.Emote = { "index":subArguments["emotes"] };
-              if (subArguments["emote-only"] === "1") { ret.Emote.only = true; }
-            }
-            if (subArguments["bits"] !== undefined) { ret.Cheer = true; }
-            if (subArguments["color"] !== undefined) {
-              ret.Color = ret.Color = subArguments["color"];
-            }
+              // 하위 모듈에서 사용할 파라미터
+              "emotes"     : subArguments["emotes"],
+              "emote-only" : subArguments["emote-only"],
+              "color"      : subArguments["color"],
+              "bits"       : subArguments["bits"]
+            };
             return ret;
           })() );
         return;

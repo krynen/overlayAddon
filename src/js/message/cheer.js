@@ -20,13 +20,32 @@ var parent  = null;
 
 
 /**
+ * 상위 모듈의 메세지 정보를 설정하고 헤더를 추가하는 메서드
+ * @param {Object} message Replace()와 동일한 message
+ * @param {Object} parentMessage parent.AddSubElement()의 message
+ */
+methods.Set = function(message, parentMessage) {
+  if (message === 0) { return; }
+  if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
+  parentMessage.attr["cheer"] = "1";
+
+  if (parentMessage.root === undefined) { parentMessage.root = {}; }
+  parentMessage.root.CheerRoot = {
+    "attr"   : { "value": message },
+    "name"   : parentMessage.name,
+    "text"   : message
+  };
+};
+
+
+/**
  * 응원 문자열 대체 메서드
  * @param {bool} message 출력할 메세지의 정보 (응원이 포함되어 있는지)
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  * @param {bool[]} done 각 어절의 처리 여부
  */
 methods.Replace = function(message, text, done) {
-  if (message !== true) { return; }
+  if (message === 0) { return; }
 
   // 응원 어절을 추출해 변환
   text.forEach( function(el, ind) {
