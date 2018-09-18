@@ -4,35 +4,52 @@
 
   virtual element는 child elements에 attribute를 추가할 때 이용
 -->
+<template id="Description">
+  <!-- 모듈 로드 완료시 표시할 메세지 -->
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAB4CAIAAAA48Cq8AAAACXBIWXMAADXUAAA11AFeZeUIAAADV0lEQVR4nO3dTU7kMBRF4dBiA70MFtU7Ycge2U4PSkIIFVWJ7fN8nZxv1hJUzPMhqR+Uftn+/tuk0f7MXoDOybCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCFeZy+gz+f7ky94+yhZx0NPF3lTuVR+bi93bry2cxAjDt9i//J+KFtt8wq/G77a2rmtE9aQ3drgNY9a5Jf+1U6a2yJhBW7YD8NX+KVnqfPmFv8cC9qw28MOyYtLqsfsuWW/KqT3rP/xL1XVkccPDqtmz3qOcs2q9h0lNazKPWs71pWr2nGsyLDq9+zoEa3q2RHzwsrcs+8yVxi2qrywmr19VLwyD9u/AZi5hb3d0LBtP4by/Z8NFzj0nbk9D172hA+eW1JYR3+ep/v09jH4BNP2aIdibdjgyLkteyncuVtzP4TuvMp0fvtvjznwy363bFj7HZrRg9/U4SeGcH1ziwnr0LatvmcDpc4tJqyTuXz6C4bVsGejroZLq51bRlj5e5l5xQmeW0ZYOh3DEsKwhDCs0S7/evDmMmG5321a55b0WeHpdb6IW+p34zJnLNUyLCEMSwjDEsKwhLhMWMEfq0Vrndtlwipjwdu2GZYgvkFa6O47nCc9w3nGEiIjrKi/8Ly7mMyPU4LnlhEWrfhyc5qrW8cPco2wVC4mLO6sPuXP1ctOWqlziwnrqPp7eGQ+zTqqam7LhrXt+OHnPtf5fA99slUyt6SwGk4Jv21e26buuVvGUQVtRc6t73bczR7MYtZv+c7tmXgSerzCsLklnbGWcI5nWry8sKbsXPMtrHKEzS0vrK18RpmhNEiaW2RYW+GM2g4U22LM3FLD2kpmlHa7vSEy5hYc1kbOaFQWV2tr99zy3m64a+ySiLlP+ZuLp+bNbZGwbvoXRp9gMv/7uxlzWyqsL/n3me2ZIbfawrndC0vqlv3kXcsyLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEuI/yJL8XiuTiLZAAAAAElFTkSuQmCC" /><br />
+  기본 테마로 모든 로드가 완료되었습니다.
+</template>
 
 <template id="Style">
   <!-- 스타일 -->
   <style type="text/css">
 #Root { position:absolute; bottom:0; left:0; right:0; }
-.NormalMessage { margin:2px 0; padding:3px; background:#000A; border:1px solid #FFFA; }
-#ErrorRoot { position:absolute; top:0; left:0; right:0; background:#000A; }
+.NormalMessage {
+  margin:2px 0; padding:3px;
+  background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.6);
+}
+#ErrorRoot { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.6); }
 .ErrorMessage { margin:2px 0; padding:3px; }
 
-.NormalMessage .NameBadges { display:flex; background:linear-gradient(to right, #AAAF, #0000); }
+.NormalMessage .NameBadges {
+  display:flex;
+  background:linear-gradient(to right, rgba(100,100,100,1), rgba(0,0,0,0));
+}
 .NormalMessage .Name {
   display:flex; flex:1; margin:auto; 
-  text-shadow:    0  1px 0 #888,  1px  1px 0 #888,
-                1px    0 0 #888,  1px -1px 0 #888,
-                  0 -1px 0 #888, -1px -1px 0 #888,
-               -1px    0 0 #888, -1px  1px 0 #888;
+  text-shadow:    0  1px 0 grey,  1px  1px 0 grey,
+                1px    0 0 grey,  1px -1px 0 grey,
+                  0 -1px 0 grey, -1px -1px 0 grey,
+               -1px    0 0 grey, -1px  1px 0 grey;
   padding:1px;
 }
 .NormalMessage .Badges { display:flex; }
-.NormalMessage .Badges img { border:1px solid #FFFA; margin:auto 1px; height:18px; }
+.NormalMessage .Badges img { 
+  margin:auto 1px; height:18px;
+  border:1px solid rgba(255,255,255,.6);
+}
 
 .Text {
-  color:#FFFF; padding:2px 1px 1px; text-align:right;
+  color:white; padding:2px 1px 1px; text-align:right;
   word-break: keep-all; word-wrap: break-word;
 }
 
 .Emote { width:56px; }
 [data-emote-only="1"] .Text { text-align:center; }
-.Cheermote { display:inline-block; padding:1px 3px; margin:-1px; border:1px solid #FFFA; }
+.Cheermote {
+  display:inline-block; padding:1px 3px; margin:-1px;
+  border:1px solid rgba(255,255,255,.6);
+}
 .Cheermote .CheerImage img { height:1rem; }
   </style>
 </template>
@@ -70,7 +87,7 @@
     Text : 메세지 문자열.
   -->
   <div theme-type="Root" class="Message ErrorMessage">
-    <span theme-type="Text" class="Text"></span>
+    <div theme-type="Text" class="Text"></div>
   </div>
 </template>
 

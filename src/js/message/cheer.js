@@ -14,6 +14,7 @@ var data = {
 // 포인터 정의
 var api     = null;
 var config  = null;
+var done    = null;
 var shared  = null;
 var parent  = null;
 
@@ -92,6 +93,8 @@ methods.Connect = function() {
             return acc;
           }, {})
         );
+
+        done.Done("cheer");
       },
       function(err) { parent.Error("Message_Fail_Cheer", err); }
     );
@@ -109,10 +112,13 @@ methods.Connect = function() {
  * @param {object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
+  done = uniformData.Done;
+  done.Register("cheer");
+
   api     = uniformData.Api;
   config  = uniformData.Data.config;
   shared  = uniformData.Data.shared;
-  parent = uniformData.Message;
+  parent  = uniformData.Message;
 };
 
 

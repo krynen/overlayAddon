@@ -158,7 +158,6 @@ methods.Response = function(line) {
       case "ROOMSTATE":   // 채널 접속 혹은 방의 상태 변경
         if (subArguments["room-id"] !== undefined) {
           shared.Id = subArguments["room-id"];
-          message.Error("Irc_Success_Connect");
           message.Connect();
         }
         return;
@@ -166,10 +165,15 @@ methods.Response = function(line) {
       case "PRIVMSG":     // 일반 메세지
           message.Add( (function() {
             // 기본 파라미터 설정
+            var text = phrase.splice(3, phrase.length).join(" ").substring(1);
+            text = String(text)
+              .replace(/&/g, '&amp;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+              .replace(/</g, '&lt;').replace(/>/g, '&gt;');
             var ret = {
               "name"   : subArguments["display-name"],
               "badges" : subArguments["badges"],
-              "text"   : phrase.splice(3, phrase.length).join(" ").substring(1)
+              "text"   : text
             };
 
             // 하위 모듈에 사용하는 파라미터 추가

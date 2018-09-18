@@ -1,6 +1,10 @@
 {
   "Id"     : null,
 
+  "Data"   : {
+    "SessionStorageFormat" : "^data\\/config\\/*"
+  },
+
   "Irc"    : {
     "Uri"   : "wss://irc-ws.chat.twitch.tv:443",
 

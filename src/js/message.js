@@ -17,6 +17,7 @@ var data = {
 // 포인터 정의
 var api    = null;
 var config = null;
+var done   = null;
 var shared = null;
 
 
@@ -44,6 +45,7 @@ var GetRootEntry = function(type) {
 
   // 최상위 Element가 생성되어있지 않을 경우 새로 생성
   var theme = data.theme[`${type}Root`];
+  // 에러 메세지의 최상위 Element를 찾을 수 없을 경우 일반 메세지에 통합해 사용
   if (theme === undefined && type === "Error") { theme = data.theme["NormalRoot"]; }
   if (theme === undefined) {
     var messageTemplate = config.Error;
@@ -53,10 +55,7 @@ var GetRootEntry = function(type) {
 
     return;
   }
-  theme.forEach( function(el) {
-    var cloned = el.cloneNode(true);
-    document.body.appendChild(cloned);
-  } );
+  theme.forEach( function(el) { document.body.appendChild(el.cloneNode(true)); } );
 
   // 하위 Element를 생성할 포인트를 찾고 정리
   entry = document.querySelectorAll("*[theme-type=Root]")[0];
@@ -297,8 +296,18 @@ var AddType = function(message, type, config) {
  */
 methods.Error = function(message, option) {
   try {
-    // 문자열 불러오고 공백일 경우 더 이상 처리하지 않음
     var str = config.Error[message];
+
+    if (message = "Module_Success_Connect") {
+      // 모듈 로드 완료 메세지 처리
+      if (config.Error[message] !== true) { return; }
+      str = "";
+      (data.theme["Description"]||[]).forEach( function(el) {
+        str += el.outerHTML || el.wholeText;
+      } );
+    }
+
+    // 문자열이 공백일 경우 더 이상 처리하지 않음
     if (str === "") { return; }
 
     // 상세표시 설정이 되어있을 경우 옵션들을 개행 후 배열시킴
@@ -375,6 +384,8 @@ methods.Connect = function() {
     if (results[1][0] === true) {
       Object.assign(data.badges, results[1][1]["badge_sets"]);
     }
+
+    done.Done("message");
   } );
 
   // 응원 모듈 데이터 로드
@@ -388,6 +399,9 @@ methods.Connect = function() {
  * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
+  done = uniformData.Done;
+  done.Register("message");
+
   api = uniformData.Api;
   config = uniformData.Data.config;
   shared = uniformData.Data.shared;

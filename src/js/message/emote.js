@@ -38,7 +38,11 @@ methods.Replace = function(message, text, done) {
   if (message === undefined) { return; }
 
   // 색채팅을 배제하고 탐색
-  var textString = text.join(" ").replace(/^ACTION ([^]+)$/, "$1");
+  var textString = ( function() {
+    var element = document.createElement("span");
+    element.innerHTML = text.join(" ").replace(/^ACTION ([^]+)$/, "$1");
+    return element.innerText;
+  } )();
 
   // 이모티콘 어절을 추출
   var ids = [];
@@ -47,7 +51,6 @@ methods.Replace = function(message, text, done) {
     var id = el.split(":");
     var index = id.pop().split(",")[0].split("-").map(ind => Number(ind));
     id = id[0];
-
 
     var str = textString.slice(index[0], index[1]+1);
     ids.push(id);
@@ -58,10 +61,13 @@ methods.Replace = function(message, text, done) {
   text.forEach( function(el, ind) {
     if (done[ind] === true) { return; }              // 이미 처리된 어절 무시
 
-    var emoteIndex = values.indexOf(el);
+    var element = document.createElement("span");
+    element.innerHTML = el;
+
+    var emoteIndex = values.indexOf(element.innerText);
     if (emoteIndex === -1) { return; }               // 이모티콘이 아닌것같으면 무시
 
-    var element = document.createElement("span");
+    element.innerHTML = "";
     parent.AddSubElement(
       "Emote",
       {

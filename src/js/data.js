@@ -8,18 +8,15 @@
 // 모듈 인터페이스
 var methods = {};
 var data = {
-  shared : {},  // 모듈들간의 공유 데이터
-  config : {}   // 사용자 설정 데이터
+  shared  : {},  // 모듈들간의 공유 데이터
+  config  : {},  // 사용자 설정 데이터
+  default : {}   // 기본 설정 데이터
 };
 
 // 포인터 정의
-var api = null;
+var api     = null;
+var done    = null;
 var message = null;
-
-// 상수값
-var SHARED_DATA = require("../json/shared.json");
-var DEFAULT_CONFIG = require("../json/default.json");
-var SESSION_CONFIG_REGEX = /^data\/config\/*/;
 
 
 /**
@@ -33,14 +30,6 @@ methods.Get = async function(type, key) {
 
   // type에 따라 switch문 전개
   switch (type) {
-    case "shared":  // 모듈 공용 데이터 로드
-      ret = SHARED_DATA;
-      break;
-
-    case "default": // 기본 설정 로드
-      ret = DEFAULT_CONFIG;
-      break;
-
     case "config":  // URI로부터 설정 로드
       await api.Get( {uri:key} )
         .then(
@@ -129,16 +118,23 @@ methods.Merge = function(target, source) {
  * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = async function(uniformData) {
+  // 완료 목록 등록
+  done = uniformData.Done;
+  done.Register("data");
   // 포인터를 연결
-  api = uniformData.Api;
+  api     = uniformData.Api;
   message = uniformData.Message;
 
   // 내부 데이터를 연결
-  Object.assign(data.shared, await methods.Get("shared"));
-  Object.assign(data.config, await methods.Get("default"));
+  Object.assign(data.shared, uniformData.Shared);
+  Object.assign(data.default, uniformData.Default);
+  Object.assign(data.config, uniformData.Default);
 
   // 세션 설정을 연결
-  methods.Merge(data.config, await methods.Get("session", SESSION_CONFIG_REGEX));
+  methods.Merge(
+    data.config,
+    await methods.Get("session", data.shared.Data.SessionStorageForamt)
+  );
 
   // 웹 설정을 로드
   var uris = JSON.parse( JSON.stringify(data.config.Data.Uris) );
@@ -147,7 +143,9 @@ methods.Load = async function(uniformData) {
   } ) );
 
   // 로드한 웹 설정을 연결
-  webConfigs.forEach( (el) => { methods.Merge(data.config, el); } );
+  webConfigs.forEach( function(el) { methods.Merge(data.config, el); } );
+  
+  done.Done("data");
 };
 
 
