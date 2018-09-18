@@ -302,7 +302,7 @@ methods.Error = function(message, option) {
   try {
     var str = config.Error[message];
 
-    if (message = "Module_Success_Connect") {
+    if (message === "Module_Success_Connect") {
       // 모듈 로드 완료 메세지 처리
       if (config.Error[message] !== true) { return; }
       str = "";
@@ -413,7 +413,6 @@ methods.Connect = function() {
  */
 methods.Load = function(uniformData) {
   done = uniformData.Done;
-  done.Register("message");
 
   api = uniformData.Api;
   config = uniformData.Data.config;

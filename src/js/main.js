@@ -150,6 +150,7 @@ var LoadModules = async function(object, modules) {
  */
 module.exports = new function() {
   Object.assign(this, ConnectModules(REQUIRE_MODULES));
+  this.Done.Register("data", "message", "cheer");
 
   LoadModules(this, REQUIRE_MODULES)
     .then( () => { this.Irc.Connect(); } );

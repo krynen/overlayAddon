@@ -40,7 +40,7 @@ methods.Get = async function(type, key) {
 
     case "session": // sessionStorage에 저장된 설정 로드
       Object.keys(sessionStorage).some( function(el) {
-        if (el.match(key)) {
+        if (el.match(key) !== null) {
           ret = JSON.parse(sessionStorage.getItem(el));
           sessionStorage.removeItem(el);
           return true;
@@ -118,9 +118,6 @@ methods.Merge = function(target, source) {
  * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = async function(uniformData) {
-  // 완료 목록 등록
-  done = uniformData.Done;
-  done.Register("data");
   // 포인터를 연결
   api     = uniformData.Api;
   message = uniformData.Message;
@@ -131,10 +128,11 @@ methods.Load = async function(uniformData) {
   Object.assign(data.config, uniformData.Default);
 
   // 세션 설정을 연결
-  methods.Merge(
-    data.config,
-    await methods.Get("session", new RegExp(data.shared.Data.SessionStorageForamt))
-  );
+  while(1) {
+    var session = await methods.Get("session", new RegExp(data.shared.Data.SessionStorageFormat));
+    if (Object.keys(session).length === 0) { break; }
+    methods.Merge(data.config, session);
+  }
 
   // 웹 설정을 로드
   var uris = JSON.parse( JSON.stringify(data.config.Data.Uris) );
@@ -145,7 +143,7 @@ methods.Load = async function(uniformData) {
   // 로드한 웹 설정을 연결
   webConfigs.forEach( function(el) { methods.Merge(data.config, el); } );
 
-  done.Done("data");
+  uniformData.Done.Done("data");
 };
 
 

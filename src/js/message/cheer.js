@@ -113,7 +113,6 @@ methods.Connect = function() {
  */
 methods.Load = function(uniformData) {
   done = uniformData.Done;
-  done.Register("cheer");
 
   api     = uniformData.Api;
   config  = uniformData.Data.config;

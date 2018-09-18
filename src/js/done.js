@@ -19,9 +19,11 @@ var message = null;
 
 /**
  * 리스트 등록 메서드
- * @param {string} name 모듈의 이름
+ * @param {string[]} arguments 모듈의 이름 배열
  */
-methods.Register = function(name) { data.list[name] = false; };
+methods.Register = function(names) {
+  Array.from(arguments).forEach(function(name) { data.list[name] = false; });
+};
 
 
 /**
