@@ -1,393 +1,471 @@
-/* 모듈 내부데이터 설정 */
-var message = null;
-var config  = null;
-var theme   = null;
-var emotes  = null;
-var badges  = null;           // load()를 통해 uniformData와 연결
+/**********************************************************
+ * 메세지 모듈                                            *
+ * IRC 모듈에서 정리된 데이터를 사용해 DOM Element를 추가 *
+ * 추가에 필요한 테마를 파싱하는 역할도 겸함              *
+ *                                                        *
+ **********************************************************/
 
-
-/* 내부 메서드 정의 */
-var getColor = function(object) {
-  /* 설정값에 따라 유저 이름 색을 가져옴 */
-  if (config.color.userColor) {
-    if (config.color.customColor && object.color!="") {
-      return object.color;
-    } else {
-      var list = config.color.defaultColor;
-      return list[object.id % list.length];
-    }
-  } else { return null; }
+// 모듈 인터페이스
+var methods = {};
+var data = {
+  theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
+  badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
+  entryPoint : {}, // GetRootEntry()에서 사용
+  nodes      : {}  // Add()에서 사용
 };
-var addRecursive = function(object, struct, parent) {
-  var condition = (!Array.isArray(struct.cases) || struct.cases.length==0);
-  /* struct에 cases가 존재할 경우 메세지 출력 조건을 판단 */
-  if (!condition) {
-    condition = object.cases.some(function(el) {
-      return struct.cases.indexOf(el) != -1;
-    });
-  }
-  
-  if (condition) {
-    if (struct.tag) {
-      /* tag가 존재할 경우 DOM을 생성 */
-      var dom = document.createElement(struct.tag);
-      if (Array.isArray(struct.classes)) {
-        struct.classes.forEach( function(el) { dom.classList.add(el); } );
-      }
-      if (Array.isArray(struct.variable)) {
-        struct.variable.forEach( function(target) {
-          var type = target.type;
-          var value = new String(target.value);
 
-          /* value의 {name} 수정 */
-          if (lowerModule.orimg) {  // 전용이미지 선처리
-            value = lowerModule.orimg.method.setDomValue(object, value);
-          }
-          if (lowerModule.cheer) {  // 응원 선처리
-            value = lowerModule.orimg.method.setDomValue(object, value);
-          }
-          var matches = value.match(/{[^}]+}/g);
-          (matches||[]).forEach( function(match) {
-            switch(match.replace(/[{}]/g,"")) {
-            /* 이름 색상 */
-            case "color":
-              var color = getColor(object);
-              if (color) { value = value.replace(match, color); }
-              else       { value = ""; }
-              break;
+// 포인터 정의
+var api    = null;
+var config = null;
+var done   = null;
+var shared = null;
 
-            /* 색채팅시 이름 색상(채팅색과 이름색이 같으므로) */
-            case "meColor":
-              if (object.me) {
-                var color = getColor(object);
-                if (color) { value = value.replace(match, color); }
-                else       { value = ""; }
-              } else { value = null; }
-              break;
-            
-            /* 유저 혹은 이모티콘이나 전용이미지의 이름 */
-            case "name":
-              if (object.name) {
-                value = value.replace(match, object.name);
-              }
-              break;
-            
-            /* 메세지 텍스트 혹은 응원이모티콘의 금액 */
-            case "text":
-              if (object.text) {
-                value = value.replace(match, object.text);
-              }
-              break;
-              
-            /* 이모티콘 및 전용이미지 URI */
-            case "uri":
-              if (object.uri) {
-                value = value.replace(match, object.uri);
-              }
-              break;
-            
-            /* 수치 범위에서 랜덤 */
-            case "random":
-              if (target.min && target.max && target.interval) {
-                var num = Math.random();
-                num *= Math.ceil((target.max-target.min)/target.interval) *
-                       target.interval;
-                num += target.min - num%target.interval;
-                
-                /* 정수간격이거나 digit이 존재할 경우 부동소수점을 처리 */
-                if (Number.isInteger(target.interval)) { num = parseInt(num); }
-                else if (target.digit) { num = num.toFixed(target.digit); }
-                
-                value = value.replace(match, num);
-              } else { value = null; }
-              break;
-              
-            /* 목록에서 랜덤 */
-            case "listRandom":
-              if (Array.isArray(target.list)) {
-                var index = Math.floor(Math.random()*target.list.length);
-                value = value.replace(match, target.list[index]);
-              } else { value = null; }
-              break;
-              
-            default:
-              value = null;
-              break;
-            }
-          } );
-          
-          /* 각 value를 type에 적용 */
-          if (value) {
-            switch(type[0]) {
-            case "data":
-              dom.setAttribute(type[1], value);
-              break;
-              
-            case "style":
-              dom.style[type[1]] = value;
-              break;
-              
-            case "class":
-              dom.classList.add(value);
-              break;
-              
-            case "src":
-              dom.src = value;
-              break;
-              
-            default:
-              break;
-            }
-          }
-        } );
-      }
-      parent.appendChild(dom);
-      parent = dom;
-    }
-    if (Array.isArray(struct.children)) {
-      /* children이 존재할 경우 하위 처리 및 재귀 호출 */
-      struct.children.forEach( function(el) {
-        if (typeof el == "object") { addRecursive(object, el, parent); }
-        else {
-          switch(el) {
-          case "badges":
-            object.badges.forEach( function(el) {
-              var badge = document.createElement("img");
-              badge.classList.add(el);
-              
-              var data = badges.list[el.split("/")[0]];
-              if (data) {
-                var index = el.split("/")[1];
-                /* 다른 서브뱃지가 없을 경우 최소 뱃지를 표시
-                   유저 구독뱃지를 로드하는데 실패했을 때 기본 구독뱃지를 표시함 */
-                if (!data.versions[index]) {
-                  index = Math.min.apply(null, Object.keys(data.versions));
-                }
-                badge.src = data.versions[index]["image_url_1x"];
-              }
-              parent.appendChild(badge);
-            } );
-            break;
-            
-          case "donationHeader":
-            if ((object.cases.indexOf("type-donation")!=-1) && object.header) {
-              parent.innerHTML += object.header;
-            }
-            break;
-            
-          case "name":
-          case "text":
-          default:
-            if (object[el]) { parent.innerHTML += object[el]; }
-            break;
-          }
-        }
-      } );
-    }
+
+/**
+ * 최상위 Element 설정 메서드
+ * 아이디를 통해 DOM Element가 생성되지 않았을 경우 생성하며
+ * 하위 Element를 추가할 지점을 반환한다
+ * @param {string} type Element의 종류. 대소문자를 구분. Normal, Error.
+ */
+var GetRootEntry = function(type) {
+  // 올바르지 않은 타입이 입력되었을 경우 예외처리
+  switch(type) {
+    case "Normal":
+    case "Error":
+      break;
+
+    default:
+      // 내부함수이므로 콘솔출력으로 충분
+      console.error(`GetRootEntry, type, ${type}`);
+      return;
   }
-  
-  return parent;
+
+  // 최상위 Element가 이미 존재하는지 판별해 존재할 경우 바로 반환
+  if (data.entryPoint[type] !== undefined) { return data.entryPoint[type];}
+
+  // 최상위 Element가 생성되어있지 않을 경우 새로 생성
+  var theme = data.theme[`${type}Root`];
+  // 에러 메세지의 최상위 Element를 찾을 수 없을 경우 일반 메세지에 통합해 사용
+  if (theme === undefined && type === "Error") { theme = data.theme["NormalRoot"]; }
+  if (theme === undefined) {
+    var messageTemplate = config.Error;
+    if (type === "Error") {
+      methods.NativeError(messageTemplate["Error_Message_No_ErrorRoot"]);
+    } else { methods.NativeError(messageTemplate["Error_Mesage_No_NormalRoot"]); }
+
+    return;
+  }
+  theme.forEach( function(el) { document.body.appendChild(el.cloneNode(true)); } );
+
+  // 하위 Element를 생성할 포인트를 찾고 정리
+  entry = document.querySelectorAll("*[theme-type=Root]")[0];
+  entry.removeAttribute("theme-type");
+
+  // 찾은 포인트를 data.entryPoint에 등록하고 반환
+  data.entryPoint[type] = entry;
+  return entry;
 };
-var getDom = function(data, struct) {
-  var dom = document.createElement("span");
-  addRecursive(data, struct, dom);
-  var ret = dom.innerHTML;
-  delete dom;
+
+
+/**
+ * 테마 파일에서 템플릿을 불러오는 메서드
+ * @param {string} response에서 읽어온 stringify된 html template
+ * @return {Object} 불러온 템플릿
+ */
+methods.ParseTheme = function(response) {
+  // 바탕이 될 DOM Element를 생성해 response를 추출
+  var element = document.createElement("template");
+  element.innerHTML = response;
+
+  // 최상위 template element 각각을 아이디에 따라 분류
+  var ret = {};
+  var length = element.content.children.length;
+  var someFunc = function(el)  {
+    if (el.nodeName !== "#text") { return true; }
+    if (el.nodeValue.match(/^\s*$/) === null) { return true; }
+
+    node.removeChild(el);
+    return false;
+  };
+  for(var i=0; i<length; ++i) {
+    var child = element.content.children[i];
+    var node = child.content;
+
+    // 각 template에서 주석을 제거
+    node.childNodes.forEach( function(el) {
+      if (el.nodeName === "#comment") { node.removeChild(el); }
+    } );
+    // template 안의 양끝단의 공백 텍스트노드를 제거
+    var spaces = Array.from(node.childNodes).reverse();
+    spaces.some(someFunc);
+    spaces.reverse().some(someFunc);
+
+    if (child.id !== undefined) { ret[child.id] = node.childNodes; }
+  }
+
+  // 스타일 템플릿을 페이지에 추가
+  if (ret["Style"] !== null) {
+    ret["Style"].forEach( function(el) { document.head.appendChild(el); } );
+  } 
+
   return ret;
-}
+};
 
 
-/* 모듈 메서드 정의 */
-var method = {
-  load  : function(uniformData) {
-    /* 내부데이터에 연결 */
-    message = uniformData.message;
-    config  = uniformData.config.data.message;
-    theme   = uniformData.shared.data.theme;
-    emotes  = uniformData.shared.data.emotes;
-    badges  = uniformData.shared.data.badges;
-    
-    if (!config) {
-      message.method.error("loadConfigFail");
-      return;
-    }
-    
-    /* 최상위 DOM 체크 및 생성 */
-    with (uniformData.shared.data.theme) {
-      [error, normal].forEach( function(el) {
-        with (el) {
-          var rootDOM = document.getElementById(root.id);
-          if (!rootDOM) {
-            rootDOM = document.createElement(root.tag);
-            rootDOM.id = root.id;
-            if (Array.isArray(root.classes)) {
-              root.classes.forEach( function(el) { rootDOM.classList.add(el); } );
-            }
-            document.body.appendChild(rootDOM);
+/**
+ * 하위 Element 생성 메서드
+ * 덧붙일 Element를 만들어 상위 Element에 appendChild
+ * @param {string} type Element의 종류.
+ * @param {Object} message.parent 추가할 부모 노드
+ * @param {Object} message 추가할 메세지의 정보
+ * @param {string} message.name 메세지를 보낸 유저의 이름
+ * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
+ * @param {string} message.text 추가할 메세지의 문자열
+ */
+methods.AddSubElement = function(type, message) {
+  switch(type) {
+    case "Badges":
+      // 뱃지가 로드되지 않았을 경우 생략
+      if (Object.keys(data.badges).length === 0) { break; }
+
+      // message.badges의 각 뱃지를 추가
+      message.badges.forEach( function(el){
+        var element = document.createElement("img");
+        var name = el.split("/")[0];
+        var version = el.split("/")[1];
+
+        element.setAttribute("data-type", name);
+        element.setAttribute("data-tier", version);
+
+        var uris = (data.badges[name]||{}).versions||{};
+        // name/version이 실패하면 name/0, name/1을 순차적으로 시도
+        // name/0은 subscriber, name/1은 다른 경우의 예외처리가 됨
+        var uri = [version, "0", "1"].reduce( function(acc, cur) {
+          if (acc !== null || uris[cur] === undefined) { return acc; }
+          return uris[cur];
+        }, null );
+        element.src = (uri["image_url_4x"] || uri["image_url_2x"]) || uri["image_url_1x"];
+
+        if (typeof element.src !== "string" || element.src === "") { return; }
+        message.parent.appendChild(element);
+      } );
+      break;
+
+    case "Image":
+      var img = document.createElement("img");
+      img.src = message.image;
+      message.parent.appendChild(img);
+      break;
+
+    case "Name":
+      message.parent.innerHTML += message.name;
+      break;
+
+    case "Text":
+      message.parent.innerHTML += message.text;
+      break;
+
+    case "Root":
+      // Attribute와 Style Variable을 추가
+      Object.keys(message.attr||{}).forEach( function(key) {
+        message.parent.setAttribute("data-"+key, message.attr[key]);
+      } );
+      Object.keys(message.var||{}).forEach( function(key) {
+        message.parent.style.setProperty(["--data-"+key], message.var[key]);
+      } );
+      break;
+
+    case "NormalMessage":
+    case "ErrorMessage":
+    case "CheerHead":
+    case "Cheermote":
+    case "Emote":
+    case "Orimg":
+    case "TwipHead":
+    case "TwipText":
+    default:
+      // 생성
+      var ret = [];
+      data.theme[type].forEach( function(el) {
+        ret.push(message.parent.appendChild(el.cloneNode(true)));
+      } );
+
+      // 포인트를 뽑아내고 이름을 정리함
+      // 사용되지 않는 이름은 undefined될 것
+      var points = ["Root", "Name", "Badges", "Image", "Text"].reduce( function(acc, cur) {
+        acc[cur] = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
+        return acc;
+      }, {});
+      Object.keys(points).forEach( function(key)  {
+        points[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
+
+      // 각 포인트로부터 parent만 바꾸어 재귀 호출
+        points[key].forEach( function(el) {
+          var childMessage = JSON.parse(JSON.stringify(message));
+          childMessage.parent = el;
+          methods.AddSubElement(key, childMessage);
+        } );
+      } );
+
+      // 루트포인트에서 위의 과정을 반복
+      if (message.root !== undefined) {
+        var rootPoints = Object.keys(message.root).reduce( function(acc, cur) {
+          acc[cur] = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
+          return acc;
+        }, {});
+        Object.keys(rootPoints).forEach( function(key) {
+          rootPoints[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
+
+          // message는 자신의 message대신 message.root[key]를 이용
+          rootPoints[key].forEach( function(el) {
+            var childMessage = message.root[key];
+            childMessage.parent = el;
+            methods.AddSubElement(key, childMessage);
+          } );
+        } );
+      }
+
+      // virtual element를 변환
+      ret.forEach( function(el) {
+        if (el.nodeName === "#text") { return; }
+        Array.from(el.getElementsByTagName("virtual")).forEach( function(child) {
+          if (child.nodeName === "VIRTUAL") {
+            var attrs = Array.from(child.attributes);
+            Array.from(child.childNodes).forEach( function(grandChild) {
+              // child elements를 text자리로 이동
+              child.parentElement.insertBefore(grandChild, child);
+              if (grandChild.nodeName === "#text") { return; }
+
+              // attribute를 추가
+              attrs.forEach( function(attr) {
+                if (grandChild.getAttribute(attr.key) !== null) { return; }
+                grandChild.setAttribute(attr.name, attr.value);
+              } );
+            } );
+
+            // text element를 제거
+            child.parentElement.removeChild(child);
           }
-        }    
-      } );
-    }
-  },
-  add   : function(object) {
-    object.cases = [];
-    
-    /* 텍스트를 어절별로 처리 */
-    var processes = new Array(object.text.length);
-    
-    if (object.emotes.length > 0) {                                   // 트위치 이모티콘 처리
-      var emotesData = [];
-      object.emotes.forEach( function(el) {
-        var index = Number(el.split(":")[1].split("-")[0]);
-        
-        emotesData.push( {
-          name : object.text.join(" ").slice(index).split(" ")[0],
-          id   : el.split(":")[0]
         } );
       } );
-      
-      emotesData.forEach( function(el) {
-        object.text.forEach( function(txt, ind, arr) {
-          if (processes[ind] != undefined) { return; }
-          if (txt == el.name) {
-            var size = emotes.sizes[config.emote.size];
-            var uri = emotes.uri.replace("{id}", el.id).replace("{size}", size);
-            arr[ind] = getDom(
-              { uri:uri, name:el.name, emote:{} }, theme.normal.emotes);
-            processes[ind] = "emote";
-          }
-        } );
-      } );
-    }
-    {                                                                 // 색채팅 처리
-      /* 색채팅 여부 체크 */
-      var tail = object.text[object.text.length-1];
-      var cond = object.text && object.text[0] && object.text[0]=="ACTION";
-      cond = cond && tail && (tail.match(/$/)!=null);
-      if (cond) {
-        /* 색채팅 표시 여부 체크 */
-        cond = config.color.meVisible.some( function(el) {
-          if (el == "all") { return true; }
-          return object.badges.some( function(badge) {
-            return (badge.indexOf(el) == 0);
-          } );
-        } );
-        if (!cond) { return; }
-        
-        /* 색채팅 강조 여부 체크 */
-        cond = config.color.meColored.some( function(el) {
-          if (el == "all") { return true; }
-          return object.badges.some( function(badge) {
-            return (badge.indexOf(el) == 0);
-          } );
-        } );
-
-        object.text.shift();
-        processes.shift();
-        object.text[object.text.length-1] = tail.replace(/$/, "");
-        
-        if (cond) {
-          object.cases.push("type-me");
-          object.me = 1;
-        }
-      }
-    }
-    if (Number(object.bits) > 0) {                                    // 응원 메세지
-      if (lowerModule.cheer) {
-        var list = lowerModule.cheer.method.get(object, processes);
-
-        /* 각 어절을 변환 */
-        if (list) {
-          list.forEach( function(el) {
-            var obj = { name:el.name, text:el.value, uri:el.uri };
-            if (config.cheer.moteVisible) { obj.cases = ["type-image"]; }
-            else                          { obj.cases = ["type-text"];  }
-            object.text[el.index] = getDom(obj, theme.normal.cheers);
-            processes[el.index] = "cheer";
-          } );
-        }
-      }
-    }
-    if (lowerModule.orimg && config.orimg) {                          // 전용이미지 처리
-      var list = lowerModule.orimg.method.get(object, processes);
-      
-      if (list) {
-        list.forEach( function(el) {
-          object.text[el.index] = getDom(
-            { id:object.id, uri:el.uri, name:el.name, orimg:{method:el.method} },
-            theme.normal.orimgs
-          );
-          processes[el.index] = "orimg";
-        } );
-      }
-    }
-    if ({
-    }
-
-    
-    /* text 데이터를 문자열로 변환 */
-    object.text = object.text.join(" ");
-    
-
-    /* 텍스트를 전체적으로 처리 */
-    if (lowerModule.twip && !lowerModule.twip.method.apply(object)) { // 트윕 후원 메세지
-      return;
-    }
-    if (!object.text.match(/^[\s]*$/)) {                              // 길이가 0이 아닌 메세지
-      object.cases.push("type-text");
-    }
-    
-    /* DOM생성 및 등록 */
-    var root = document.getElementById((((theme||{}).normal||{}).root||{}).id);
-    if (root) {
-      var struct = JSON.parse(JSON.stringify(theme.normal.struct));
-      if (!struct.variable) { struct.variable = []; }
-      object.cases.forEach( function(el) {
-        struct.variable.push({ type:["data", el], value:"1" });
-      } );
-
-      addRecursive(object, struct, root);
-    } else {
-      message.method.error("loadDataFail", { data:"테마" });
-    }
-  },
-  error : function(key, option) {
-    var object = Object.assign(
-      { text: config.errorText[key] }, config.moderator);
-    
-    if (object.text && option) {
-      Object.keys(option).forEach( function(key) {
-        object.text = object.text.replace("{"+key+"}", option[key]);
-      } );
-    }
-    
-    var root = document.getElementById(theme.error.id);
-    if (root) {
-      addRecursive(object, theme.error.struct, root);
-    } else {
-      /* message.load()가 없어 root가 생성되지 않았을 때 예외처리 */
-      var error = document.createElement("div");
-      Object.assign(error.style, { background:"red", color:"white", fontWeight:"bold" });
-      error.innerHTML = object.text;
-      document.body.appendChild(error);
-    }
+      return ret;
   }
 };
 
 
-/* 하위 모듈 정의 */
-var lowerModule = {
-  emote : null,
-  orimg : null,
-  twip  : null,
-  cheer : null
+/**
+ * 오류 메세지 출력용 기본 메서드
+ * methods.Error에 문제가 발생하였을 때 사용되는 대체품
+ * @param {string} message 출력할 오류 문자열
+ */
+methods.NativeError = function(message)  {
+  var err = document.createElement("div");
+  Object.assign(err.style, {
+    "background" : "red",
+    "color"      : "white",
+    "fontWeight" : "bold",
+
+    "whiteSpace" : "pre-wrap",
+    "wordBreak"  : "keep-all"
+  } );
+  err.innerHTML = message;
+
+  document.body.appendChild(err);
 };
 
 
-/* 정의된 엘리먼트 적용 */
-module.exports = new function() {
-  this.method = method;
-  this.module = lowerModule;
+/**
+ * 타입에 따른 메세지 출력 메서드
+ * @param {Object} message medthods.Add의 message
+ * @param {string} type 출력할 메세지의 타입(normal, error)
+ * @param {Object} config 출력할 메세지를 담당하는 설정 부분
+ */
+var AddType = function(message, type, config) {
+  var lower = type.toLowerCase();
+  var capital = lower[0].toUpperCase() + lower.slice(1);
+
+  var root = GetRootEntry(capital);
+  if (!Array.isArray(data.nodes[lower])) { data.nodes[lower] = []; }
+
+  // 메세지를 출력
+  var elements = methods.AddSubElement(
+    `${capital}Message`,
+    Object.assign({ "parent":root }, message)
+  );
+
+  // 메세지 삭제시간을 적용
+  data.nodes[lower].push(elements);
+  if (config.Timeout > 0) {
+    setTimeout( function() {
+      var index = data.nodes[lower].indexOf(elements);
+      if (index >= 0) {
+        data.nodes[lower].splice(index, 1)[0].forEach( function(el) { root.removeChild(el); } );
+      }
+    }, config.Timeout * 1000);
+  }
+
+  // 메세지가 많을 경우 FIFO로 element를 제거
+  if (data.nodes[lower].length > Math.min(config.Maximum, 100)) {
+    data.nodes[lower].shift().forEach( function(el) { root.removeChild(el); } );
+  }
+};
+
+
+/**
+ * 오류, 디버그 메세지 출력 메서드
+ * data.theme의 TemplateErrorMessage에 따라 메세지를 출력한다
+ * try-catch문 이용해 출력 실패시 NativeError로 재시도
+ * @param {string} message 출력할 오류의 종류
+ * @param {string} option 출력할 문자열에 추가할 수 있는 값
+ */
+methods.Error = function(message, option) {
+  try {
+    var str = config.Error[message];
+
+    if (message === "Module_Success_Connect") {
+      // 모듈 로드 완료 메세지 처리
+      if (config.Error[message] !== true) { return; }
+      str = "";
+      (data.theme["Description"]||[]).forEach( function(el) {
+        str += el.outerHTML || el.wholeText;
+      } );
+    }
+
+    // 문자열이 공백일 경우 더 이상 처리하지 않음
+    if (str === "") { return; }
+
+    // 상세표시 설정이 되어있을 경우 옵션들을 개행 후 배열시킴
+    if (config.Error.Detailed !== false && typeof option === "string") {
+      str += "\n" + option;
+    }
+
+    // 메세지 추가
+    AddType({ "text":str, "attr":{"type":message} }, "Error", config.Error);
+  } catch(err) {
+    if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
+    else { methods.NativeError(`${message}\n\n${err}`); }
+  }
+};
+
+
+/**
+ * 일반 메세지 출력 메서드
+ * data.theme의 TemplateNormalMessage에 따라 메세지를 출력한다
+ * @param {Object} message 출력할 메세지의 정보
+ * @param {string} message.name 메세지를 보낸 유저의 이름
+ * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
+ * @param {string} message.text 보낸 메세지의 문자열
+ */
+methods.Add = function(message) {
+  // 메세지를 어절별로 분해
+  var text = message.text.split(" ");
+  var done = new Array(text.length);
+
+
+  // 하위 모듈 처리
+  message.Emote = {
+    "index" : message.emotes,
+    "only"  : message["emote-only"] === "1"
+  };
+  delete message.emotes;
+  delete message["emote-only"];
+  this.Module.emote.Replace(message.Emote, text, done);
+  this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+
+  message.Color = {
+    "name"   : message.name,
+    "badges" : message.badges,
+    "color"  : message.color
+  };
+  delete message.color;
+  this.Module.color.Replace(message.Color, text, done);
+  this.Module.color.Set(message.Color, message);        // 색 처리
+
+  message.Cheer = Number(message.bits||0);
+  delete message.bits;
+  this.Module.cheer.Replace(message.Cheer, text, done);
+  this.Module.cheer.Set(message.Cheer, message);        // 응원 처리
+
+  message.Orimg = { "name":message.name };
+  this.Module.orimg.Replace(message.Orimg, text, done); // 전용 이미지 처리
+
+  message.Twip = {
+    "isTwip" : message.name === "Twipkr"
+  };
+  this.Module.twip.Replace(message.Twip, text, done);
+  this.Module.twip.Set(message.Twip, message);          // 트윕 후원 처리
   
-  return this;
-}();
+  // 분해한 메세지 병합
+  message.text = text.join(" ");
+
+  // 나머지 하위 모듈 처리
+
+  // 메세지 추가
+  AddType(message, "Normal", config.Message);
+};
+
+
+/**
+ * 뱃지, 하위 모듈 데이터 로드 및 연결 메서드
+ * 유저 Id가 식별되어야하므로 IRC에 연결된 후 호출됨
+ */
+methods.Connect = function() {
+  // Promise.all에 쓰일 각 Promise 정의
+  var func = function(uri) {
+    return function(resolve) {
+      api.Get({ "uri":uri }).then(
+        function(r) { resolve([true, JSON.parse(r)]); },
+        function(r) { resolve([false, r]); }
+      );
+    };
+  };
+
+  // 유저 뱃지와 글로벌 뱃지를 모두 로드
+  Promise.all( [
+    new Promise( func(shared.Message.GlobalUri) ),
+    new Promise( func(shared.Message.ChannelUri.replace(/{id}/g, shared.Id)) )
+  ] ).then( function(results) {
+    // 글로벌 뱃지가 로드
+    if (results[0][0] === false) {
+      methods.Error("Message_Fail_Badge", results[0][1]);
+      return;
+    }
+    Object.assign(data.badges, results[0][1]["badge_sets"]);
+
+    // 유저 뱃지가 로드
+    // 실패했을 때 혹은 유저 뱃지가 존재하지 않으면 그냥 글로벌 뱃지만 사용
+    if (results[1][0] === true) {
+      Object.assign(data.badges, results[1][1]["badge_sets"]);
+    }
+
+    done.Done("message");
+  } );
+
+  // 하위 모듈 데이터 로드
+  this.Module.cheer.Connect();
+  this.Module.orimg.Connect();
+  this.Module.twip.Connect();
+};
+
+
+/**
+ * 모듈 Load 메서드
+ * main.js에서 연결된 이후에 호출됨
+ * @param {Object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {
+  done = uniformData.Done;
+
+  api = uniformData.Api;
+  config = uniformData.Data.config;
+  shared = uniformData.Data.shared;
+
+  Object.assign(data.theme, methods.ParseTheme(uniformData.Theme));
+};
+
+
+/**
+ * 모듈 오브젝트
+ * 전달받은 메서드로 모듈 내부 메서드와 데이터를 자기자신과 연결하여 반환
+ */
+module.exports = function(InitModule) { return InitModule.call({}, methods, data); };

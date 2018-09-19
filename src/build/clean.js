@@ -1,35 +1,51 @@
+/**************************************
+ * 파일 정리 자동화 스크립트          *
+ *                                    *
+ * build.js를 통해 생성된 파일을 제거 *
+ *                                    *
+ **************************************/
+
+// 빌드 옵션 파일 로드
+var BUILD_OPTION = require("./option.json");
+
+// 공통으로 사용되는 라이브러리를 로드
 var fs = require("fs");
-var path = require("path");
-var childProcess = require("child_process");
 
-if (fs.existsSync("./client.html")) { fs.unlink("./client.html", function(){} ); }
 
-var sandbox = path.resolve(process.env.npm_package_config_sandbox).replace(/\\/g, "/");
-
-var upward = function(path) {
-  var temp = path.split("/");
-  temp.pop();
-  path = temp.join("/");
-  return path;
+/** 
+ * build.js의 WriteScript로 생성된 파일을 제거
+ */
+var RemoveWrittenScript = function() {
+  var target = BUILD_OPTION.HTML_TARGET_FILE;
+  if (fs.existsSync(target)) { fs.unlink(target, function(){} ); }
 };
 
-var reculsive = function(path) {
-  childProcess.exec("rmdir \""+path+"\"", function(err, out) {
-    if (err == null) {
-      reculsive(upward(path));
-    }
-  } ); 
+
+/**
+ * biuld.js의 ExecuteBrowser로 생성된 파일을 제거
+ */
+var RemoveBrowserSandbox = function() {
+  var path = require("path");
+  var child = require("child_process");
+  var sandbox = path.posix.join(
+    process.env.npm_package_config_test,
+    BUILD_OPTION.CHROME_SANDBOX_DIRECTORY
+  );
+
+  // 샌드박스 내부 파일 제거 명령어
+  var cmd1 = "rm -r \"" + sandbox + "\"";
+  // 샌드박스 외부 빈 디렉터리 제거 명령어
+  var cmd2 = "rmdir -p \"" + path.join(sandbox, "..") + "\"";
+  // 명령어 실행
+  child.exec(cmd1, (err) => { if(err===null) { child.exec(cmd2),()=>{} } } );
 };
 
-while (!fs.existsSync(sandbox)) {
-  sandbox = upward(sandbox);
-}
 
-childProcess.exec("rm -r \""+sandbox+"\"", function(err, out) {
-  if (err == null) {
-    var temp = sandbox.split("/");
-    temp.pop();
-    sandbox = temp.join("/");
-    reculsive(sandbox);
-  }
-} );
+/**
+ * 메인 코드 블럭
+ * 빌드시 생성됐던 파일을 처리
+ */
+(function() {
+  RemoveWrittenScript();
+  RemoveBrowserSandbox();
+}());

@@ -1,0 +1,167 @@
+<!--
+  template#style에는 document.head에 추가할 스타일을,
+  나머지 template에는 각각의 경우에 생성할 Node Tree를 입력한다.
+
+  virtual element는 child elements에 attribute를 추가할 때 이용
+-->
+<template id="Description">
+  <!-- 모듈 로드 완료시 표시할 메세지 -->
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAB4CAIAAAA48Cq8AAAACXBIWXMAADXUAAA11AFeZeUIAAADV0lEQVR4nO3dTU7kMBRF4dBiA70MFtU7Ycge2U4PSkIIFVWJ7fN8nZxv1hJUzPMhqR+Uftn+/tuk0f7MXoDOybCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCFeZy+gz+f7ky94+yhZx0NPF3lTuVR+bi93bry2cxAjDt9i//J+KFtt8wq/G77a2rmtE9aQ3drgNY9a5Jf+1U6a2yJhBW7YD8NX+KVnqfPmFv8cC9qw28MOyYtLqsfsuWW/KqT3rP/xL1XVkccPDqtmz3qOcs2q9h0lNazKPWs71pWr2nGsyLDq9+zoEa3q2RHzwsrcs+8yVxi2qrywmr19VLwyD9u/AZi5hb3d0LBtP4by/Z8NFzj0nbk9D172hA+eW1JYR3+ep/v09jH4BNP2aIdibdjgyLkteyncuVtzP4TuvMp0fvtvjznwy363bFj7HZrRg9/U4SeGcH1ziwnr0LatvmcDpc4tJqyTuXz6C4bVsGejroZLq51bRlj5e5l5xQmeW0ZYOh3DEsKwhDCs0S7/evDmMmG5321a55b0WeHpdb6IW+p34zJnLNUyLCEMSwjDEsKwhLhMWMEfq0Vrndtlwipjwdu2GZYgvkFa6O47nCc9w3nGEiIjrKi/8Ly7mMyPU4LnlhEWrfhyc5qrW8cPco2wVC4mLO6sPuXP1ctOWqlziwnrqPp7eGQ+zTqqam7LhrXt+OHnPtf5fA99slUyt6SwGk4Jv21e26buuVvGUQVtRc6t73bczR7MYtZv+c7tmXgSerzCsLklnbGWcI5nWry8sKbsXPMtrHKEzS0vrK18RpmhNEiaW2RYW+GM2g4U22LM3FLD2kpmlHa7vSEy5hYc1kbOaFQWV2tr99zy3m64a+ySiLlP+ZuLp+bNbZGwbvoXRp9gMv/7uxlzWyqsL/n3me2ZIbfawrndC0vqlv3kXcsyLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEuI/yJL8XiuTiLZAAAAAElFTkSuQmCC" /><br />
+  기본 테마로 모든 로드가 완료되었습니다.
+</template>
+
+<template id="Style">
+  <!-- 스타일 -->
+  <style type="text/css">
+#Root { position:absolute; bottom:0; left:0; right:0; }
+.NormalMessage {
+  margin:2px 0; padding:3px;
+  background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.6);
+}
+#ErrorRoot { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.6); }
+.ErrorMessage { margin:2px 0; padding:3px; }
+
+.NormalMessage .NameBadges {
+  display:flex;
+  background:linear-gradient(to right, rgba(160,160,160,.7), rgba(0,0,0,0));
+}
+.NormalMessage .Name {
+  display:flex; flex:1; margin:auto; 
+  text-shadow:    0  1px 0 black,  1px  1px 0 black,
+                1px    0 0 black,  1px -1px 0 black,
+                  0 -1px 0 black, -1px -1px 0 black,
+               -1px    0 0 black, -1px  1px 0 black;
+  color:var(--data-color);
+  padding:1px;
+}
+.NormalMessage .Badges { display:flex; }
+.NormalMessage .Badges img { 
+  margin:auto 1px; height:18px;
+  border:1px solid rgba(255,255,255,.6);
+}
+
+.Text {
+  color:white; padding:2px 1px 1px; text-align:right;
+  word-break: keep-all; word-wrap: break-word;
+}
+[data-color-chat="1"] .Text {
+  color:var(--data-color);
+}
+.Cheer {
+  color:white; padding:3px; text-align:center;
+}
+
+.Emote { width:56px; }
+[data-emote-only="1"] .Text { text-align:center; }
+
+.Cheermote {
+  display:inline-block; padding:1px 3px; margin:-1px;
+  border:1px solid rgba(255,255,255,.6);
+}
+.Cheermote .CheerImage { height:1rem; }
+  </style>
+</template>
+
+
+<template id="NormalRoot">
+  <!-- 일반 메세지 최상위 Element -->
+  <div theme-type="Root" id="Root" class="Root"></div>
+</template>
+
+<template id="ErrorRoot">
+  <!-- 디버그 메세지 최상위 Element -->
+  <div theme-type="Root" id="ErrorRoot" class="Root"></div>
+</template>
+
+<template id="NormalMessage">
+  <!-- NormalRoot의 Root에 추가되는 일반 메세지 템플릿
+    Root   : 최상위 element.
+      data-emote-only="1" data-color-chat="1" data-cheer="1"이 추가될 수 있음
+    Name   : 유저 이름. 스타일 --data-color:"[유저 색상]"이 추가될 수 있음
+    Badges : 뱃지 목록. 각 뱃지는 data-type="[이름]" data-tier="[등급]"이 포함된 img element
+    Text   : 메세지 문자열. 처리된 이모티콘 등도 포함됨
+  -->
+  <div theme-type="Root" class="Message NormalMessage">
+    <div class="NameBadges">
+      <span theme-type="Name" class="Name"></span>
+      <span theme-type="Badges" class="Badges"></span>
+    </div>
+    <virtual theme-type="TwipHead"></virtual>
+    <virtual theme-type="CheerHead"></virtual>
+    <div theme-type="Text" class="Text"></div>
+  </div>
+</template>
+
+<template id="ErrorMessage">
+  <!-- ErrorRoot의 Root에 추가되는 디버그 메세지 템플릿
+    Root : 최상위 element. data-type="[오류 종류]"가 추가
+    Text : 메세지 문자열.
+  -->
+  <div theme-type="Root" class="Message ErrorMessage">
+    <div theme-type="Text" class="Text"></div>
+  </div>
+</template>
+
+<template id="Emote">
+  <!-- NormalMessage의 Text 내부에 추가되는 일반, 구독자 전용 이모티콘 템플릿
+    Root  : 최상위 element. data-type="[이름]" date-id="[아이디]"가 추가
+    Image : 이모티콘 이미지가 img element로 추가
+    Text  : 이미지를 표현하지 않을 경우 사용. 변환 이전 문자열
+  -->
+  <virtual theme-type="Root" class="Emote">
+    <virtual theme-type="Image"></virtual>
+  </virtual>
+</template>
+
+<template id="CheerHead">
+  <!-- NormalMessage의 CheerHead 내부에 추가되는 응원 메세지 헤더
+    Root  : 최상위 element. data-value="[응원 금액]"이 추가
+    Name  : 응원한 유저 이름
+  -->
+  <div theme-type="Root" class="Cheer">
+    ☆ <Virtual theme-type="Name"></Virtual>님
+    <Virtual theme-type="Text"></Virtual>비트 후원 감사합니다! ☆
+  </div>
+</template>
+
+<template id="Cheermote">
+  <!-- NormalMessage의 Text 내부에 추가되는 응원 이모티콘 템플릿
+    Root  : 최상위 element. data-type="[종류]" data-tier="[등급]" data-value="[금액]"이 추가
+    Image : 응원 이모티콘 이미지가 img element로 추가
+    Text  : 응원 금액 문자열
+  -->
+  <span theme-type="Root" class="Cheermote">
+    <virtual theme-type="Image" class="CheerImage"></virtual>
+    <span theme-type="Text" class="CheerValue"></span>
+  </span>
+</template>
+
+<template id="Orimg">
+  <!-- NormalMessage의 Text 내부에 추가되는 전용 이미지 템플릿
+    Root  : 최상위 element. data-type="[이름]"이 추가
+    Image : 전용 이미지가 img element로 추가
+    Text  : 변환 이전 문자열.
+  -->
+  <virtual theme-type="Root" class="Orimg">
+    <virtual theme-type="Image"></virtual>
+  </virtual>
+</template>
+
+<template id="TwipHead">
+  <!-- NormalMessage의 TwipHead 내부에 추가되는 트윕 후원 메세지 헤더
+    Root  : 최상위 element. data-value="[후원 금액]"이 추가
+    Name  : 후원한 유저 이름
+  -->
+  <div theme-type="Root" class="Cheer">
+    ☆ <Virtual theme-type="Name"></Virtual>님
+    <Virtual theme-type="Text"></Virtual>원 후원 감사합니다! ☆
+  </div>
+</template>
+
+<template id="TwipText">
+  <!-- NormalMessage의 Text 내부를 대체하는 후원 텍스트 템플릿
+    Root : 최상위 element. data-name="[후원자]" data-value="[금액]"이 추가
+    Text : 후원 메세지
+  -->
+  <virtual theme-type="Text"></virtual>
+</template>

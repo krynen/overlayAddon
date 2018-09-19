@@ -1,63 +1,117 @@
-/* 모듈 내부데이터 설정 */
-var id     = 115581168;       // Twipkr 계정의 아이디
-var config = null;            // load()를 통해 uniformData와 연결
+/****************************************************************
+ ****************************************************************/
 
-
-/* 데이터 기본값(기본 설정) */
+// 모듈 인터페이스
+var methods = {};
 var data = {
-  list    : ["{닉네임}", "{금액}", "{메시지}"],
-  indexes : [],
-  regExp  : null
-};
-
-
-/* 모듈 메서드 정의 */
-var method = {
-  load  : function(uniformData) {
-    config = uniformData.config.data.message.module.twip;
-    
-    var replacer = new RegExp("(?:" + data.list.join(")|(?:") + ")", "g");
-    data.indexes = config.originalFormat.match(replacer);
-    var format = config.originalFormat.replace(/[-\/\\^$*+?.()|[\]]/g, "\\$&");
-    data.regExp = new RegExp(format.replace(replacer, "([^\\u0001]*)"));
-  },
-  apply : function(object) {
-    if (object.id != id) { return true; }  // 처리하지 않음
-    if (!config.visible) { return false; } // 표시하지 않음
-    
-    var matches = object.text.match(data.regExp);
-    if (matches) {
-      matches.shift();
-      if (data.indexes.indexOf("{닉네임}")!=-1) {
-        var ind = data.indexes.indexOf("{닉네임}");
-        
-        /* 익명 처리 */
-        if (matches[ind] == "") { matches[ind] = "익명"; }
-        
-        /* 이름 변조 */
-        if (config.replaceName) {
-          object.name = matches[ind];
-        }
-      }
-      
-      /* 텍스트 변조 및 헤더 추가 */
-      object.text = config.textFormat;
-      object.header = config.accentFormat;
-      object.cases.push("type-accent", "type-donation");
-      matches.forEach( function(el, ind) {
-        object.text = object.text.replace(data.indexes[ind], el);
-        object.header = object.header.replace(data.indexes[ind], el);
-      } );
-    }
-    return true;
+  rule : {
+    expression : null,
+    result : []
   }
 };
 
+// 포인터 정의
+var config = null;
+var shared = null;
+var parent = null;
 
-/* 정의된 엘리먼트 적용 */
-module.exports = new function() {
-  this.method = method;
-  this.data = data;
 
-  return this;
-}();
+/**
+ * 상위 모듈의 메세지 정보를 설정하고 헤더를 추가하는 메서드
+ * @param {Object} message Replace()와 동일한 message
+ * @param {Object} parentMessage parent.AddSubElement()의 message
+ */
+methods.Set = function(message, parentMessage) {
+  if (message.isTwip !== true) { return; }
+  if (data.rule.expression === null) { return; }
+
+  if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
+  parentMessage.attr["twip"] = "1";
+
+  if (parentMessage.root === undefined) { parentMessage.root = {}; }
+  parentMessage.root.TwipHead = {
+    "attr"   : { "value": message.value },
+    "name"   : message.name,
+    "text"   : message.value
+  };
+};
+
+
+/**
+ * 유저 색상을 가져오고 색채팅 권한이 있는지 판별
+ * @param {Object} message 출력할 메세지의 색상 정보
+ * @param {string} message.isTwip 트윕 계정 여부
+ * @param {string[]} text 어절별로 분리된 메세지 문자열
+ * @param {bool[]} done 각 어절의 처리 여부
+ */
+methods.Replace = function(message, text, done) {
+  // 트윕의 메세지가 아니면 처리 종료
+  if (message.isTwip !== true) { return; }
+  // 트윕 관련 설정을 하지 않았다면 처리 종료
+  if (data.rule.expression === null) { return; }
+  var match = text.join(" ").match(data.rule.expression);
+  
+  ["name", "value", "text"].forEach( function(el) {
+    message[el] = match[data.rule.result.indexOf(`{${el}}`)+1];
+  } );
+
+  while(text.length > 0) {
+    text.pop();
+    done.pop();
+  };
+
+  // 기존 텍스트를 템플릿 텍스트로 대체
+  done.push(true);
+  var element = document.createElement("span");
+  parent.AddSubElement(
+    "TwipText",
+    {
+      "parent" : element,
+      "attr"   : { "name":message.name, "value":message.value },
+      "text"   : message.text
+    }
+  );
+  text.push(element.innerHTML);
+};
+
+
+/**
+ * 추가 데이터 로드 및 연결 메서드
+ * 설정값을 사용하므로 추가 설정 로드 후 호출됨
+ */
+methods.Connect = function() {
+  // 트윕 설정으로부터 정규 표현식을 추출
+  var format = (config.Message.Twip||{}).Format; 
+  if (typeof format !== "string") { return; }
+
+  // 포맷 문자열에서 치환자를 검색해 각 치환자의 종류를 저장하고
+  // 해당 치환자에 모든 문자가 대응되는 정규표현식을 작성
+  var replacer = new RegExp("(?:{text})|(?:{name})|(?:{value})", "g");
+  (format.match(replacer)||[]).forEach( function(el) { data.rule.result.push(el); } );
+  if (format === "") { return; }
+
+  data.rule.expression = new RegExp(
+    format
+      .replace(/[-/\\^$*+?.()|[\]]/g, "\\$&")
+      .replace(replacer, "(.*)")
+  );
+};
+
+
+/**
+ * 모듈 Load 메서드
+ * 포인터를 메인 모듈과 연결
+ * @param {object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {
+  config = uniformData.Data.config;
+  shared = uniformData.Data.shared;
+  parent = uniformData.Message;
+};
+
+
+/**
+ * 모듈 오브젝트
+ * 전달받은 메서드로 모듈 내부 메서드와 데이터를 자기자신과 연결하여 반환
+ */
+module.exports = function(InitModule) { return InitModule.call({}, methods, data); };

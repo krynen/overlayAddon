@@ -1,0 +1,27 @@
+{
+  "Id"     : null,
+
+  "Data"   : {
+    "SessionStorageFormat" : "^data\\/config\\/*"
+  },
+
+  "Irc"    : {
+    "Uri"   : "wss://irc-ws.chat.twitch.tv:443",
+
+    "Caps"  : [
+      "twitch.tv/tags",
+      "twitch.tv/commands",
+      "twitch.tv/membership"
+    ]
+  },
+
+  "Message" : {
+    "ColorChatPrefix" : "ACTION ",
+    "ColorChatPostfix" : "",
+
+    "ChannelUri" : "https://badges.twitch.tv/v1/badges/channels/{id}/display",
+    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display",
+    "EmoteUri"   : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0",
+    "CheerUri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
+  }
+}

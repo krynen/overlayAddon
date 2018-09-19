@@ -1,68 +1,147 @@
-/* 모듈 내부데이터 설정 */
-var config = null;
-var cheers = null;            // load()를 통해 uniformData와 연결
+/*************************************************
+ * 응원 하위모듈                                 *
+ * 응원(트위치 자체 후원)이 포함된 메세지를 처리 *
+ * 어절별로 분해된 텍스트를 받아 내용을 수정함   *
+ *                                               *
+ *************************************************/
+
+// 모듈 인터페이스
+var methods = {};
+var data = {
+  list : {}   // cheermotes 목록
+};
+
+// 포인터 정의
+var api     = null;
+var config  = null;
+var done    = null;
+var shared  = null;
+var parent  = null;
 
 
-/* 모듈 메서드 정의 */
-var method = {
-  load        : function(uniformData) {
-    config = uniformData.config.data.message.cheer;
-    cheers = uniformData.shared.data.cheers;
-  },
-  get         : function(object, processes) {
-    /* 헤더를 추가 */
-    if (config.accentFormat && config.accentFormat.length>0) {
-      object.cases.push("type-accent", "type-donation");
-      object.header = config.accentFormat;
-      object.header = object.header.
-        replace("{name}", object.name).
-        replace("{bits}", object.bits);
-    }
-    
-    /* 각 비트 어절을 추출 */
-    var list = [];
-    object.text.forEach( function(el, ind, arr) {
-      if (processes[ind] != undefined) { return; }      // 이미 처리된 어절 스킵
-      if (el.match(/\d+$/) == null)    { return; }      // 숫자로 끝나지 않는 어절 스킵
-      
-      var value = Number(el.match(/\d+$/)[0]);          // 해당 비트 어절의 금액
-      var prefix = el.replace(value, "").toLowerCase(); // 비트 어절의 영문자
-      
-      /* 데이터에서 어절을 탐색 */
-      var detected = cheers.list.every( function(cheer, index) {
-        if (cheer.prefix.toLowerCase() == prefix) {
-          
-          /* 탐색한 데이터에서 URI를 추출 */
-          var uri = "";
-          cheers.list[index].tiers.every( function(tier) {
-            if (value >= tier["min_bits"]) {
-              uri = tier.images.light.animated[1];
-              return true;
-            }
-            return false;
-          } );
-          
-          list.push({ index:ind, name:prefix, value:value, uri:uri });
-          return false;
-        }
-        return true;
-      } );
-    } );
-      
-    /* 비트 어절의 인덱스와 금액, 인덱스에 해당하는 uri의 목록을 반환 */
-    if (list.length != 0) { return list; }
-    else                  { return null; }
-  },
-  setDomValue : function(object, value) {
-    /* message의 하위모듈간 포맷을 맞추기 위한 더미 메서드 */
-    return value;
+/**
+ * 상위 모듈의 메세지 정보를 설정하고 헤더를 추가하는 메서드
+ * @param {Object} message Replace()와 동일한 message
+ * @param {Object} parentMessage parent.AddSubElement()의 message
+ */
+methods.Set = function(message, parentMessage) {
+  if (message === 0) { return; }
+  if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
+  parentMessage.attr["cheer"] = "1";
+
+  if (parentMessage.root === undefined) { parentMessage.root = {}; }
+  parentMessage.root.CheerHead = {
+    "attr"   : { "value": message },
+    "name"   : parentMessage.name,
+    "text"   : message
+  };
+};
+
+
+/**
+ * 응원 문자열 대체 메서드
+ * @param {number} message 출력할 메세지의 정보 (응원 금액)
+ * @param {string[]} text 어절별로 분리된 메세지 문자열
+ * @param {bool[]} done 각 어절의 처리 여부
+ */
+methods.Replace = function(message, text, done) {
+  if (message === 0) { return; }
+
+  // 응원 어절을 추출해 변환
+  text.forEach( function(el, ind) {
+    if (done[ind] === true) { return; }              // 이미 처리된 어절 무시
+
+    var match = el.match(/^(\D+)(\d+)$/);
+    if (match === null) { return; }                  // 숫자로 끝나지 않는 어절 무시
+
+    var prefix = match[1].toLowerCase();
+    if (data.list[prefix] === undefined) { return; } // 응원 어절이 아닌것같으면 무시
+
+    // 티어 추출
+    var value = Number(match[2]);
+    var index = data.list[prefix].reduce( function(acc, cur, ind) {
+      if (cur["min_bits"] < value) { return ind; }
+      return acc;
+    }, 0);
+
+    // 이미지 URI 추출
+    var image = data.list[prefix][index].images.light.animated;
+    var key = Object.keys(image).reduce( function(acc, cur) {
+      var num = Number(cur);
+      if (num > acc) { return num; }
+      else { return acc; }
+    }, 0);
+
+    done[ind] = true;
+    var element = document.createElement("span");
+    parent.AddSubElement(
+      "Cheermote",
+      {
+        "parent" : element,
+        "attr"   : { "type": prefix, "tier":data.list[prefix][index].id, "value":value },
+        "image"  : image[key],
+        "text"   : value
+      }
+    );
+    text[ind] = element.innerHTML;
+  } );
+
+  return;
+};
+
+
+/**
+ * 추가 데이터 로드 및 연결 메서드
+ * 유저 Id가 식별되어야하므로 IRC에 연결된 후 호출됨
+ */
+methods.Connect = function() {
+  if (config.Key !== null && config.Key.length > 0) {
+    api.Get( {
+      "uri"    : shared.Message.CheerUri.replace(/{id}/g, shared.Id),
+      "header" : [{ "key":"Client-ID", "value":config.Key  }]
+    } ).then(
+      function(res) {
+        var list = JSON.parse(res).actions;
+        // 응원 모듈의 data.list에 로드된 데이터를 추가
+        Object.assign(
+          data.list,
+          list.reduce( function(acc, cur) {
+            var prefix = cur.prefix;
+            acc[prefix.toLowerCase()] = cur.tiers;
+
+            return acc;
+          }, {})
+        );
+
+        done.Done("cheer");
+      },
+      function(err) { parent.Error("Message_Fail_Cheer", err); }
+    );
+  } else {
+    // 클라이언트 아이디가 입력되지 않으면 응원 모듈 기능을 비활성화
+    parent.Error("Message_Wrong_Cheer");
+    methods.Replace = function() {};
   }
 };
 
 
-/* 정의된 엘리먼트 적용 */
-module.exports = new function() {
-  this.method = method;
+/**
+ * 모듈 Load 메서드
+ * 포인터를 메인 모듈과 연결
+ * @param {object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {
+  done = uniformData.Done;
 
-  return this;
-}();
+  api     = uniformData.Api;
+  config  = uniformData.Data.config;
+  shared  = uniformData.Data.shared;
+  parent  = uniformData.Message;
+};
+
+
+/**
+ * 모듈 오브젝트
+ * 전달받은 메서드로 모듈 내부 메서드와 데이터를 자기자신과 연결하여 반환
+ */
+module.exports = function(InitModule) { return InitModule.call({}, methods, data); };

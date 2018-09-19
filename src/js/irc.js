@@ -1,236 +1,250 @@
-/* 모듈 내부데이터 설정 */
-var ws      = null;           // 웹소켓 정의
-var message = null;
+/****************************************************
+ * IRC 모듈                                         *
+ * 트위치 IRC 채팅 서버에 접속해 채팅 내용을 불러옴 *
+ * 불러온 내용을 정리해 메세지 모듈에 전달          *
+ *                                                  *
+ ****************************************************/ 
+
+// 모듈 인터페이스
+var methods = {};
+var data = {
+  socket : null   // IRC에 접속할 웹소켓. 생성자를 사용하므로 그 전까진 참조할 수 없다
+};
+
+// 포인터 정의
 var config  = null;
 var shared  = null;
-var irc     = null;           // load()를 통해 uniformData와 연결
+var message = null;
 
 
-/* 내부 메서드 정의 */
-var send = function(txt) {    // ws.send()에 CRLF 추가
-  ws.send(txt + String.fromCharCode(13) + String.fromCharCode(10));
-};
-var removePrefix = function(target, num) {
-  target.splice(0, num);
-  if (target.length != 0) {
-    target[0] = target[0].replace(/^:/, "");
-    return target;
-  }
-  else { return []; }
+/**
+ * 웹소켓에 메세지 전송
+ * @param {...string} text
+ */
+var send = function(text) {
+  for (var i=0; i<arguments.length; ++i) {
+    data.socket.send(arguments[i] + "\r\n");
+  };
 }
 
-
-/* 모듈 메서드 정의 */
-var method = {
-  load       : function(uniformData) {
-    message = uniformData.message.method;
-    config  = uniformData.config.data;
-    shared  = uniformData.shared.data;
-    irc     = uniformData.irc;
-  },
-  connect    : function() {
-    /* 채널 이름 로드 및 예외처리 */
-    var channel = config.channel.name;
-    if (typeof channel!="string" || channel.match(/^[A-Za-z0-9_]+$/)==null) {
-      message.error("ircWrongChannel", { channel:channel });
-      return;
-    }
-
-    /* 채널 아이디 데이터를 초기화 */
-    shared.channel.id = null;
-    
-    /* 웹소켓을 열고 초기 메세지 발송 설정 */
-    try { ws = new WebSocket(shared.irc.uri); }
-    catch(event) {
-      message.error("ircConnectFail", { error:event.message });
-      return;
-    }
-    ws.onopen = function() {      
-      send("PASS " + shared.irc.pass);
-      send("NICK " + shared.irc.nick);
-      send("CAP REQ :" + shared.irc.caps.join(" "));
-      send("JOIN #" + channel);
-    };
-    
-    ws.onmessage = function(event) {
-      var lines = event.data.toString().split(/\r\n|\r|\n/);
-      lines.forEach( function(line) {
-        if (!line.match(/^[\s]*$/)) { irc.method.response(line); }
-      } );
-    };
-    
-    ws.onclose = function(event) { message.error("ircClosed", { error:event.code }); }
-    ws.addEventListener("close", irc.method.connect);
-  },
-  disconnect : function() {
-    if(ws.removeEventListener) {
-      ws.removeEventListener("close", irc.method.connect);
-    }
-    if(ws.close) {
-      ws.close();
-    }
-  },
-  response   : function(line) {
-    var arguments = line.split(/\s/);
-    
-    /* 핑퐁을 통해 접속 유지 */
-    if (arguments[0] == "PING") {
-      send("PONG");
-      return;
-    }
-    
-    var prefix = arguments[0][0];
-    arguments[0] = arguments[0].substring(1);
-    
-    /* 첫글자가 :인 IRC 기본 프로토콜을 포함한 메세지 */
-    if (prefix == ":") {
-      switch(arguments[1]) {
-      case "001":
-      case "002":
-      case "003":
-      case "004":
-      case "375":
-      case "372":
-      case "376": 
-      case "CAP":
-      case "366":                           // 접속시 고정 표시 메세지
-      case "JOIN":
-      case "PART":                          // 유저의 참가 및 퇴장
-      case "MODE":                          // 참가 및 퇴장 유저가 매니저인 경우
-      case "353":                           // 접속시 유저 목록
-      case "HOSTTARGET":                    // 타 채널로 호스팅(중계)
-        break;
-        
-      case "NOTICE":                        // 트위치 서버 문제로 접속이 불가능할 경우(Error logging in)
-        uniformData.error("ircNotice", { error:text });
-        break;
-        
-      default:
-        uniformData.error("ircWrongMessage", { notice:arguments[1] });
-        break;
-      }
-      
-      return;
-    }
-    
-    /* 첫글자가 @인 Twitch-specific commands를 포함한 메세지 */
-    if (prefix == "@") {
-      subArgs = arguments.shift().split(";");
-      for(var i=subArgs.length-1; i>=0; --i) {
-        subArgs[subArgs[i].split("=")[0]] = subArgs[i].split("=")[1];
-        subArgs.splice(i);
-      }
-      subArgs = Object.assign({}, subArgs);
-
-      /* object 기본 구성 */
-      var object = {
-        id     : Number(subArgs["user-id"]),
-        name   : subArgs["display-name"],
-        badges : subArgs["badges"],
-        color  : subArgs["color"],
-        emotes : subArgs["emotes"],
-        bits   : subArgs["bits"]
-      };
-      if ((object.badges||{}).length||0 > 0) { object.badges = object.badges.split(","); }
-      else                                   { object.badges = [] }
-      if (object.bits == null) { object.bits = "0"; }
-      if ((object.emotes||"") != "") { object.emotes = object.emotes.split("/"); }
-      else                           { object.emotes = []; }
-      
-      
-      switch(arguments[1]) {
-      case "ROOMSTATE":                     // 채널 접속 및 방 상태 변경 등
-        /* 해당 메세지로 첫 접속을 감지 */
-        if (!shared.channel.id && subArgs["room-id"]) {
-          shared.channel.id = Number(subArgs["room-id"]);
-          irc.dispatchEvent(new Event("connect"));
-        }
-        break;
-        
-      case "PRIVMSG":                       // 일반 메세지 수신
-        object.text = removePrefix(arguments, 3);
-        message.add(object);
-        break;
-        
-      case "CLEARCHAT":                     // 채팅 삭제나 유저 차단
-        if (subArgs["ban-reason"] || subArgs["ban-duration"]) {
-          /* 유저 차단 */
-          // command.ban(subArgs["target-user-id"]);
-        } else {
-          /* moderator에 의한 채팅 삭제 */
-          // command.clear();
-        }
-        break;
-        
-      case "USERNOTICE":                    // 유저 구독 등
-        switch(subArgs["msg-id"]) {
-          case "sub":
-          case "resub":                     // 유저 구독 및 재구독(2개월 이상 연속 구독)
-            object.type = "sub";
-            object.month = Number(subArgs["msg-param-months"]);
-            object.text = removePrefix(arguments, 3);
-            message.add(object);
-            break;
-            
-          case "subgift":                   // 타 유저의 구독 선물
-            object.type = "subgift";
-            object.target = subArgs["msg-param-recipient-display-name"];
-            /* 구독 선물은 메세지를 추가할 수 없으므로 빈 배열로 */
-            object.text = [];
-            message.add(object);
-            break;
-            
-          case "raid":                      // 타 채널의 레이드(채팅을 포함한 호스팅)
-            object.type = "raid";
-            /* 레이드도 메세지를 추가할 수 없는것으로 보임 */
-            object.text = [];
-            message.add(object);
-            break;
-            
-          case "ritual":                    // 채널에 처음으로 온 시청자가 있을 경우
-          case "rewardgift":                // 후원으로 인해 선물 나눔이 발생했을 경우
-            break;
-            
-          default:
-            message.error("ircWrongMessage", { error:removePrefix(arguments, 2).join(" ") });
-            break;
-        }
-        break;
-        
-      case "NOTICE":                        // 방 상태 변경
-          switch(subArgs["msg-id"]) {
-          case "subs_on":                       // 구독자 전용 채팅 모드
-          case "subs_off":
-          case "host_on":
-          case "host_target_went_offline":
-          case "host_off":                      // 타 채널을 호스팅
-          case "emote_only_on":                 // 이모티콘 채팅만 허용
-          case "emote_only_off":
-          case "slow_on":                       // 채팅 딜레이 모드
-          case "slow_off":
-            break;
-            
-          default:
-            message.error("ircWrongMessage", { error:removePrefix(arguments, 2).join(" ") });
-            break;
-          }
-          break;
-        
-      default:
-        message.error("ircWrongMessage", { error:arguments[2] });
-        break;
-      }
-      return;
-    }
-    
-    message.error("ircWrongMessage", { error:line });
+/**
+ * 트위치 IRC에 접속
+ * 이후 onmessage 이벤트를 통해 통신
+ */
+methods.Connect = function() {
+  // 채널이름이 제대로 되었는지 파싱
+  var channel = config.Channel;
+  if (typeof channel !=="string" || channel.match(/\W/) !== null) {
+    message.Error("Irc_Wrong_Channel");
   }
+
+  // 트위치 IRC서버로 접속을 시도
+  try { this.socket = data.socket = new WebSocket(shared.Irc.Uri); }
+  catch(err) { message.Error("Irc_Fail_Connect", err.message); return; }
+
+  // 접속 성공시 목표 채널 참가를 시도하고 Compability를 설정
+  data.socket.onopen = function() {
+    // pass는 의미는 없지만 난수로. nick은 justinfan+난수로.
+    // justinfan으로 접속시 게스트모드로 참여할 수 있다
+    var rand = function(n) { return Math.floor(Math.random()*(`1${"0".repeat(n)}`)) };
+    var pass = rand(8);
+    var nick = "justinfan" + rand(5);
+
+    send(
+      `PASS ${pass}`,
+      `NICK ${nick}`,
+      `CAP REQ :${shared.Irc.Caps.join(" ")}`,
+      `JOIN #${channel}`
+    );
+  };
+
+  data.socket.onmessage = function(event) {
+    event.data.toString().split(/[\r\n]+/).forEach( function(el) {
+      if (!el.match(/^[\s]*$/)) { methods.Response(el); }
+    } );
+  };
+
+  data.socket.onclose = function(event) {
+    // 연결중이지 않을 때의 아이디는 null로 고정
+    shared.Id = null;
+    message.Error("Irc_Close_Connect", event.code);
+  };
+};
+
+/**
+ * 받은 IRC 메세지에 대응
+ * @param {string} line 줄별로 나뉘어진 메세지
+ */
+methods.Response = function(line) {
+  // 공백으로 각 구문을 구분
+  var phrase = line.split(/\s/);
+
+  // 핑에 자동응답하여 접속을 유지
+  if (phrase[0] === "PING") {
+    send("PONG");
+    return;
+  }
+
+  // PING외의 모든 메세지는 :또는 @으로 시작하므로 구분
+  var prefix = phrase[0][0];
+
+  // IRC 기본 프로토콜 메세지 처리
+  if (prefix === ":") {
+    switch (phrase[1]) {
+      // 접속시 고정 표시 메세지 무시
+      case "001": case "002": case "003": case "004":
+      case "375": case "372": case "376": case "366": case "CAP":
+      
+      // 유저 참가 및 퇴장 메세지 무시
+      case "JOIN": case "PART":
+      case "MODE": case "353" :
+
+      // 타 채널로 호스팅 메세지 무시
+      case "HOSTTARGET":
+        return;
+
+      // 트위치 내부 문제가 발생했을 때
+      case "NOTICE":
+        message.Error("Irc_Notice", phrase.splice(3, phrase.length).join(" ").substring(1));
+        return;
+
+      default:
+        message.Error("Irc_Wrong_Message", prefix+phrase[1]);
+        return;
+    }
+  }
+
+  // Twitch-specific 메세지 처리
+  if (prefix === "@") {
+    // 메세지 데이터들을 파싱
+    var subArguments = phrase.shift().substring(1).split(";").reduce( function(acc, cur) {
+      var keyValue = cur.split("=");
+      if (keyValue[1] !== undefined) {
+        switch(keyValue[0]) {
+          // 필요 없는 데이터 생략
+          case "id":          // 메세지 아이디
+          case "turbo":       // 트위치 터보 이용 여부
+          case "tmi-sent-ts": // 메세지 타임스탬프
+          case "user-type":   // 유저 타입("mod", "")
+            break;
+
+          // 뱃지 데이터 정리
+          case "badges":
+            if (keyValue[1] === "") { acc[keyValue[0]] = []; }
+            else { acc[keyValue[0]] = keyValue[1].split(","); }
+            break;
+
+          // 채널 아이디 (첫 접속 메세지에 필요)
+          case "room-id":
+            if (shared.Id === null) { acc[keyValue[0]] = keyValue[1]; }
+            break;
+
+          // 특별히 처리할 필요 없는 데이터 반영
+          default:
+          /*
+          case "emotes":      // 이모티콘(트위치 자체, 구독자 전용)
+          case "emote-only":  // 이모티콘만 포함된 메세지
+          case "color":       // 유저별 (이름)색상
+          case "bits":        // 응원이 포함된 메세지
+          */
+            acc[keyValue[0]] = keyValue[1];
+            break;
+        }
+      }
+
+      return acc;
+    }, {});
+
+    switch (phrase[1]) {
+      case "ROOMSTATE":   // 채널 접속 혹은 방의 상태 변경
+        if (subArguments["room-id"] !== undefined) {
+          shared.Id = subArguments["room-id"];
+          message.Connect();
+        }
+        return;
+
+      case "PRIVMSG":     // 일반 메세지
+          message.Add( (function() {
+            // 기본 파라미터 설정
+            var text = phrase.splice(3, phrase.length).join(" ").substring(1);
+            text = String(text)
+              .replace(/&/g, '&amp;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+              .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            var ret = {
+              "name"   : subArguments["display-name"],
+              "badges" : subArguments["badges"],
+              "text"   : text,
+
+              // 하위 모듈에서 사용할 파라미터
+              "emotes"     : subArguments["emotes"],
+              "emote-only" : subArguments["emote-only"],
+              "color"      : subArguments["color"],
+              "bits"       : subArguments["bits"]
+            };
+            return ret;
+          })() );
+        return;
+
+      case "CLEARCHAT":   // 채팅 전체삭제 혹은 유저 차단
+        if (subArguments["ban-reason"] === undefined) {
+
+        } else {
+
+        }
+        return;
+
+      case "USERNOTICE":  // 유저 관련 메세지
+        switch(subArguments["msg-id"]) {
+          case "sub":
+          case "resub":       // 신규 구독 및 재구독
+            return;
+
+          case "subgift":     // 구독 선물
+            return;
+
+          case "raid":        // 다른 채널에서 온 레이드
+            return;
+
+          case "ritual":      // 채널에 처음 온 시청자
+            return;
+
+          case "rewardgift":  // 응원으로 인한 선물 나눔
+            return;
+
+          default:
+            message.Error("Irc_Wrong_Message", prefix+phrase[1]+" "+subArguments["msg-id"]);
+            return;
+        }
+
+      case "NOTICE":      // 방 상태 변경
+        return;
+
+      default:
+        message.Error("Irc_Wrong_Message", prefix+phrase[1]);
+        return;
+    }
+  }
+
+  message.Error("Irc_Wrong_Message", line);
 };
 
 
-/* 정의된 엘리먼트 적용 */
-module.exports = new function() {
-  this.method = method;
-  
-  return this;
-}();
+/**
+ * 모듈 Load 메서드
+ * 포인터를 메인 모듈과 연결
+ * @param {object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {
+  config = uniformData.Data.config;
+  shared = uniformData.Data.shared;
+  message = uniformData.Message;
+};
+
+
+/**
+ * 모듈 오브젝트
+ * 전달받은 메서드로 모듈 내부 메서드와 데이터를 자기자신과 연결하여 반환
+ */
+module.exports = function(InitModule) { return InitModule.call({}, methods, data); };

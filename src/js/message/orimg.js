@@ -1,142 +1,144 @@
-/* 모듈 내부데이터 설정 */
-var sequenceCount = {};       // setDomValue()에 사용
-var config = null;            // load()를 통해 uniformData와 연결
+/****************************************************************
+ * 전용이미지 하위모듈                                          *
+ * 스트리머가 직접 지정할 수 있는 전용 이미지를 표시            *
+ *                                                              *
+ * 이미지 상위 URI를 통일하거나                                 *
+ * 목록에서 경우에 따른 특정 이미지만 표시하는 확장을 사용 가능 *
+ *                                                              *
+ ****************************************************************/
 
-
-/* 데이터 기본값 */
+// 모듈 인터페이스
+var methods = {};
 var data = {
-  "file" : {},
-  "list" : {}
+  list   : {}, // 이미지의 KeyValuePair
+  groups : {}, // 방법과 목록을 저장
+  alias  : {}, // 키워드와 이미지를 연결
+  counts : {}, // sequence group의 사용 수를 저장
 };
 
+// 포인터 정의
+var config = null;
+var shared = null;
+var parent = null;
 
-/* 모듈 메서드 정의 */
-var method = {
-  load        : function(uniformData) {
-    config = uniformData.config.data.message.orimg;
-    
-    var key = "message.orimg.data.file";
-    var lifetime = uniformData.config.data.api.session.timeout;
-    uniformData.api.method.load(key, config.uri, lifetime, null, function(storage) {
-      if (storage) { data.file = storage; }
-      var prefix = "";
-      if (data.file.uriPrefix) {
-        prefix += data.file.uriPrefix;
-        if (prefix>0 && prefix[prefix.length-1] != "/") { preifx += "/"; }
-      }
-      
-      if (Array.isArray(data.file.images)) {
-        data.file.images.forEach( function(el) {
-          data.list[el.name] = { uri:prefix+el.uri, method:"normal" };
-          if (Array.isArray(el.alias)) {
-            el.alias.forEach( function(al) {
-              data.list[al] = { uri:prefix+el.uri, method:"normal" };
-            } );
-          }
-        } );
-      }
-      if (data.file.groups) {
-        data.file.groups.forEach( function(el) {
-          if (el.method == "none") { return; }
-          var obj = { uri:[], method:el.method };
-          
-          if (el.list) {
-            el.list.forEach( function(name) {
-              obj.uri.push(data.list[name].uri);
-            } );
-          }
-          if (el.rule) {
-            var regExp = new RegExp(el.rule);
-            Object.keys(data.list).forEach( function(key) {
-              if (key.match(regExp) && data.list[key].method=="normal") {
-                obj.uri.push(data.list[key].uri);
-              }
-            } );
-          }
-          
-          if (obj.uri.length > 0) {
-            data.list[el.name] = obj;
-          }
-        } );
-      }
-    } );
-  },
-  get         : function(object, processes) {
-    /* 각 이미지 어절을 추출 */
-    var list = [];
-    object.text.forEach( function(el, ind, arr) {
-      if (processes[ind] != undefined) { return; }    // 이미 처리된 어절 스킵
-      if (el.indexOf(config.prefix) != 0) { return; } // 프리픽스가 사용되지 않은 어절 스킵
-      
-      var name = el.split(config.prefix);             // 이미지 이름
-      name.shift();
-      name = name.join("");
-      if (data.list[name]) {
-        list.push( {
-          index  : ind,
-          name   : name,
-          uri    : data.list[name].uri,
-          method : data.list[name].method
-        } );
-      }
-    } );
-      
-    /* 인덱스와 이름, uri의 목록을 반환 */
-    if (list.length != 0) { return list; }
-    else                  { return null; }
-  },
-  setDomValue : function(object, value) {
-    /* struct의 varaible에서 orimg 전용 value를 선처리 */
-    if (object.orimg == undefined)       { return value; }
-    if (object.orimg.method == "normal") { return value; }
-    
-    if (value.indexOf("{uri}") != -1) {
-      var length = object.uri.length;
-      var match = "{uri}";
-      
-      switch (object.orimg.method) {
+
+/**
+ * 유저 색상을 가져오고 색채팅 권한이 있는지 판별
+ * @param {Object} message 출력할 메세지의 색상 정보
+ * @param {string} message.name fixed group 전용 이미지에 사용할 유저 이름
+ * @param {string[]} text 어절별로 분리된 메세지 문자열
+ * @param {bool[]} done 각 어절의 처리 여부
+ */
+methods.Replace = function(message, text, done) {
+  text.forEach( function(el, ind) {
+    // 이미 처리된 어절 무시
+    if (done[ind] === true) { return; }
+
+    // 이스케이핑된 텍스트를 이용
+    var element = document.createElement("span");
+    element.innerHTML = el;
+    el = element.innerText;
+
+    // 전용이미지 어절이 아니면 무시
+    if (el.match(new RegExp("^"+config.Message.Orimg.Prefix)) === null) { return; }
+    var name = el.replace(config.Message.Orimg.Prefix, "");
+    if (data.alias[name] === undefined) { return; }
+
+    if (data.list[name] === undefined) {
+      // 그룹 이미지 처리
+      var group = data.groups[name];
+
+      switch(group.method) {
         case "random":
-          value = value.replace(
-            match,
-            object.uri[ Math.floor(Math.random() * length) ]
-          );
+          name = group.list[Math.floor(Math.random()*(group.list.length))];
           break;
-          
+
         case "sequence":
-          var name = object.orimg.name;
-          if (sequenceCount[name] != undefined) {
-            sequenceCount[name] = (sequenceCount[name]+1) % length;
-          } else {
-            sequenceCount[name] = 0;
-          }
-          
-          value = value.replace(
-            match,
-            object.uri[ sequenceCount[name] ]
-          );
+          if (data.counts[name] === undefined) { data.counts[name] = 0; }
+          name = group.list[data.counts[name]++];
+          data.counts[name] %= group.list.length;
           break;
-          
+
         case "fixed":
-          value = value.replace(
-            match,
-            object.uri[ object.id % length ]
-          );
-          break;
-          
-        default:
+          var findex = message.name.charCodeAt(0);
+          var lindex = message.name.charCodeAt(message.name.length-1);
+          console.log(findex, lindex, group.list.length);
+          name = group.list[(findex+lindex) % group.list.length];
           break;
       }
     }
-    
-    return value;
-  }
+
+    // 문자열을 이미지로 변환
+    done[ind] = true;
+    element.innerHTML = "";
+    parent.AddSubElement(
+      "Orimg",
+      {
+        "parent" : element,
+        "attr"   : { "type":name },
+        "image"  : config.Message.Orimg.UriBase + data.list[data.alias[name]],
+        "text"   : el
+      }
+    );
+    text[ind] = element.innerHTML;
+  } );
 };
 
 
-/* 정의된 엘리먼트 적용 */
-module.exports = new function() {
-  this.method = method;
-  this.data = data;
+/**
+ * 설정 데이터 정리 메서드
+ */
+methods.Connect = function() {
+  // Images를 연결
+  config.Message.Orimg.Images.forEach( function(el) {
+    data.list[el.name] = el.uri;
+    data.alias[el.name] = el.name;
 
-  return this;
-}();
+    (el.alias||[]).forEach( function(al) {
+      data.alias[al] = el.name;
+    } );
+  } );
+
+  // Groups를 연결
+  config.Message.Orimg.Groups.forEach( function(el) {
+    if (el.method === "none") { return; }
+    if (data.alias[el.name] === undefined) {
+      if ((el.rule || el.list) === undefined) { return; }
+
+      data.alias[el.name] = el.name;
+      data.groups[el.name] = { "method":el.method, "list":el.list };
+      if (el.list === undefined) {
+        data.groups[el.name].list = [];
+        var rule = new RegExp(el.rule);
+
+        Object.keys(data.list).forEach( function(key) {
+          if (key.match(rule) === null) { return; }
+          data.groups[el.name].list.push(key);
+        } );
+      }
+    }
+  } );
+
+  done.Done("orimg");
+};
+
+
+/**
+ * 모듈 Load 메서드
+ * 포인터를 메인 모듈과 연결
+ * @param {object} uniformData 메인 모듈 오브젝트
+ */
+methods.Load = function(uniformData) {
+  done = uniformData.Done;
+
+  config = uniformData.Data.config;
+  shared = uniformData.Data.shared;
+  parent = uniformData.Message;
+};
+
+
+/**
+ * 모듈 오브젝트
+ * 전달받은 메서드로 모듈 내부 메서드와 데이터를 자기자신과 연결하여 반환
+ */
+module.exports = function(InitModule) { return InitModule.call({}, methods, data); };
