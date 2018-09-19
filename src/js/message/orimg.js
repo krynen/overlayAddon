@@ -25,7 +25,7 @@ var parent = null;
 /**
  * 유저 색상을 가져오고 색채팅 권한이 있는지 판별
  * @param {Object} message 출력할 메세지의 색상 정보
- * @param {string} message.id fixed group 전용 이미지에 사용할 유저 이름
+ * @param {string} message.name fixed group 전용 이미지에 사용할 유저 이름
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  * @param {bool[]} done 각 어절의 처리 여부
  */
@@ -60,8 +60,8 @@ methods.Replace = function(message, text, done) {
           break;
 
         case "fixed":
-          var findex = message.id.charCodeAt(0);
-          var lindex = message.id.charCodeAt(message.id.length-1);
+          var findex = message.name.charCodeAt(0);
+          var lindex = message.name.charCodeAt(message.name.length-1);
           console.log(findex, lindex, group.list.length);
           name = group.list[(findex+lindex) % group.list.length];
           break;

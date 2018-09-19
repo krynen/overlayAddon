@@ -177,10 +177,12 @@ methods.AddSubElement = function(type, message) {
 
     case "NormalMessage":
     case "ErrorMessage":
-    case "CheerRoot":
+    case "CheerHead":
     case "Cheermote":
     case "Emote":
     case "Orimg":
+    case "TwipHead":
+    case "TwipText":
     default:
       // 생성
       var ret = [];
@@ -371,9 +373,9 @@ methods.Add = function(message) {
   this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
 
   message.Color = {
-    id : message.name,
-    badges : message.badges,
-    color : message.color
+    "name"   : message.name,
+    "badges" : message.badges,
+    "color"  : message.color
   };
   delete message.color;
   this.Module.color.Replace(message.Color, text, done);
@@ -384,8 +386,14 @@ methods.Add = function(message) {
   this.Module.cheer.Replace(message.Cheer, text, done);
   this.Module.cheer.Set(message.Cheer, message);        // 응원 처리
 
-  message.Orimg = { id : message.name };
+  message.Orimg = { "name":message.name };
   this.Module.orimg.Replace(message.Orimg, text, done); // 전용 이미지 처리
+
+  message.Twip = {
+    "isTwip" : message.name === "Twipkr"
+  };
+  this.Module.twip.Replace(message.Twip, text, done);
+  this.Module.twip.Set(message.Twip, message);          // 트윕 후원 처리
   
   // 분해한 메세지 병합
   message.text = text.join(" ");
@@ -433,11 +441,10 @@ methods.Connect = function() {
     done.Done("message");
   } );
 
-  // 응원 모듈 데이터 로드
+  // 하위 모듈 데이터 로드
   this.Module.cheer.Connect();
-
-  // 전용이미지 모듈 데이터 로드
   this.Module.orimg.Connect();
+  this.Module.twip.Connect();
 };
 
 

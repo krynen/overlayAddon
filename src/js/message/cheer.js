@@ -30,7 +30,7 @@ methods.Set = function(message, parentMessage) {
   parentMessage.attr["cheer"] = "1";
 
   if (parentMessage.root === undefined) { parentMessage.root = {}; }
-  parentMessage.root.CheerRoot = {
+  parentMessage.root.CheerHead = {
     "attr"   : { "value": message },
     "name"   : parentMessage.name,
     "text"   : message
@@ -40,7 +40,7 @@ methods.Set = function(message, parentMessage) {
 
 /**
  * 응원 문자열 대체 메서드
- * @param {bool} message 출력할 메세지의 정보 (응원이 포함되어 있는지)
+ * @param {number} message 출력할 메세지의 정보 (응원 금액)
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  * @param {bool[]} done 각 어절의 처리 여부
  */

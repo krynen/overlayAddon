@@ -28,6 +28,10 @@
       "UriBase" : "",
       "Groups"  : [],
       "Images"  : []
+    },
+
+    "Twip"    : {
+      "Format" : ""
     }
   },
 

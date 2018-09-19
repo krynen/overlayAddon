@@ -50,6 +50,11 @@ var value =
           "broadcaster/0", "moderator/0"
         ]
       }
+    },
+
+    "Twip"    : {
+      // 트윕 후원 메세지 양식(name, value, text <- 이름, 금액, 메세지)
+      "Format" : "{name}({value}원) : {text}"
     }
   },
 

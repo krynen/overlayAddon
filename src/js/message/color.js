@@ -33,7 +33,7 @@ methods.Set = function(message, parentMessage) {
  * 색상 처리 메서드
  * 유저 색상을 가져오고 색채팅 권한이 있는지 판별
  * @param {Object} message 출력할 메세지의 색상 정보
- * @param {string} message.id 색 임의 지정에 사용할 유저 이름
+ * @param {string} message.name 색 임의 지정에 사용할 유저 이름
  * @param {string[]} message.badges 색채팅 권환 확인에 사용할 유저 뱃지 목록
  * @param {bool} message.isColorChat 색채팅 처리 유무를 표시할 출력값
  * @param {string} message.color 유저 고유 색상
@@ -61,8 +61,8 @@ methods.Replace = function(message, text, done) {
   // 기본 색 미설정시 목록에서 이름에 따라 색 선택
   if (message.color == "") {
     var length = config.Message.Color.List.length;
-    var findex = message.id.charCodeAt(0);
-    var lindex = message.id.charCodeAt(message.id.length-1);
+    var findex = message.name.charCodeAt(0);
+    var lindex = message.name.charCodeAt(message.name.length-1);
     message.color = config.Message.Color.List[(findex+lindex) % length];
   }
 

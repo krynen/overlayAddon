@@ -86,7 +86,8 @@
       <span theme-type="Name" class="Name"></span>
       <span theme-type="Badges" class="Badges"></span>
     </div>
-    <virtual theme-type="CheerRoot"></virtual>
+    <virtual theme-type="TwipHead"></virtual>
+    <virtual theme-type="CheerHead"></virtual>
     <div theme-type="Text" class="Text"></div>
   </div>
 </template>
@@ -112,10 +113,10 @@
   </virtual>
 </template>
 
-<template id="CheerRoot">
-  <!-- NormalMessage의 CheerRoot 내부에 추가되는 응원 메세지 헤더
+<template id="CheerHead">
+  <!-- NormalMessage의 CheerHead 내부에 추가되는 응원 메세지 헤더
     Root  : 최상위 element. data-value="[응원 금액]"이 추가
-    Name  : 응원 
+    Name  : 응원한 유저 이름
   -->
   <div theme-type="Root" class="Cheer">
     ☆ <Virtual theme-type="Name"></Virtual>님
@@ -144,4 +145,23 @@
   <virtual theme-type="Root" class="Orimg">
     <virtual theme-type="Image"></virtual>
   </virtual>
+</template>
+
+<template id="TwipHead">
+  <!-- NormalMessage의 TwipHead 내부에 추가되는 트윕 후원 메세지 헤더
+    Root  : 최상위 element. data-value="[후원 금액]"이 추가
+    Name  : 후원한 유저 이름
+  -->
+  <div theme-type="Root" class="Cheer">
+    ☆ <Virtual theme-type="Name"></Virtual>님
+    <Virtual theme-type="Text"></Virtual>원 후원 감사합니다! ☆
+  </div>
+</template>
+
+<template id="TwipText">
+  <!-- NormalMessage의 Text 내부를 대체하는 후원 텍스트 템플릿
+    Root : 최상위 element. data-name="[후원자]" data-value="[금액]"이 추가
+    Text : 후원 메세지
+  -->
+  <virtual theme-type="Text"></virtual>
 </template>
