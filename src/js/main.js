@@ -17,6 +17,7 @@ var REQUIRE_MODULES = new function() {
   this["Message/emote"] = require("./message/emote.js");
   this["Message/orimg"] = require("./message/orimg.js");
   this["Message/twip"]  = require("./message/twip.js");
+  this["Message/link"]  = require("./message/link.js");
   this["Theme"]         = require("../html/theme.html");
   this["Data"]    = require("./data.js");
   this["Default"] = require("../json/default.json");
