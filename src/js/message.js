@@ -435,7 +435,18 @@ methods.Connect = function() {
     // 유저 뱃지가 로드
     // 실패했을 때 혹은 유저 뱃지가 존재하지 않으면 그냥 글로벌 뱃지만 사용
     if (results[1][0] === true) {
-      Object.assign(data.badges, results[1][1]["badge_sets"]);
+      var badges = results[1][1]["badge_sets"];
+      Object.keys(badges).forEach( function(el) {
+        if (el === "bits") {
+          // 누적 응원 금액 뱃지가 일부만 적용되어있을 수 있으므로 개별 처리
+          if ((data.badges[el]||{}).versions === undefined) {
+            data.badges[el] = {"versions":{}};
+          }
+          Object.assign(data.badges[el].versions, badges[el].versions);
+        } else {
+          data.badges[el] = badges[el];
+        }
+      } );
     }
 
     done.Done("message");
