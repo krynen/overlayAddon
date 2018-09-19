@@ -16,7 +16,6 @@ var data = {
 
 // 포인터 정의
 var config = null;
-var shared = null;
 var parent = null;
 
 
@@ -109,7 +108,6 @@ methods.Connect = function() {
  */
 methods.Load = function(uniformData) {
   config = uniformData.Data.config;
-  shared = uniformData.Data.shared;
   parent = uniformData.Message;
 };
 

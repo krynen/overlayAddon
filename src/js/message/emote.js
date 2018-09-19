@@ -43,9 +43,9 @@ methods.Replace = function(message, text, done) {
     var element = document.createElement("span");
     element.innerHTML = text.join(" ").replace(
       new RegExp(
-        "^" + shared.Message.ColorChatPrefix +
+        "^" + shared.Message.Color.Prefix +
         "([\\s\\S]+)" +
-        shared.Message.ColorChatPostFix + "$"
+        shared.Message.Color.Postfix + "$"
       ), "$1"
     );
     return element.innerText;
@@ -81,7 +81,7 @@ methods.Replace = function(message, text, done) {
       {
         "parent" : element,
         "attr"   : { "type":el, "id":ids[emoteIndex] },
-        "image"  : shared.Message.EmoteUri.replace("{id}", ids[emoteIndex]),
+        "image"  : shared.Message.Emote.Uri.replace("{id}", ids[emoteIndex]),
         "text"   : el
       }
     );

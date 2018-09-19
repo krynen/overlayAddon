@@ -16,12 +16,18 @@
   },
 
   "Message" : {
-    "ColorChatPrefix" : "ACTION ",
-    "ColorChatPostfix" : "",
+    "Emote"  : {
+      "Uri"   : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0"
+    },
+    "Color"  : {
+      "Prefix"  : "ACTION ",
+      "Postfix" : ""
+    },
+    "Cheer"  : {
+      "Uri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
+    },
 
     "ChannelUri" : "https://badges.twitch.tv/v1/badges/channels/{id}/display",
-    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display",
-    "EmoteUri"   : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0",
-    "CheerUri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
+    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display"
   }
 }

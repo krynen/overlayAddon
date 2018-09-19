@@ -97,7 +97,7 @@ methods.Replace = function(message, text, done) {
 methods.Connect = function() {
   if (config.Key !== null && config.Key.length > 0) {
     api.Get( {
-      "uri"    : shared.Message.CheerUri.replace(/{id}/g, shared.Id),
+      "uri"    : shared.Message.Cheer.Uri.replace(/{id}/g, shared.Id),
       "header" : [{ "key":"Client-ID", "value":config.Key  }]
     } ).then(
       function(res) {
