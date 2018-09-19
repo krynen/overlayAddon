@@ -42,7 +42,18 @@ methods.Replace = function(message, text, done) {
     // 전용이미지 어절이 아니면 무시
     if (el.match(new RegExp("^"+config.Message.Orimg.Prefix)) === null) { return; }
     var name = el.replace(config.Message.Orimg.Prefix, "");
-    if (data.alias[name] === undefined) { return; }
+    var remain = "";
+    if (Object.keys(data.alias).reverse().some( function(el) {
+      if (name.indexOf(el) === 0) { 
+        // 남는 문자를 remain으로 옮김
+        remain = name.replace(el, "");
+        name = data.alias[el];
+        return true;
+      }
+      return false;
+    }) === false) { return; }
+
+
 
     if (data.list[name] === undefined) {
       // 그룹 이미지 처리
@@ -76,11 +87,11 @@ methods.Replace = function(message, text, done) {
       {
         "parent" : element,
         "attr"   : { "type":name },
-        "image"  : config.Message.Orimg.UriBase + data.list[data.alias[name]],
+        "image"  : config.Message.Orimg.UriBase + data.list[name],
         "text"   : el
       }
     );
-    text[ind] = element.innerHTML;
+    text[ind] = element.innerHTML + remain;
   } );
 };
 
