@@ -1,18 +1,21 @@
-/****************************************************************
- ****************************************************************/
+/**********************************************
+ * 트윕 후원 하위모듈                         *
+ * 트윕 계정을 통해 표시된 후원 메세지를 처리 *
+ * 이름, 금액 정보를 분리하여 헤더에 표시     *
+ *                                            *
+ **********************************************/
 
 // 모듈 인터페이스
 var methods = {};
 var data = {
   rule : {
     expression : null,
-    result : []
+    result     : []
   }
 };
 
 // 포인터 정의
 var config = null;
-var shared = null;
 var parent = null;
 
 
@@ -105,7 +108,6 @@ methods.Connect = function() {
  */
 methods.Load = function(uniformData) {
   config = uniformData.Data.config;
-  shared = uniformData.Data.shared;
   parent = uniformData.Message;
 };
 

@@ -78,7 +78,7 @@ methods.Replace = function(message, text, done) {
       "Cheermote",
       {
         "parent" : element,
-        "attr"   : { "type": prefix, "tier":data.list[prefix][index].id, "value":value },
+        "attr"   : { "type":prefix, "tier":data.list[prefix][index].id, "value":value },
         "image"  : image[key],
         "text"   : value
       }
@@ -97,7 +97,7 @@ methods.Replace = function(message, text, done) {
 methods.Connect = function() {
   if (config.Key !== null && config.Key.length > 0) {
     api.Get( {
-      "uri"    : shared.Message.CheerUri.replace(/{id}/g, shared.Id),
+      "uri"    : shared.Message.Cheer.Uri.replace(/{id}/g, shared.Id),
       "header" : [{ "key":"Client-ID", "value":config.Key  }]
     } ).then(
       function(res) {

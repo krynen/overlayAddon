@@ -23,14 +23,11 @@
 
 .NormalMessage .NameBadges {
   display:flex;
-  background:linear-gradient(to right, rgba(160,160,160,.7), rgba(0,0,0,0));
+  background:linear-gradient(to right, rgba(0,0,0,.7), rgba(0,0,0,0));
 }
 .NormalMessage .Name {
   display:flex; flex:1; margin:auto; 
-  text-shadow:    0  1px 0 black,  1px  1px 0 black,
-                1px    0 0 black,  1px -1px 0 black,
-                  0 -1px 0 black, -1px -1px 0 black,
-               -1px    0 0 black, -1px  1px 0 black;
+  text-shadow:0 0 1px white;
   color:var(--data-color);
   padding:1px;
 }
@@ -47,6 +44,9 @@
 [data-color-chat="1"] .Text {
   color:var(--data-color);
 }
+.Text [nth:child(n+5)] { display:none; }
+
+
 .Cheer {
   color:white; padding:3px; text-align:center;
 }
@@ -59,6 +59,17 @@
   border:1px solid rgba(255,255,255,.6);
 }
 .Cheermote .CheerImage { height:1rem; }
+
+.Video .Image { max-width:100%; text-align:center; }
+.Video .Title,
+.Video .Name { text-align:center; }
+
+.Video[data-invalid] .Image,
+.Video[data-invalid] .Name { diaplay:none; }
+.Video[data-invalid] .Title::after {
+  content:"Invalid clip";
+}
+
   </style>
 </template>
 
@@ -140,7 +151,7 @@
   <!-- NormalMessage의 Text 내부에 추가되는 전용 이미지 템플릿
     Root  : 최상위 element. data-type="[이름]"이 추가
     Image : 전용 이미지가 img element로 추가
-    Text  : 변환 이전 문자열.
+    Text  : 변환 이전 문자열
   -->
   <virtual theme-type="Root" class="Orimg">
     <virtual theme-type="Image"></virtual>
@@ -164,4 +175,19 @@
     Text : 후원 메세지
   -->
   <virtual theme-type="Text"></virtual>
+</template>
+
+<template id="Video">
+  <!-- NormalMessage의 Text 내부에 추가되는 비디오/클립 템플릿
+    Root  : 최상위 element. data-type="[종류]" data-id="[아이디]" data-name="[제목]"이 추가
+      data-invalid="1"이 추가될 수 있음
+    Name  : 비디오 제목 문자열
+    Image : 섬네일 이미지가 img element로 추가
+    Text  : 제작자, 업로더 이름 문자열
+  -->
+  <div theme-type="Root" class="Video">
+    <virtual theme-type="Image" class="Image"></virtual>
+    <div theme-type="Name" class="Title"></div>
+    <div theme-type="Text" calss="Name"></div>
+  </div>
 </template>

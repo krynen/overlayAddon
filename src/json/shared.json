@@ -16,12 +16,33 @@
   },
 
   "Message" : {
-    "ColorChatPrefix" : "ACTION ",
-    "ColorChatPostfix" : "",
+    "Emote"  : {
+      "Uri"   : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0"
+    },
+    "Color"  : {
+      "Prefix"  : "ACTION ",
+      "Postfix" : ""
+    },
+    "Cheer"  : {
+      "Uri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
+    },
+    "Link"   : {
+      "youtube" : {
+        "uri"      : "https://noembed.com/embed?url=http://youtu.be/{id}",
+        "regExp"   : "^(?:https?:\\/\\/)?(?:www\\.)?youtu(?:(?:be\\.com\/)|(?:\\.be\/))([\\w\\-=&]+)",
+        "replacer" : "(attribution_link[^/]*\\/)|(embed\\/)|(watch(?:\/|\\?))|(v\/)"
+      },
+      "clip"    : {
+        "uri"      : "https://noembed.com/embed?url=http://clips.twitch.tv/{id}",
+        "regExp"   : "^(?:https?:\\/\\/)?clips\\.twitch\\.tv(?:\\/([A-Za-z]+))(?:\\?[\\w\\-=&]*)?"
+      },
+      "twitch"  : {
+        "uri"      : "https://noembed.com/embed?url=https://www.twitch.tv/videos/{id}",
+        "regExp"   : "^(?:https?:\\/\\/)?(?:[wW]{3}\\.)?twitch\\.tv\\/videos\\/([0-9]+)"
+      }
+    },
 
     "ChannelUri" : "https://badges.twitch.tv/v1/badges/channels/{id}/display",
-    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display",
-    "EmoteUri"   : "https://static-cdn.jtvnw.net/emoticons/v1/{id}/3.0",
-    "CheerUri"   : "https://api.twitch.tv/kraken/bits/actions?api_version=5&channel_id={id}"
+    "GlobalUri"  : "https://badges.twitch.tv/v1/badges/global/display"
   }
 }

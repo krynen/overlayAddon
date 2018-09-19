@@ -43,16 +43,16 @@ methods.Set = function(message, parentMessage) {
 methods.Replace = function(message, text, done) {
   // 색채팅 판별
   var isColorChat = text.join(" ").match(new RegExp(
-    "^" + shared.Message.ColorChatPrefix +
+    "^" + shared.Message.Color.Prefix +
     "[\\s\\S]+" +
-    shared.Message.ColorChatPostfix + "$"
+    shared.Message.Color.Postfix + "$"
   )) !== null;
 
   // 색채팅 표시문자 제거
   if (isColorChat) {
-    text[0] = text[0].replace(new RegExp("^"+shared.Message.ColorChatPrefix.replace(" ","")), "");
+    text[0] = text[0].replace(new RegExp("^"+shared.Message.Color.Prefix.replace(" ","")), "");
     var index = text.length-1;
-    text[index] = text[index].replace(new RegExp(shared.Message.ColorChatPostfix+"$"), "");
+    text[index] = text[index].replace(new RegExp(shared.Message.Color.Postfix+"$"), "");
   }
 
   // 색 설정 미사용시 처리 종료
