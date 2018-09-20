@@ -36,7 +36,7 @@ methods.Set = function(message, parentMessage) {
  * @param {bool[]} done 각 어절의 처리 여부
  */
 methods.Replace = function(message, text, done) {
-  if (message === undefined) { return; }
+  if (((message||{}).index||"") === "") { return; }
 
   // 색채팅과 HTML 이스케이핑을 배제하고 탐색
   var textString = ( function() {

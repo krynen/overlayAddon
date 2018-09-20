@@ -138,7 +138,7 @@ methods.ParseUri = function() {
         break;
 
       case "theme":
-        data.config.Theme.Uri = value;
+        data.config.Theme.FileName = value;
 
       default:
         break;

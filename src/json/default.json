@@ -11,12 +11,17 @@
       "clear" : {
         "allow" : ["broadcaster/0"],
         "alias" : []
+      },
+      "theme" : {
+        "allow" : ["broadcaster/0"],
+        "alias" : []
       }
     }
   },
 
   "Theme"   : {
-    "Uri"     : ""
+    "BaseUri"   : "",
+    "FileName"  : ""
   },
 
   "Message" : {

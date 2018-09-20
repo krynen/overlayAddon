@@ -72,10 +72,12 @@ methods.Parse = function(response) {
  * 설정이 불러와져야 하므로 모듈 로드가 끝난 후 호출됨
  */
 methods.Connect = async function() {
-  var uri = (config.Theme||{}).Uri;
-  if (typeof uri !== "string" || uri === "") {
+  var theme = config.Theme||{};
+
+  if (theme.BaseUri === "" || theme.FileName === "") {
     methods.Parse(this.Module.Default);
   } else {
+    var uri = theme.BaseUri + "/" + theme.FileName + ".html";
     await api.Get("theme", uri);
   }
 };

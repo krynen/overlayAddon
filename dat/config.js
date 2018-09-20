@@ -22,6 +22,10 @@ var value =
       "clear" : {
         "allow" : { "type":"replace", "value":["broadcaster/0", "moderator/0"] },
         "alias" : { "type":"replace", "value":["clear"] }
+      },
+      "theme" : {
+        "allow" : { "type":"replace", "value":["broadcaster/0"] },
+        "alias" : { "type":"replace", "value":["theme"] }
       }
     }
   },
@@ -36,8 +40,10 @@ var value =
   },
 
   "Theme"   : {
-    // 테마 템플릿 파일의 경로
-    "Uri"     : ""
+    // 테마 템플릿들의 상위 경로
+    "BaseUri"   : "./",
+    // 테마 파일명
+    "FileName"  : ""
   },
 
   "Message" : {

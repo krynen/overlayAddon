@@ -21,6 +21,7 @@ var REQUIRE_MODULES = new function() {
   this["Theme/Default"] = require("../html/theme.html");
   this["Command"]       = require("./command.js");
   this["Command/Clear"] = require("./command/clear.js");
+  this["Command/Theme"] = require("./command/theme.js");
   this["Data"]    = require("./data.js");
   this["Default"] = require("../json/default.json");
   this["Shared"]  = require("../json/shared.json");
