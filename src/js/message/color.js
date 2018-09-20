@@ -48,9 +48,13 @@ methods.Replace = function(message, text, done) {
     shared.Message.Color.Postfix + "$"
   )) !== null;
 
-  // 색채팅 표시문자 제거
+  // 색채팅 표시문자 처리
   if (isColorChat) {
-    text[0] = text[0].replace(new RegExp("^"+shared.Message.Color.Prefix.replace(" ","")), "");
+    // 첫어절 제거
+    text.shift();
+    done.shift();
+
+    // 끝어절 끝문자 제거
     var index = text.length-1;
     text[index] = text[index].replace(new RegExp(shared.Message.Color.Postfix+"$"), "");
   }

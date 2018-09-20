@@ -26,7 +26,6 @@ var parent = null;
  */
 methods.Set = function(message, parentMessage) {
   if (message.isTwip !== true) { return; }
-  if (data.rule.expression === null) { return; }
 
   if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
   parentMessage.attr["twip"] = "1";
@@ -51,9 +50,17 @@ methods.Replace = function(message, text, done) {
   // 트윕의 메세지가 아니면 처리 종료
   if (message.isTwip !== true) { return; }
   // 트윕 관련 설정을 하지 않았다면 처리 종료
-  if (data.rule.expression === null) { return; }
+  if (data.rule.expression === null) {
+    message.isTwip = false;
+    return;
+  }
+  // 포맷이 제대로 되지 않은 것 같으면 처리 종료
   var match = text.join(" ").match(data.rule.expression);
-  
+  if ((match||[]).length !== (data.rule.result.length+1)) {
+    message.isTwip = false;
+    return;
+  }
+
   ["name", "value", "text"].forEach( function(el) {
     message[el] = match[data.rule.result.indexOf(`{${el}}`)+1];
   } );

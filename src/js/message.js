@@ -92,9 +92,11 @@ methods.ParseTheme = function(response) {
     var node = child.content;
 
     // 각 template에서 주석을 제거
-    node.childNodes.forEach( function(el) {
-      if (el.nodeName === "#comment") { node.removeChild(el); }
-    } );
+    for (var j=0; j<node.childNodes.length; ++j) {
+      if (node.childNodes[j].nodeName === "#comment") {
+        node.removeChild(node.childNodes[j--]);
+      }
+    }
     // template 안의 양끝단의 공백 텍스트노드를 제거
     var spaces = Array.from(node.childNodes).reverse();
     spaces.some(someFunc);

@@ -73,7 +73,6 @@ methods.Replace = function(message, text, done) {
         case "fixed":
           var findex = message.name.charCodeAt(0);
           var lindex = message.name.charCodeAt(message.name.length-1);
-          console.log(findex, lindex, group.list.length);
           name = group.list[(findex+lindex) % group.list.length];
           break;
       }

@@ -69,7 +69,6 @@
 .Video[data-invalid] .Title::after {
   content:"Invalid clip";
 }
-
   </style>
 </template>
 
@@ -179,7 +178,8 @@
 
 <template id="Video">
   <!-- NormalMessage의 Text 내부에 추가되는 비디오/클립 템플릿
-    Root  : 최상위 element. data-type="[종류]" data-id="[아이디]" data-name="[제목]"이 추가
+    Root  : 최상위 element.
+      data-type="[종류]" data-id="[아이디]" data-name="[제목]" data-value="[원본 텍스트]"가 추가
       data-invalid="1"이 추가될 수 있음
     Name  : 비디오 제목 문자열
     Image : 섬네일 이미지가 img element로 추가

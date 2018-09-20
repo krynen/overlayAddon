@@ -113,6 +113,37 @@ methods.Merge = function(target, source) {
 
 
 /**
+ * URI 파싱 메서드
+ * uri로부터 일부 설정값을 받아 적용한다
+ */
+methods.ParseUri = function() {
+  var uri = location.href.split("?");
+  if (uri.length <= 1) { return; }
+
+  uri.reverse()[0].split("&").forEach( function(el) {
+    // 각 설정값이 올바른지 판정
+    if (el.split("=").length !== 2) { return; }
+    var key = el.split("=")[0].toLowerCase();
+    var value = el.split("=")[1];
+
+    // 설정값을 적용
+    switch(key) {
+      case "channel":
+        data.config.Channel = value;
+        break;
+
+      case "client-key":
+        data.config.Key = value;
+        break;
+
+      default:
+        break;
+    }
+  } );
+}
+
+
+/**
  * 모듈 Load, 핵심 메서드
  * 모듈에 하위 모듈들로부터 불러온 데이터를 추가
  * @param {Object} uniformData 메인 모듈 오브젝트
@@ -142,7 +173,10 @@ methods.Load = async function(uniformData) {
 
   // 로드한 웹 설정을 연결
   webConfigs.forEach( function(el) { methods.Merge(data.config, el); } );
+  // URI 설정을 연결
+  methods.ParseUri();
 
+  // 모듈 로드 완료 등록
   uniformData.Done.Done("data");
 };
 

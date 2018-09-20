@@ -17,6 +17,7 @@ var value =
 
   "Data"    : {
     // 추가로 불러올 (웹상의) json 설정 파일
+    // (내부 설정과) 세션 설정을 통해서만 입력할 수 있음
     "Uris"  : {
       "type"  : "replace",
       "value" : []

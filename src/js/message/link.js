@@ -80,7 +80,7 @@ methods.Replace = async function(message, text, done) {
     var element = document.createElement("span");
     var obj = {
       "parent" : element,
-      "attr"   : { "type":type, "id":id, "name":name },
+      "attr"   : { "type":type, "id":id, "name":name, "value":text[i] },
       "name"   : name,
       "image"  : image,
       "text"   : author
