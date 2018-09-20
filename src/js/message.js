@@ -8,7 +8,6 @@
 // 모듈 인터페이스
 var methods = {};
 var data = {
-  theme      : {}, // Load()에서 재정의되어 모듈의 대부분에서 사용
   badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
   entryPoint : {}, // GetRootEntry()에서 사용
   nodes      : {}  // Add()에서 사용
@@ -19,6 +18,7 @@ var api    = null;
 var config = null;
 var done   = null;
 var shared = null;
+var theme  = null;
 
 
 /**
@@ -44,10 +44,10 @@ var GetRootEntry = function(type) {
   if (data.entryPoint[type] !== undefined) { return data.entryPoint[type];}
 
   // 최상위 Element가 생성되어있지 않을 경우 새로 생성
-  var theme = data.theme[`${type}Root`];
+  var template = theme.template[`${type}Root`];
   // 에러 메세지의 최상위 Element를 찾을 수 없을 경우 일반 메세지에 통합해 사용
-  if (theme === undefined && type === "Error") { theme = data.theme["NormalRoot"]; }
-  if (theme === undefined) {
+  if (template === undefined && type === "Error") { template = theme.template["NormalRoot"]; }
+  if (template === undefined) {
     var messageTemplate = config.Error;
     if (type === "Error") {
       methods.NativeError(messageTemplate["Error_Message_No_ErrorRoot"]);
@@ -55,7 +55,7 @@ var GetRootEntry = function(type) {
 
     return;
   }
-  theme.forEach( function(el) { document.body.appendChild(el.cloneNode(true)); } );
+  template.forEach( function(el) { document.body.appendChild(el.cloneNode(true)); } );
 
   // 하위 Element를 생성할 포인트를 찾고 정리
   entry = document.querySelectorAll("*[theme-type=Root]")[0];
@@ -64,53 +64,6 @@ var GetRootEntry = function(type) {
   // 찾은 포인트를 data.entryPoint에 등록하고 반환
   data.entryPoint[type] = entry;
   return entry;
-};
-
-
-/**
- * 테마 파일에서 템플릿을 불러오는 메서드
- * @param {string} response에서 읽어온 stringify된 html template
- * @return {Object} 불러온 템플릿
- */
-methods.ParseTheme = function(response) {
-  // 바탕이 될 DOM Element를 생성해 response를 추출
-  var element = document.createElement("template");
-  element.innerHTML = response;
-
-  // 최상위 template element 각각을 아이디에 따라 분류
-  var ret = {};
-  var length = element.content.children.length;
-  var someFunc = function(el)  {
-    if (el.nodeName !== "#text") { return true; }
-    if (el.nodeValue.match(/^\s*$/) === null) { return true; }
-
-    node.removeChild(el);
-    return false;
-  };
-  for(var i=0; i<length; ++i) {
-    var child = element.content.children[i];
-    var node = child.content;
-
-    // 각 template에서 주석을 제거
-    for (var j=0; j<node.childNodes.length; ++j) {
-      if (node.childNodes[j].nodeName === "#comment") {
-        node.removeChild(node.childNodes[j--]);
-      }
-    }
-    // template 안의 양끝단의 공백 텍스트노드를 제거
-    var spaces = Array.from(node.childNodes).reverse();
-    spaces.some(someFunc);
-    spaces.reverse().some(someFunc);
-
-    if (child.id !== undefined) { ret[child.id] = node.childNodes; }
-  }
-
-  // 스타일 템플릿을 페이지에 추가
-  if (ret["Style"] !== null) {
-    ret["Style"].forEach( function(el) { document.head.appendChild(el); } );
-  } 
-
-  return ret;
 };
 
 
@@ -189,7 +142,7 @@ methods.AddSubElement = function(type, message) {
     default:
       // 생성
       var ret = [];
-      data.theme[type].forEach( function(el) {
+      theme.template[type].forEach( function(el) {
         ret.push(message.parent.appendChild(el.cloneNode(true)));
       } );
 
@@ -316,7 +269,7 @@ var AddType = function(message, type, config) {
 
 /**
  * 오류, 디버그 메세지 출력 메서드
- * data.theme의 TemplateErrorMessage에 따라 메세지를 출력한다
+ * theme.template의 TemplateErrorMessage에 따라 메세지를 출력한다
  * try-catch문 이용해 출력 실패시 NativeError로 재시도
  * @param {string} message 출력할 오류의 종류
  * @param {string} option 출력할 문자열에 추가할 수 있는 값
@@ -329,7 +282,7 @@ methods.Error = function(message, option) {
       // 모듈 로드 완료 메세지 처리
       if (config.Error[message] !== true) { return; }
       str = "";
-      (data.theme["Description"]||[]).forEach( function(el) {
+      (theme.template["Description"]||[]).forEach( function(el) {
         str += el.outerHTML || el.wholeText;
       } );
     }
@@ -353,7 +306,7 @@ methods.Error = function(message, option) {
 
 /**
  * 일반 메세지 출력 메서드
- * data.theme의 TemplateNormalMessage에 따라 메세지를 출력한다
+ * theme.template의 TemplateNormalMessage에 따라 메세지를 출력한다
  * @param {Object} message 출력할 메세지의 정보
  * @param {string} message.name 메세지를 보낸 유저의 이름
  * @param {string[]} message.badges 메세지를 보낸 유저의 뱃지 배열
@@ -372,8 +325,8 @@ methods.Add = function(message) {
   };
   delete message.emotes;
   delete message["emote-only"];
-  this.Module.emote.Replace(message.Emote, text, done);
-  this.Module.emote.Set(message.Emote, message);        // 이모티콘 처리
+  this.Module.Emote.Replace(message.Emote, text, done);
+  this.Module.Emote.Set(message.Emote, message);        // 이모티콘 처리
 
   message.Color = {
     "name"   : message.name,
@@ -381,26 +334,26 @@ methods.Add = function(message) {
     "color"  : message.color
   };
   delete message.color;
-  this.Module.color.Replace(message.Color, text, done);
-  this.Module.color.Set(message.Color, message);        // 색 처리
+  this.Module.Color.Replace(message.Color, text, done);
+  this.Module.Color.Set(message.Color, message);        // 색 처리
 
   message.Cheer = Number(message.bits||0);
   delete message.bits;
-  this.Module.cheer.Replace(message.Cheer, text, done);
-  this.Module.cheer.Set(message.Cheer, message);        // 응원 처리
+  this.Module.Cheer.Replace(message.Cheer, text, done);
+  this.Module.Cheer.Set(message.Cheer, message);        // 응원 처리
 
   message.Orimg = { "name":message.name };
-  this.Module.orimg.Replace(message.Orimg, text, done); // 전용 이미지 처리
+  this.Module.Orimg.Replace(message.Orimg, text, done); // 전용 이미지 처리
 
   message.Twip = {
     "isTwip" : message.name === "Twipkr"
   };
-  this.Module.twip.Replace(message.Twip, text, done);
-  this.Module.twip.Set(message.Twip, message);          // 트윕 후원 처리
+  this.Module.Twip.Replace(message.Twip, text, done);
+  this.Module.Twip.Set(message.Twip, message);          // 트윕 후원 처리
 
   // 링크 처리
   // 비동기 호출이므로 then() 이용
-  this.Module.link.Replace(null, text, done).then( () => {
+  this.Module.Link.Replace(null, text, done).then( () => {
     // 분해한 메세지 병합
     message.text = text.join(" ");
 
@@ -461,10 +414,10 @@ methods.Connect = function() {
   } );
 
   // 하위 모듈 데이터 로드
-  this.Module.cheer.Connect();
-  this.Module.orimg.Connect();
-  this.Module.twip.Connect();
-  this.Module.link.Connect();
+  this.Module.Cheer.Connect();
+  this.Module.Orimg.Connect();
+  this.Module.Twip.Connect();
+  this.Module.Link.Connect();
 };
 
 
@@ -476,11 +429,10 @@ methods.Connect = function() {
 methods.Load = function(uniformData) {
   done = uniformData.Done;
 
-  api = uniformData.Api;
+  api    = uniformData.Api;
   config = uniformData.Data.config;
   shared = uniformData.Data.shared;
-
-  Object.assign(data.theme, methods.ParseTheme(uniformData.Theme));
+  theme  = uniformData.Theme;
 };
 
 

@@ -25,7 +25,7 @@ var parent = null;
  * @param {Object} parentMessage parent.AddSubElement()의 message
  */
 methods.Set = function(message, parentMessage) {
-  if (message.isTwip !== true) { return; }
+  if (config.Message.Twip.Enable && message.isTwip !== true) { return; }
 
   if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
   parentMessage.attr["twip"] = "1";
@@ -48,7 +48,7 @@ methods.Set = function(message, parentMessage) {
  */
 methods.Replace = function(message, text, done) {
   // 트윕의 메세지가 아니면 처리 종료
-  if (message.isTwip !== true) { return; }
+  if (config.Message.Twip.Enable && message.isTwip !== true) { return; }
   // 트윕 관련 설정을 하지 않았다면 처리 종료
   if (data.rule.expression === null) {
     message.isTwip = false;

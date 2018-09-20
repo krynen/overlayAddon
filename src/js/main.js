@@ -1,6 +1,5 @@
 /***************************************************************
- * JS 진입점 파일                                              *
- *                                                             *
+ * JS 진입점 파일. 메인 모듈                                   *
  * 따로 명명하지 않고 module.exports에 데이터 트리를 만듬      *
  * 내부에서 자기자신을 연결해주거나, 진입점 우회를 사용해야 함 *
  *                                                             *
@@ -12,13 +11,14 @@
 var REQUIRE_MODULES = new function() {
   this["Irc"] = require("./irc.js");
   this["Message"]       = require("./message.js");
-  this["Message/cheer"] = require("./message/cheer.js");
-  this["Message/color"] = require("./message/color.js");
-  this["Message/emote"] = require("./message/emote.js");
-  this["Message/orimg"] = require("./message/orimg.js");
-  this["Message/twip"]  = require("./message/twip.js");
-  this["Message/link"]  = require("./message/link.js");
-  this["Theme"]         = require("../html/theme.html");
+  this["Message/Cheer"] = require("./message/cheer.js");
+  this["Message/Color"] = require("./message/color.js");
+  this["Message/Emote"] = require("./message/emote.js");
+  this["Message/Orimg"] = require("./message/orimg.js");
+  this["Message/Twip"]  = require("./message/twip.js");
+  this["Message/Link"]  = require("./message/link.js");
+  this["Theme"]         = require("./theme.js");
+  this["Theme/Default"] = require("../html/theme.html");
   this["Data"]    = require("./data.js");
   this["Default"] = require("../json/default.json");
   this["Shared"]  = require("../json/shared.json");
@@ -156,7 +156,10 @@ module.exports = new function() {
   this.Done.Register("data", "message", "cheer", "orimg");
 
   LoadModules(this, REQUIRE_MODULES)
-    .then( () => { this.Irc.Connect(); } );
+    .then( () => {
+      this.Theme.Connect();
+      this.Irc.Connect();
+    } );
 
   return this;
 }();

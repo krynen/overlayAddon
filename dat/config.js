@@ -24,6 +24,11 @@ var value =
     }
   },
 
+  "Theme"   : {
+    // 테마 템플릿 파일의 경로
+    "Uri"     : ""
+  },
+
   "Message" : {
     // 표시할 메세지의 최대 갯수 (0-100)
     "Maximum" : 10,
@@ -54,8 +59,13 @@ var value =
     },
 
     "Twip"    : {
+      "Enable" : true,
       // 트윕 후원 메세지 양식(name, value, text <- 이름, 금액, 메세지)
       "Format" : "{name}({value}원) : {text}"
+    },
+
+    "Link"    : {
+      "Enable" : true
     }
   },
 

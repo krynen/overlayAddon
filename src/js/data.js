@@ -17,6 +17,7 @@ var data = {
 var api     = null;
 var done    = null;
 var message = null;
+var theme   = null;
 
 
 /**
@@ -52,7 +53,7 @@ methods.Get = async function(type, key) {
     case "theme":
       await api.Get( {uri:key} )
         .then(
-          function(res) { ret = message.ParseTheme(res); },
+          function(res) { ret = theme.Parse(res); },
           function(err) { message.Error("Data_Fail_Theme", err); }
         );
       break;
@@ -136,6 +137,9 @@ methods.ParseUri = function() {
         data.config.Key = value;
         break;
 
+      case "theme":
+        data.config.Theme.Uri = value;
+
       default:
         break;
     }
@@ -152,6 +156,7 @@ methods.Load = async function(uniformData) {
   // 포인터를 연결
   api     = uniformData.Api;
   message = uniformData.Message;
+  theme   = uniformData.Theme;
 
   // 내부 데이터를 연결
   Object.assign(data.shared, uniformData.Shared);

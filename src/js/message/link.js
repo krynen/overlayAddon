@@ -26,6 +26,8 @@ var parent = null;
  * @param {bool[]} done 각 어절의 처리 여부
  */
 methods.Replace = async function(message, text, done) {
+  if (config.Message.Link.Enable !== true) { return; }
+  
   for (var i=0; i<text.length; ++i) {
     // 이미 처리된 어절 무시
     if (done[i] === true) { continue; }

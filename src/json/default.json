@@ -5,6 +5,10 @@
     "Uris"    : []
   },
 
+  "Theme"   : {
+    "Uri"     : ""
+  },
+
   "Message" : {
     "Maximum" : 10,
     "Timeout" : 20,
@@ -31,7 +35,12 @@
     },
 
     "Twip"    : {
+      "Enable" : true,
       "Format" : ""
+    },
+
+    "Link"    : {
+      "Enable" : true
     }
   },
 
