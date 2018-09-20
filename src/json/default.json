@@ -5,6 +5,16 @@
     "Uris"    : []
   },
 
+  "Command" : {
+    "Prefix" : "!!",
+    "List"   : {
+      "clear" : {
+        "allow" : ["broadcaster/0"],
+        "alias" : []
+      }
+    }
+  },
+
   "Theme"   : {
     "Uri"     : ""
   },

@@ -15,6 +15,17 @@ var value =
   // 트위치 어플리케이션 클라이언트 아이디
   "Key"     : "",
 
+  "Command" : {
+    // 명령어 문자(열). 공백이 없을 것
+    "Prefix" : "!!",
+    "List"   : {
+      "clear" : {
+        "allow" : { "type":"replace", "value":["broadcaster/0", "moderator/0"] },
+        "alias" : { "type":"replace", "value":["clear"] }
+      }
+    }
+  },
+
   "Data"    : {
     // 추가로 불러올 (웹상의) json 설정 파일
     // (내부 설정과) 세션 설정을 통해서만 입력할 수 있음

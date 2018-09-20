@@ -14,11 +14,12 @@ var data = {
 };
 
 // 포인터 정의
-var api    = null;
-var config = null;
-var done   = null;
-var shared = null;
-var theme  = null;
+var api     = null;
+var command = null;
+var config  = null;
+var done    = null;
+var shared  = null;
+var theme   = null;
 
 
 /**
@@ -241,7 +242,7 @@ var AddType = function(message, type, config) {
   var capital = lower[0].toUpperCase() + lower.slice(1);
 
   var root = GetRootEntry(capital);
-  if (!Array.isArray(data.nodes[lower])) { data.nodes[lower] = []; }
+  if (!Array.isArray(data.nodes[capital])) { data.nodes[capital] = []; }
 
   // 메세지를 출력
   var elements = methods.AddSubElement(
@@ -250,19 +251,19 @@ var AddType = function(message, type, config) {
   );
 
   // 메세지 삭제시간을 적용
-  data.nodes[lower].push(elements);
+  data.nodes[capital].push(elements);
   if (config.Timeout > 0) {
     setTimeout( function() {
-      var index = data.nodes[lower].indexOf(elements);
+      var index = data.nodes[capital].indexOf(elements);
       if (index >= 0) {
-        data.nodes[lower].splice(index, 1)[0].forEach( function(el) { root.removeChild(el); } );
+        data.nodes[capital].splice(index, 1)[0].forEach( function(el) { root.removeChild(el); } );
       }
     }, config.Timeout * 1000);
   }
 
   // 메세지가 많을 경우 FIFO로 element를 제거
-  if (data.nodes[lower].length > Math.min(config.Maximum, 100)) {
-    data.nodes[lower].shift().forEach( function(el) { root.removeChild(el); } );
+  if (data.nodes[capital].length > Math.min(config.Maximum, 100)) {
+    data.nodes[capital].shift().forEach( function(el) { root.removeChild(el); } );
   }
 };
 
@@ -313,10 +314,12 @@ methods.Error = function(message, option) {
  * @param {string} message.text 보낸 메세지의 문자열
  */
 methods.Add = function(message) {
+  // 기본 attribute를 추가
+  message.attr = { "name":message.name };
+
   // 메세지를 어절별로 분해
   var text = message.text.split(" ");
   var done = new Array(text.length);
-
 
   // 하위 모듈 처리
   message.Emote = {
@@ -354,12 +357,10 @@ methods.Add = function(message) {
   // 링크 처리
   // 비동기 호출이므로 then() 이용
   this.Module.Link.Replace(null, text, done).then( () => {
-    // 분해한 메세지 병합
-    message.text = text.join(" ");
-
-    // 나머지 하위 모듈 처리
+    if (command.Get(message, text)) { return; }
 
     // 메세지 추가
+    message.text = text.join(" ");
     AddType(message, "Normal", config.Message);
   } );
 
@@ -429,10 +430,11 @@ methods.Connect = function() {
 methods.Load = function(uniformData) {
   done = uniformData.Done;
 
-  api    = uniformData.Api;
-  config = uniformData.Data.config;
-  shared = uniformData.Data.shared;
-  theme  = uniformData.Theme;
+  api     = uniformData.Api;
+  config  = uniformData.Data.config;
+  command = uniformData.Command;
+  shared  = uniformData.Data.shared;
+  theme   = uniformData.Theme;
 };
 
 
