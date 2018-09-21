@@ -128,8 +128,6 @@ methods.Connect = function() {
       }
     }
   } );
-
-  done.Done("orimg");
 };
 
 
