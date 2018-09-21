@@ -156,7 +156,7 @@ var LoadModules = async function(object, modules) {
  */
 module.exports = new function() {
   Object.assign(this, ConnectModules(REQUIRE_MODULES));
-  this.Done.Register("data", "message", "cheer", "orimg");
+  this.Done.Register("data", "theme", "message", "cheer", "orimg");
 
   LoadModules(this, REQUIRE_MODULES)
     .then( () => {

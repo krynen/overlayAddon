@@ -13,6 +13,7 @@ var data = {
 // 포인터 정의
 var api    = null;
 var config = null;
+var done   = null;
 
 
 /**
@@ -80,6 +81,7 @@ methods.Connect = async function() {
     var uri = theme.BaseUri + "/" + theme.FileName + ".html";
     await api.Get("theme", uri);
   }
+  done.Done("theme");
 };
 
 
@@ -89,6 +91,8 @@ methods.Connect = async function() {
  * @param {Object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) { 
+  done = uniformData.Done;
+
   api    = uniformData.Data;
   config = uniformData.Data.config;
 };
