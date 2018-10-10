@@ -12,6 +12,19 @@ var BUILD_OPTION = require("./option.json");
 var fs = require("fs");
 
 
+
+/**
+ * build.js의 CopyScript로 복사된 파일을 제거
+ */
+var RemoveCopiedScript = function() {
+  var list = BUILD_OPTION.COPY_SOURCE_FILES;
+  var path = BUILD_OPTION.COPY_TARGET_DIRECTORY;
+  list.forEach( function(el) {
+    var name = el.split("/").pop();
+    if (fs.existsSync(path+name)) { fs.unlink(path+name, function(){} ); }
+  } );
+};
+
 /** 
  * build.js의 WriteScript로 생성된 파일을 제거
  */
@@ -46,6 +59,7 @@ var RemoveBrowserSandbox = function() {
  * 빌드시 생성됐던 파일을 처리
  */
 (function() {
+  RemoveCopiedScript();
   RemoveWrittenScript();
   RemoveBrowserSandbox();
 }());

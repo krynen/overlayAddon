@@ -20,6 +20,18 @@ var BUILD_OPTION = require("./option.json");
 var fs = require("fs");
 var through = require("through2");
 
+/**
+ * COPY_SOURCE_FILES를 COY_TARGET_DIRECTORY로 복사
+ */
+var CopyScript = function() {
+  var target = BUILD_OPTION.COPY_TARGET_DIRECTORY;
+
+  BUILD_OPTION.COPY_SOURCE_FILES.forEach( function(el) {
+    var name = el.split("/").pop();
+    fs.createReadStream(el).pipe(fs.createWriteStream(target + name));
+  } );
+};
+
 
 /** 
  * HTML_SOURCE_FILE의 body 끝에 진입점으로부터 생성한 스크립트를 끼워넣음
@@ -129,11 +141,13 @@ var ExecuteBrowser = function() {
 (function() {
   switch (process.argv[2]) {
     case "debug":
+      CopyScript();
       WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, false)
         .then( ExecuteBrowser, console.log );
       break;
 
     case "start":
+      CopyScript();
       WriteScript(BUILD_OPTION.BUILD_START_ENTRANCE_FILE, true)
         .then( ()=>{}, console.log );
       break;

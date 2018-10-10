@@ -1,0 +1,818 @@
+<!-- 아래 스타일을 수정해 양식을 변경 -->
+<style type="text/css">
+  html {
+    --dark:#27373F;   /* 밝은 부분의 색상 */
+    --right:#207979;  /* 어두운 부분의 색상 */
+    --height:112px;   /* 이미지의 (최대) 표시 높이 */
+    --ratio:1;        /* 이미지의 종횡비 (길이 = 높이x종횡비) */
+    --space:.5rem;    /* 요소 사이의 간격 */
+  }
+</style>
+
+<!doctype HTML>
+<html>
+  <head>
+    <style type="text/css">
+      html { --border:1px solid var(--right);}
+      body { background:var(--dark); color:var(--right); padding:var(--space); margin:0; }
+      button, .category {
+        display:inline-block;
+        border:var(--border);
+        margin:var(--space); padding:var(--space);
+      }
+      button { background:var(--right); color:var(--dark); font-size:1rem; cursor:pointer; }
+      .category { float:left; clear:left; }
+      p { float:left; clear:left; margin-bottom:0; }
+      ul { list-style:none; margin:0; padding:0; vertical-align:middle; }
+      input[type="text"] {
+        background:none; color:var(--right);
+        font-size:1rem; padding:0 var(--space); box-sizing:content-box;
+        border:none; border-bottom:var(--border);
+      }
+      input[type="file"] {
+        position:absolute; top:0; left:0;
+        width:100%; height:100%; opacity:0;
+      }
+      input[type="file"]+label { cursor:pointer; }
+      input[type="file"]+label.active { background:var(--right); color:var(--dark); }
+      textarea {
+        background:none; color:var(--right);
+        font-size:1rem; font-family:inherit;
+        border:var(--border);
+      }
+      select {
+        background:none; color:var(--right);
+        font-size:1rem;
+        border:none;
+      }
+      select[disabled] { text-decoration:line-through; }
+
+      .chips { margin:calc(var(--space) / -4); }
+      .chips:not(:hover) {
+        overflow:hidden;
+        -webkit-mask-image:-webkit-gradient(linear,85% 0,100% 0, from(black), to(transparent));
+        mask-image:gradient(linear,85% 0,100% 0, from(black), to(transparent));
+      }
+      .chips>div { display:flex; }
+      .chips:hover>div { flex-wrap:wrap; }
+      .chips .chip label { padding-right:.5em; }
+      .chips .chip {
+        border:var(--border);
+        margin:calc(var(--space) / 4); padding:calc(var(--space) / 2);
+        flex-shrink:0;
+      }
+      .chips .chip button { width:1em; margin:0; padding:0; }
+      #group :not(.chip)>button,
+      #image :not(.chip)>button { width:2rem; }
+
+      #file>*, #file li { display:inline-block; }
+      #file form {
+        position:relative;
+        border:var(--border); margin:var(--space); padding:var(--space);
+      }
+      #file form label { margin:calc(-1 * var(--space)); padding:var(--space); }
+
+      #option form { display:inline; }
+      #option li { display:flex; }
+      #option li:not(:last-child) { margin-bottom:var(--space); }
+      #option label { margin-right:var(--space); }
+      #option input { text-align:center; }
+      #option select[disabled]+label { text-decoration:line-through; }
+      #option form { margin:0; }
+      #option input[type="checkbox"] { width:0; margin:0; }
+      #option input[type="checkbox"]+label:after {
+        content:' '; display:inline-block;
+        width:1.2rem; height:1.2rem; line-height:1.2rem;
+        text-align:center; vertical-align:top;
+        border:var(--border);
+      }
+      #option input[type="checkbox"]:checked+label:after { content:'\2714'; }
+
+      #group,
+      #image {
+        display:flex;
+        flex-wrap:wrap; align-items:flex-end;
+      }
+      #group>div,
+      #image>div {
+        display:flex;
+        border:var(--border); margin:var(--space); padding:var(--space);
+      }
+      #group>div { width:15rem; flex-direction:column; position:relative; }
+      #image>div { width:calc(var(--ratio) * var(--height) + 15rem); }
+      #image .image {
+        display:inline-block; position:relative;
+        width:calc(var(--ratio) * var(--height)); flex-shrink:0;
+        height:var(--height);
+        vertical-align:top; margin-right:var(--space);
+      }
+      #image .image:after {
+        content:' '; display:block; position:absolute;
+        top:0; bottom:0; left:0; right:0;
+        border:var(--border); box-sizing:border-box;
+        pointer-events:none;
+      }
+      #image .image img {
+        position:absolute; margin:auto;
+        top: 0; bottom: 0; left: 0; right: 0;
+        max-width:100%; max-height:100%;
+      }
+      #group .input button,
+      #image .image button { position:absolute; top:0; left:0; display:none; }
+      #image .image button { margin:0; }
+      #group .input:hover button,
+      #image .image:hover button { display:block; }
+      #group .input,
+      #group .value,
+      #image .input {
+        display:flex; flex-direction:column;
+        vertical-align:top; flex-grow:1;
+      }
+      #group .value { margin-bottom:calc(var(--space) * -1); }
+      #group .input>*,
+      #group .value>*,
+      #image .input>*:not(:last-child) { margin-bottom:var(--space); }
+      #group .input span,
+      #group .value span,
+      #image .input span { display:flex; }
+      #group .input span>label,
+      #group .value span>label,
+      #image .input span>label {
+        position:relative;
+        padding-right:.5em; margin-right:.5em;
+        flex-shrink:0;
+      }
+      #group .input span>label:after,
+      #group .value span>label:after,
+      #image .input span>label:after { content:" : "; position:absolute; right:0; }
+      #group .input span input,
+      #group .value span input,
+      #image .input span input { flex-grow:1; width:0; }
+      #group .input span select,
+      #group .value span select { margin:0 auto; }
+
+      #group .value .list:not(.active),
+      #group .value .chips:not(.active),
+      #group .value .rule:not(.active) { display:none; }
+    </style>
+
+    <script type="text/javascript">
+      window.data = null; // 불러온 데이터
+
+      /**
+       * 페이지 벗어나기 전 경고를 추가
+       * setWarn()으로 window의 beforeunload 이벤트 리스너를 추가
+       * unsetWarn()으로 제거
+       */
+      window.warned = false;
+      window.warnLeave = function(evt) {evt.returnValue = ""; };
+      window.setWarn = function() {
+        if (window.warned === false) {
+          window.addEventListener("beforeunload", window.warnLeave);
+          window.warned = true;
+        }
+      };
+      window.unsetWarn = function() {
+        if (window.warned === true) {
+          window.removeEventListener("beforeunload", window.warnLeave);
+          window.warned = false;
+        }
+      };
+
+      /**
+       * input type="text"의 너비를 조절
+       * span요소를 만들고 그 offsetWidth를 이용
+       */
+      window.fit = function(el) {
+        var span = document.createElement("span");
+        el.parentElement.appendChild(span);
+        span.innerText = el.value;
+        el.style.width = Math.max(
+          span.offsetWidth,
+          Number.parseFloat(getComputedStyle(el)["min-width"])
+        ) + "px";
+        el.parentElement.removeChild(span);
+      };
+
+      /**
+       * 경로를 최적화
+       * 윈도우식 경로가 입력되면 웹식으로 변경
+       */
+      window.pathReplace = function(el) {
+        if (el.value.indexOf("\\") !== -1) {
+          el.value = el.value
+            .replace(/([A-Za-z]):\\(\\)?/, "file:///$1://")
+            .replace(/\\/g, "/");
+        }
+        if (el.value.length !== el.value.lastIndexOf("/") + 1) { el.value = el.value + "/"; }
+
+        window.fit(el);
+      };
+
+      /**
+       * input with chips를 구현
+       */
+      window.addChipsInput = function(dataTarget, chipsTarget, chipsId) {
+        dataTarget.setAttribute(`data-${chipsId}`, "");
+        var chipsDiv = document.createElement("div");
+        chipsTarget.appendChild(chipsDiv);
+        var ret = document.createElement("input");
+        ret.type = "text";
+        ret.onpaste =
+        ret.onblur = function() {
+          this.value.split(" ").forEach( function(el) {
+            if (el === "") { return; }
+
+            // 이미 존재하는 태그는 중복해 추가하지 않음
+            var values = dataTarget.getAttribute(`data-${chipsId}`).split(" ");
+            if (values.indexOf(el) !== -1) { return; }
+            values.push(el);
+            dataTarget.setAttribute(`data-${chipsId}`, values.join(" "));
+
+            var div = document.createElement("div");
+            div.classList.add("chip");
+            var label = document.createElement("label");
+            label.innerText = el;
+            div.appendChild(label);
+            var button = document.createElement("button");
+            button.onclick = function() {
+              chipsDiv.removeChild(div);
+              var values = dataTarget.getAttribute(`data-${chipsId}`).split(" ");
+              values.splice(values.indexOf(el), 1);
+              dataTarget.setAttribute(`data-${chipsId}`, values.join(" "));
+            };
+            button.innerText = "-";
+            div.appendChild(button);
+            chipsDiv.appendChild(div);
+          } );
+          this.value = "";
+        }
+        ret.onkeyup = function(evt) { if (evt.key === " ") {
+          ret.dispatchEvent(new Event("blur"));
+        } }
+        return ret;
+      };
+
+      /**
+       * #image에 요소를 추가
+       */
+      window.addImage = function(uri, name, alias) {
+        var element = document.createElement("div");
+
+        // img 요소와 컨테이너 추가
+        var imgContainer = document.createElement("div");     // img 컨테이너
+        imgContainer.classList.add("image");
+
+        var img = document.createElement("img");              // img
+        img.src = document.getElementById("basePath").value + uri;
+        imgContainer.appendChild(img);
+
+        var form = document.createElement("form");            // 파일 상호작용 폼
+        var input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        form.appendChild(input);
+        var label = document.createElement("label");
+        form.appendChild(label);
+        imgContainer.appendChild(form);
+
+        var removeButton = document.createElement("button");  // 요소 삭제 폼
+        removeButton.innerText = "-";
+        imgContainer.appendChild(removeButton);
+
+        // input 요소와 컨테이너 추가
+        var inputContainer = document.createElement("div");   // input 컨테이너
+        inputContainer.classList.add("input");
+
+        var add = function(id, value, prefix) {        // input
+          var ret = document.createElement("span");
+          ret.classList.add(id);
+
+          if (prefix !== null) {
+            var label = document.createElement("label");
+            label.innerText = prefix;
+            ret.appendChild(label);
+          }
+
+          if (value !== null) {
+            var input = document.createElement("input");
+            input.type = "text";
+            input.value = value;
+            element.setAttribute(`data-${id}`, value);
+            input.onchange = function() { element.setAttribute(`data-${id}`, input.value); };
+            ret.appendChild(input);
+          }
+
+          inputContainer.appendChild(ret);
+          return ret;
+        };
+        add("uri", uri, "경로");
+        add("name", name, "이름");
+
+        var aliasSpan = add("alias", null, "이름 추가");
+        var chipsSpan = add("chips", null, null);
+        var aliasInput = window.addChipsInput(element, chipsSpan, "alias");
+        aliasInput.value = alias.join(" ");
+        aliasInput.dispatchEvent(new Event("paste"));
+        aliasSpan.appendChild(aliasInput);
+
+        // 컨테이너를 상위요소에 추가
+        element.appendChild(imgContainer);
+        element.appendChild(inputContainer);
+
+        // 요소에 이벤트 등록
+        var basePath = document.getElementById("basePath");  // 직접 입력 이벤트변경
+        var pathEvent = function() {
+          var uriInput = inputContainer
+            .getElementsByClassName("uri")[0]
+            .getElementsByTagName("input")[0];
+          img.src = basePath.value + uriInput.value;
+        };
+        basePath.addEventListener("change", pathEvent);
+        inputContainer
+          .getElementsByClassName("uri")[0]
+          .getElementsByTagName("input")[0].addEventListener("change", pathEvent);
+
+        removeButton.onclick = function() { element.parentElement.removeChild(element); }
+                                                             // 요소 삭제 이벤트
+
+        input.oninput = function(evt) {                      // 드래그&드랍 이벤트
+          imgContainer.classList.remove("active");
+          var file = input.files[0];
+          if (!file) { return; }
+
+          inputContainer
+            .getElementsByClassName("uri")[0]
+            .getElementsByTagName("input")[0].value = file.name;
+
+          var name = file.name.split(".").reverse().splice(1).reverse().join(".");
+          inputContainer
+            .getElementsByClassName("name")[0]
+            .getElementsByTagName("input")[0].value = name;
+
+          // value 직접 변경으로는 이벤트가 트리거되지 않으므로 직접 실행
+          pathEvent();
+        };
+        input.ondragenter = function(evt) { imgContainer.classList.add("active"); }
+        input.ondragleave = function(evt) { imgContainer.classList.remove("active"); }
+
+        // 생성된 요소를 문서에 추가
+        var parent = document.getElementById("image");
+        var button = Array.from(parent.getElementsByTagName("button")).reverse()[0];
+        parent.insertBefore(element, button);
+
+        // 새 요소로 포커스 이동
+        inputContainer
+            .getElementsByClassName("uri")[0]
+            .getElementsByTagName("input")[0].focus();
+      };
+
+      /**
+       * #group에 요소를 추가
+       */
+      window.addGroup = function(name, method, type, value) {
+        var element = document.createElement("div");
+
+        var inputContainer = document.createElement("div");           // input 컨테이너
+        inputContainer.classList.add("input");
+
+        var removeButton = document.createElement("button");          // 요소 삭제 버튼
+        removeButton.innerText = "-";
+        removeButton.onclick = function() { element.parentElement.removeChild(element); }
+        inputContainer.appendChild(removeButton);
+
+        var add = function(container, id, prefix) {                   // input, value
+          var ret = document.createElement("span");
+          ret.classList.add(id);
+
+          if (prefix !== null) {
+            var label = document.createElement("label");
+            label.innerText = prefix;
+            ret.appendChild(label);
+          }
+
+          if (container !== null) { container.appendChild(ret); }
+          return ret;
+        };
+
+        var nameSpan = add(inputContainer, "name", "그룹 이름");      // name input
+        var nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = name;
+        element.setAttribute("data-name", name);
+        nameInput.onchange = function() { element.setAttribute("data-name", nameInput.value); }
+        nameSpan.appendChild(nameInput);
+
+        var methodSpan = add(inputContainer, "method", "선택 방법");  // method input
+        var methodSelect = document.createElement("select");
+        var set = function(select, id, value, options) {
+          options.forEach( function(el) {
+            var option = document.createElement("option");
+            option.text = el[0];
+            option.setAttribute("data-id", el[1]);
+            select.add(option);
+            if (value === el[1]) {
+              select.value = el[0];
+              element.setAttribute(`data-${id}`, el[1]);
+            }
+          } );
+
+          select.addEventListener("change", function(el) {
+            var option = select.options[select.selectedIndex].getAttribute("data-id");
+            element.setAttribute(`data-${id}`, option);
+          } );
+        };
+        set(methodSelect, "method", method, [
+          ["선택하지 않음",     "none"],
+          [     "랜덤선택",   "random"],
+          [     "순차선택", "sequence"],
+          ["아이디별 고정",    "fixed"]
+        ] );
+        methodSpan.appendChild(methodSelect);
+
+        var valueContainer = document.createElement("div");           // value 컨테이너
+        valueContainer.classList.add("value");
+
+        var typeSpan = add(valueContainer, "type", "목록 정의 방법"); // type value
+        typeSelect = document.createElement("select");
+        set(typeSelect, "type", type, [
+          ["문자열 목록", "list"],
+          ["정규 표현식", "rule"]
+        ] );
+        typeSpan.appendChild(typeSelect);
+
+        var listSpan = add(valueContainer, "list", "목록 추가");      // list value
+        var listChips = add(valueContainer, "chips", null);           // chips for list value
+        var listInput = addChipsInput(element, listChips, "list");
+        if (type === "list") {
+          listInput.value = value.join(" ");
+          listSpan.classList.add("active");
+          listChips.classList.add("active");
+          listInput.dispatchEvent(new Event("paste"));
+        }
+        listSpan.appendChild(listInput);
+
+        var ruleSpan = add(valueContainer, "rule", "정규표현식");     // rule value
+        var ruleInput = document.createElement("input");
+        ruleInput.type = "text";
+        if (type === "rule") {
+          ruleInput.value = value;
+          ruleSpan.classList.add("active");
+          element.setAttribute("data-rule", value);
+        }
+        ruleInput.onchange = function() { element.setAttribute("data-rule", ruleInput.value); };
+        ruleSpan.appendChild(ruleInput);
+
+        // 컨테이너를 상위요소에 추가
+        element.appendChild(inputContainer);
+        element.appendChild(valueContainer);
+
+        // 이벤트를 등록
+        typeSelect.addEventListener("change", function() {
+          var type = typeSelect.options[typeSelect.selectedIndex].getAttribute("data-id");
+          switch(type) {
+            case "rule":
+              ruleSpan.classList.add("active");
+              listSpan.classList.remove("active");
+              listChips.classList.remove("active");
+              break;
+
+            case "list":
+              listSpan.classList.add("active");
+              listChips.classList.add("active");
+              ruleSpan.classList.remove("active");
+              break;
+
+            default:
+              break;
+          }
+        } );
+
+        // 생성된 요소를 문서에 추가
+        var parent = document.getElementById("group");
+        var button = Array.from(parent.getElementsByTagName("button")).reverse()[0];
+        parent.insertBefore(element, button);
+
+        // 새 요소로 포커스 이동
+        inputContainer
+            .getElementsByClassName("name")[0]
+            .getElementsByTagName("input")[0].focus();
+      };
+
+      /**
+       * 파일 로드
+       * input 이벤트 리스너에 추가
+       */
+      window.loadFile = function(el) {
+        var file = el.files[0];
+        if (!file) { return; }
+
+        var type = "";
+        if (file.type.match(/json/g) !== null) { type = "json"; }
+        else if (file.type.match(/(javascript)|(js)/g) !== null) { type = "js"; }
+
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+          switch(type) {
+            case "json":
+              window.data = JSON.parse(this.result) || {};
+              break;
+
+            case "js":    // 세션 설정을 로드
+              eval(this.result);
+              Object.keys(sessionStorage).some( function(key) {
+                if (key.match("data/config") !== null) {
+                  window.data = JSON.parse(sessionStorage.getItem(key));
+                  sessionStorage.removeItem(key);
+                  return true;
+                }
+              } );
+              break;
+
+            default: return;
+          }
+          [document.getElementById("file")].forEach( function(el) {
+            el.getElementsByTagName("label")[0].innerText = file.name;
+            el.getElementsByTagName("form")[0].removeChild(
+              el.getElementsByTagName("input")[0]
+            );
+          } );
+
+          // 다른 설정 존재여부 적용
+          if (Object.keys(data).length>1 || Object.keys(data.Message).length>1) {
+            document.getElementById("otherOptionCheck").checked = true;
+          } else {
+            document.getElementById("otherOptionCheck").checked = false;
+          }
+
+          var orimg = (window.data.Message||{}).Orimg;
+          if (orimg === undefined) { return; }
+
+          var prefix = document.getElementById("prefix");
+          prefix.value = orimg.Prefix || "";
+          window.fit(prefix);
+
+          var basePath = document.getElementById("basePath");
+          basePath.value = orimg.UriBase || "";
+          window.fit(basePath);
+
+          var groupsType = document.getElementById("groupsType");
+          var imagesType = document.getElementById("imagesType");
+          if (Array.isArray(orimg.Groups)) { groupsType.disabled = "1"; }
+          else {
+            Array.from(groupsType.options).some( function(opt) {
+              if (opt.getAttribute("data-id") === orimg.Groups.type) {
+                groupsType.value = opt.innerText;
+                return true;
+              }
+            } );
+          }
+          if (Array.isArray(orimg.Images)) { imagesType.disabled = "1"; }
+          else {
+            Array.from(imagesType.options).some( function(opt) {
+              if (opt.getAttribute("data-id") === orimg.Images.type) {
+                groupsType.value = opt.innerText;
+                return true;
+              }
+            } );
+          }
+
+          // 그룹 목록을 추가
+          (orimg.Groups.value || orimg.Groups || []).forEach( function(grp) {
+            if (grp.rule !== undefined) {
+              window.addGroup(grp.name, grp.method, "rule", grp.rule);
+            } else if (grp.list !== undefined) {
+              window.addGroup(grp.name, grp.method, "list", grp.list);
+            }
+          } );
+
+          // 이미지 목록을 추가
+          (orimg.Images.value || orimg.Images || []).forEach( function(img) {
+            window.addImage(img.uri, img.name, (img.alias||[""]));
+          } );
+        };
+        reader.readAsText(file);
+      };
+
+      /**
+       * 파일 저장
+       * button의 click 이벤트 리스너에 추가
+       */
+      window.saveFile = function(type) {
+        var groupsType = (function() {
+          var select = document.getElementById("groupsType");
+          return select.options[select.selectedIndex].getAttribute("data-id");
+        })();
+        var imagesType = (function() {
+          var select = document.getElementById("imagesType");
+          return select.options[select.selectedIndex].getAttribute("data-id");
+        })();
+        var groupsEnabled = !document.getElementById("groupsType").disabled;
+        var imagesEnabled = !document.getElementById("imagesType").disabled;
+
+        // 파일을 로드하지 않았을 경우
+        if (window.data === null) { window.data = { Message : { Orimg : {} } }; }
+        // 전용 이미지 데이터가 없는 경우
+        if (window.data.Message.Orimg === undefined) {
+          window.data.Message.Orimg = {};
+        }
+
+        // option 데이터 입력
+        var prefix; = document.getElementById("prefix");
+        if (prefix.value.match(/^\s*$/) !== null) {
+          window.data.Message.Orimg.Prefix = prefix.value;
+        } else { delete window.data.Message.Orimg.Prefix; }
+        
+        var basePath = document.getElementById("basePath");
+        if (basePath.value.match(/^\s*$/) !== null) {
+          window.data.Message.Orimg.UriBase = basePath.value;
+        } else { delete window.data.Message.Orimg.UriBase; }
+
+        // 그룹 데이터 초기화 및 입력
+        if (groupsEnabled === false) { window.data.Message.Orimg.Groups = []; }
+        else { window.data.Message.Orimg.Groups = { type:groupsType, value:[] }; }
+
+        Array.from(document.getElementById("group").children).forEach( function(el) {
+          if (el.nodeName === "BUTTON") { return; }
+
+          var group = {
+            name   : el.getAttribute("data-name"),
+            method : el.getAttribute("data-method")
+          };
+          // 빈 데이터를 제외
+          if (group.name === "") { return; }
+          switch(el.getAttribute("data-type")) {
+            case "rule":
+              group.rule = el.getAttribute("data-rule");
+              break;
+            case "list":
+              group.list = el.getAttribute("data-list").split(" ");
+              for(var i=group.list.length-1; i>=0; --i) {
+                if (group.list[i].match(/^\s*$/) !== null) { group.list.splice(i, 1); }
+              }
+              break;
+          }
+
+          if (groupsEnabled === true) { window.data.Message.Orimg.Groups.value.push(group); }
+          else { window.data.Message.Orimg.Groups.push(group); }
+        } );
+
+        // 이미지 데이터 초기화 및 입력
+        if (imagesEnabled === false) { window.data.Message.Orimg.Images = []; }
+        else { window.data.Message.Orimg.Images = { type:imagesType, value:[] }; }
+
+        Array.from(document.getElementById("image").children).forEach( function(el) {
+          if (el.nodeName === "BUTTON") { return; }
+
+          var image = {
+            name  : el.getAttribute("data-name"),
+            uri   : el.getAttribute("data-uri"),
+            alias : el.getAttribute("data-alias").split(" ")
+          };
+          // 빈 데이터가 있을 경우 생략
+          if (image.name === "" || image.uri === "") { return; }
+          for(var i=image.alias.length-1; i>=0; --i) {
+            if (image.alias[i].match(/^\s*$/) !== null) { image.alias.splice(i, 1); }
+          }
+
+          if (imagesEnabled === true) { window.data.Message.Orimg.Images.value.push(image); }
+          else { window.data.Message.Orimg.Images.push(image); }
+        } );
+
+        // 파일을 출력
+        var name = document.getElementById("file").getElementsByTagName("label")[0]
+          .innerText.split(".").slice(0, -1).join(".");
+        var output = "";
+        var blob = null;
+
+        if (type === "json") {
+          output = JSON.stringify(window.data, null, 2).replace(/(?:^[\r])\n/g, "\r\n");
+          blob = new Blob([output], { type: "application/json;charset=utf-8" });
+        } else if (type === "js") {
+          // 세션 등록부를 포함해 작성
+          output = `
+            (function() {
+              var key = "data/config/" + (document.scripts.length - 1);
+              var value = ${JSON.stringify(window.data)};
+              sessionStorage.setItem(key, JSON.stringify(value));
+            })();`;
+          blob = new Blob([output], { type: "application/javascript;charset=utf-8" });
+        } else { return; }
+
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = name;
+        link.click();
+
+        // 페이지 이탈 경고를 제거
+        window.unsetWarn();
+      };
+    </script>
+
+    <title>전용 이미지 편집기</title>
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREAAAAAAAAREQAAAAAAEQAAEQAAAAARAAARAAAAABEAABEAAAAAEQAAEQAAAAARAAARAAAAABEAABEAAAAAABERAAAAAAAAEREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAOAHAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAA4AcAAP//AAD//wAA">
+  </head>
+
+  <body>
+    <p>파일 불러오기 · 저장하기</p>
+    <div id="file" class="category">
+      <form>
+        <input type="file" accept=".json,.js" />
+        <label>파일 열기</label>
+      </form>
+      <span>─저장→</span>
+      <ul>
+        <li><button id="saveAsJson">JSON</button></li>
+        <li><button id="saveAsJs">JS</button></li>
+      </ul>
+    </div>
+    <p>파일 설정</p>
+    <ul id="option" class="category">
+      <li>
+        <label>접두어</label>
+        <input id="prefix" type="text" style="min-width:1rem;" /></li>
+      <li>
+        <label>이미지 상위 경로</label>
+        <input id="basePath" type="text" style="min-width:2rem;" />
+      </li><li>
+        <label>적용 방식</label>
+        <select id="groupsType">
+          <option data-id="replace">대체</option>
+          <option data-id="append">추가</option>
+        </select>
+        <label>→ 그룹</label>
+        <select id="imagesType">
+          <option data-id="replace">대체</option>
+          <option data-id="append">추가</option>
+        </select>
+        <label>→ 이미지</label>
+      </li><li>
+        <label>다른 설정 있음</label>
+        <form>
+          <input type="checkbox" id="otherOptionCheck" disabled="1"></input>
+          <label for="otherOptionCheck"></label>
+        </form>
+      </li>
+    </ul>
+    <p>이미지 그룹</p>
+    <ul id="group" class="category">
+      <button>+</button>
+    </ul>
+    <p>전용 이미지</p>
+    <ul id="image" class="category">
+      <button>+</button>
+    </ul>
+
+    <!-- 이벤트를 등록 -->
+    <script type="text/javascript">
+      // file에 이벤트를 등록
+      [document.getElementById("file")].forEach( function(el) {
+        el = el.getElementsByTagName("form")[0];
+        var input = el.getElementsByTagName("input")[0];
+        var label = el.getElementsByTagName("label")[0];
+
+        input.ondragenter = function() { label.classList.add("active"); }
+        input.ondragleave = function() { label.classList.remove("active"); }
+        input.addEventListener("input", function() {
+          label.classList.remove("active");
+          window.setWarn();
+          window.loadFile(input);
+        });
+      } );
+
+      // prefix에 이벤트를 등록
+      [document.getElementById("prefix")].forEach( function(el) {
+        window.fit(el);
+
+        var event = function() { window.fit(el); window.setWarn(); };
+        el.addEventListener("keyup", event);
+        el.addEventListener("paste", event);
+        el.addEventListener("change", event);
+      } );
+
+      // basePath에 이벤트를 등록
+      [document.getElementById("basePath")].forEach( function(el) {
+        window.fit(el);
+        el.addEventListener("keyup", function() { window.fit(el); window.setWarn(); } );
+
+        var event = function() { window.pathReplace(el); window.setWarn(); };
+        el.addEventListener("paste", event);
+        el.addEventListener("change", event);
+      } );
+
+      // 버튼에 이벤트를 등록
+      document.getElementById("saveAsJs").onclick = function() { window.saveFile("js"); };
+      document.getElementById("saveAsJson").onclick = function() { window.saveFile("json"); };
+
+      document.getElementById("group").getElementsByTagName("button")[0].onclick = function() {
+        window.setWarn();
+        window.addGroup("", "none", "list", []);
+      };
+      document.getElementById("image").getElementsByTagName("button")[0].onclick = function() {
+        window.setWarn();
+        window.addImage("", "", []);
+      };
+    </script>
+  </body>
+</html>
