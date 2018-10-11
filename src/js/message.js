@@ -228,6 +228,10 @@ methods.NativeError = function(message)  {
   err.innerHTML = message;
 
   document.body.appendChild(err);
+  setTimeout(
+    function() { document.body.removeChild(err); },
+    ((config||{}).Timeout||10) * 1000
+  );
 };
 
 
@@ -276,12 +280,11 @@ var AddType = function(message, type, config) {
  * @param {string} option 출력할 문자열에 추가할 수 있는 값
  */
 methods.Error = function(message, option) {
+  var str = ((config||{}).Error||{})[message] || message;
   try {
-    var str = config.Error[message];
-
     if (message === "Module_Success_Connect") {
       // 모듈 로드 완료 메세지 처리
-      if (config.Error[message] !== true) { return; }
+      if (str !== true) { return; }
       str = "";
       (theme.template["Description"]||[]).forEach( function(el) {
         str += el.outerHTML || el.wholeText;
@@ -291,15 +294,15 @@ methods.Error = function(message, option) {
     // 문자열이 공백일 경우 더 이상 처리하지 않음
     if (str === "") { return; }
 
-    // 상세표시 설정이 되어있을 경우 옵션들을 개행 후 배열시킴
     if (config.Error.Detailed !== false && typeof option === "string") {
-      str += "\n" + option;
+      // 상세표시 설정이 되어있을 경우 옵션을 개행하여 추가
+      AddType({ "text":str+"\n"+option, "attr":{"type":message} }, "Error", config.Error);
+    } else {
+      // 되어있지 않을 경우 기본 메세지만 추가
+      AddType({ "text":str, "attr":{"type":message} }, "Error", config.Error);
     }
-
-    // 메세지 추가
-    AddType({ "text":str, "attr":{"type":message} }, "Error", config.Error);
   } catch(err) {
-    if (typeof option === "string") { methods.NativeError(`${message}\n${option}\n\n${err}`) }
+    if (typeof option === "string") { methods.NativeError(`${str}\n${option}\n\n${err}`) }
     else { methods.NativeError(`${message}\n\n${err}`); }
   }
 };

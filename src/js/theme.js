@@ -79,7 +79,10 @@ methods.Connect = async function() {
     methods.Parse(this.Module.Default);
   } else {
     var uri = theme.BaseUri + "/" + theme.FileName + ".html";
-    await api.Get("theme", uri);
+    if (await api.Get("theme", uri) !== null ) {
+      // 로드 실패시 기본 테마 적용
+      methods.Parse(this.Module.Default);
+    }
   }
   done.Done("theme");
 };
