@@ -76,9 +76,13 @@ methods.Get = function(message, text, master) {
  */
 methods.Connect = function() {
   // 설정 스타일을 적용
+  var prefix = config.Command.Prefix;
+  var command = config.Command.List.style.alias[0];
+
   Object.keys(config.Command.List.style.list).forEach( function(key) {
-    this.Get(null, [key].concat(config.Command.style.list[key].split(" ")), true);
-  } );
+    var value = config.Command.List.style.list[key];
+    this.Get(null, [prefix+command, key].concat(value.split(" ")), true);
+  }, this);
 };
 
 
