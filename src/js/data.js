@@ -139,6 +139,30 @@ methods.ParseUri = function() {
 
       case "theme":
         data.config.Theme.FileName = value;
+        break;
+
+      case "theme-enable":
+        switch(value) {
+          case "0":
+          case "false":
+          case "no":
+            data.config.Command.List.theme.enable = false;
+            break;
+
+          /*
+          case "1":
+          case "true":
+          case "yes":
+          case "":
+          */
+          default:
+            data.config.Command.List.theme.enable = true;
+        }
+        break;
+
+      case "zoom":
+        data.config.Command.List.style.list.zoom = value;
+        break;
 
       default:
         break;

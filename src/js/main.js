@@ -21,6 +21,7 @@ var REQUIRE_MODULES = new function() {
   this["Theme/Default"] = require("../html/theme.html");
   this["Command"]       = require("./command.js");
   this["Command/Clear"] = require("./command/clear.js");
+  this["Command/Style"] = require("./command/style.js");
   this["Command/Theme"] = require("./command/theme.js");
   this["Data"]    = require("./data.js");
   this["Default"] = require("../json/default.json");
@@ -162,6 +163,7 @@ module.exports = new function() {
     .then( () => {
       this.Theme.Connect();
       this.Irc.Connect();
+      this.Command.Connect();
     } );
 
   return this;

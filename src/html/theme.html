@@ -1,9 +1,7 @@
-<!--
-  template#style에는 document.head에 추가할 스타일을,
-  나머지 template에는 각각의 경우에 생성할 Node Tree를 입력한다.
-
-  virtual element는 child elements에 attribute를 추가할 때 이용
+<!-- 구현된 style 명령어 요소
+  zoom : 오버레이의 전체 배율. number
 -->
+
 <template id="Description">
   <!-- 모듈 로드 완료시 표시할 메세지 -->
   <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAB4CAIAAAA48Cq8AAAACXBIWXMAADXUAAA11AFeZeUIAAADV0lEQVR4nO3dTU7kMBRF4dBiA70MFtU7Ycge2U4PSkIIFVWJ7fN8nZxv1hJUzPMhqR+Uftn+/tuk0f7MXoDOybCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCFeZy+gz+f7ky94+yhZx0NPF3lTuVR+bi93bry2cxAjDt9i//J+KFtt8wq/G77a2rmtE9aQ3drgNY9a5Jf+1U6a2yJhBW7YD8NX+KVnqfPmFv8cC9qw28MOyYtLqsfsuWW/KqT3rP/xL1XVkccPDqtmz3qOcs2q9h0lNazKPWs71pWr2nGsyLDq9+zoEa3q2RHzwsrcs+8yVxi2qrywmr19VLwyD9u/AZi5hb3d0LBtP4by/Z8NFzj0nbk9D172hA+eW1JYR3+ep/v09jH4BNP2aIdibdjgyLkteyncuVtzP4TuvMp0fvtvjznwy363bFj7HZrRg9/U4SeGcH1ziwnr0LatvmcDpc4tJqyTuXz6C4bVsGejroZLq51bRlj5e5l5xQmeW0ZYOh3DEsKwhDCs0S7/evDmMmG5321a55b0WeHpdb6IW+p34zJnLNUyLCEMSwjDEsKwhLhMWMEfq0Vrndtlwipjwdu2GZYgvkFa6O47nCc9w3nGEiIjrKi/8Ly7mMyPU4LnlhEWrfhyc5qrW8cPco2wVC4mLO6sPuXP1ctOWqlziwnrqPp7eGQ+zTqqam7LhrXt+OHnPtf5fA99slUyt6SwGk4Jv21e26buuVvGUQVtRc6t73bczR7MYtZv+c7tmXgSerzCsLklnbGWcI5nWry8sKbsXPMtrHKEzS0vrK18RpmhNEiaW2RYW+GM2g4U22LM3FLD2kpmlHa7vSEy5hYc1kbOaFQWV2tr99zy3m64a+ySiLlP+ZuLp+bNbZGwbvoXRp9gMv/7uxlzWyqsL/n3me2ZIbfawrndC0vqlv3kXcsyLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEsIwxLCsIQwLCEMSwjDEsKwhDAsIQxLCMMSwrCEMCwhDEuI/yJL8XiuTiLZAAAAAElFTkSuQmCC" /><br />
@@ -13,62 +11,77 @@
 <template id="Style">
   <!-- 스타일 -->
   <style type="text/css">
-#Root { position:absolute; bottom:0; left:0; right:0; }
-.NormalMessage {
-  margin:2px 0; padding:3px;
-  background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.6);
-}
-#ErrorRoot { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.6); }
-.ErrorMessage { margin:2px 0; padding:3px; }
+    html {
+      /**
+       * style 명령어를 위한 변수 적용
+       * var(--name)과 html[-data-name]는 같은 값을 가짐
+       *
+       * zoom             : 오버레이 전체 배율. number
+       */
+    }
 
-.NormalMessage .NameBadges {
-  display:flex;
-  background:linear-gradient(to right, rgba(0,0,0,.7), rgba(0,0,0,0));
-}
-.NormalMessage .Name {
-  display:flex; flex:1; margin:auto; 
-  text-shadow:0 0 1px white;
-  color:var(--data-color);
-  padding:1px;
-}
-.NormalMessage .Badges { display:flex; }
-.NormalMessage .Badges img { 
-  margin:auto 1px; height:18px;
-  border:1px solid rgba(255,255,255,.6);
-}
+    html { width:100%; height:100%; zoom:var(--zoom); }
+    #Root { position:absolute; bottom:0; left:0; right:0; }
+    #ErrorRoot { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.6); }
 
-.Text {
-  color:white; padding:2px 1px 1px; text-align:right;
-  word-break: keep-all; word-wrap: break-word;
-}
-[data-color-chat="1"] .Text {
-  color:var(--data-color);
-}
-.Text [nth:child(n+5)] { display:none; }
+    .NormalMessage {
+      margin:2px 0; padding:3px;
+      background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.6);
+    }
+    .ErrorMessage { margin:2px 0; padding:3px; }
+
+    .NormalMessage .NameBadges {
+      display:flex;
+      background:linear-gradient(to right, rgba(0,0,0,.7), rgba(0,0,0,0));
+    }
+    .NormalMessage .Name {
+      display:flex; flex:1; margin:auto; 
+      text-shadow:0 0 1px white;
+      color:var(--data-color);
+      padding:1px;
+    }
+    .NormalMessage .Badges { display:flex; }
+    .NormalMessage .Badges img { 
+      margin:auto 1px; height:18px;
+      border:1px solid rgba(255,255,255,.6);
+    }
+
+    .Text {
+      color:white; padding:2px 1px 1px; text-align:right;
+      word-break: keep-all; word-wrap: break-word;
+    }
+    [data-color-chat="1"] .Text {
+      color:var(--data-color);
+    }
+    .Text [nth:child(n+5)] { display:none; }
 
 
-.Cheer {
-  color:white; padding:3px; text-align:center;
-}
+    .Cheer {
+      color:white; padding:3px; text-align:center;
+    }
 
-.Emote { width:56px; }
-[data-emote-only="1"] .Text { text-align:center; }
+    .Emote { width:56px; }
+    [data-emote-only="1"] .Text { text-align:center; }
 
-.Cheermote {
-  display:inline-block; padding:1px 3px; margin:-1px;
-  border:1px solid rgba(255,255,255,.6);
-}
-.Cheermote .CheerImage { height:1rem; }
+    .Cheermote {
+      display:inline-block; padding:1px 3px; margin:-1px;
+      border:1px solid rgba(255,255,255,.6);
+    }
+    .Cheermote .CheerImage { height:1rem; }
 
-.Video .Image { max-width:100%; text-align:center; }
-.Video .Title,
-.Video .Name { text-align:center; }
+    .Orimg {
+      max-height:112px;
+    }
 
-.Video[data-invalid] .Image,
-.Video[data-invalid] .Name { diaplay:none; }
-.Video[data-invalid] .Title::after {
-  content:"Invalid clip";
-}
+    .Video .Image { max-width:100%; text-align:center; }
+    .Video .Title,
+    .Video .Name { text-align:center; }
+
+    .Video[data-invalid] .Image,
+    .Video[data-invalid] .Name { diaplay:none; }
+    .Video[data-invalid] .Title::after {
+      content:"Invalid clip";
+    }
   </style>
 </template>
 

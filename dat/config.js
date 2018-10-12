@@ -23,9 +23,15 @@ var value =
         "allow" : { "type":"replace", "value":["broadcaster/0", "moderator/0"] },
         "alias" : { "type":"replace", "value":["clear"] }
       },
-      "theme" : {
+      "style" : {
         "allow" : { "type":"replace", "value":["broadcaster/0"] },
-        "alias" : { "type":"replace", "value":["theme"] }
+        "alias" : { "type":"replace", "value":["style"] },
+        "list"  : {}
+      },
+      "theme" : {
+        "allow"  : { "type":"replace", "value":["broadcaster/0"] },
+        "alias"  : { "type":"replace", "value":["theme"] },
+        "enbale" : true
       }
     }
   },

@@ -618,11 +618,11 @@
         }
 
         // option 데이터 입력
-        var prefix; = document.getElementById("prefix");
+        var prefix = document.getElementById("prefix");
         if (prefix.value.match(/^\s*$/) !== null) {
           window.data.Message.Orimg.Prefix = prefix.value;
         } else { delete window.data.Message.Orimg.Prefix; }
-        
+
         var basePath = document.getElementById("basePath");
         if (basePath.value.match(/^\s*$/) !== null) {
           window.data.Message.Orimg.UriBase = basePath.value;

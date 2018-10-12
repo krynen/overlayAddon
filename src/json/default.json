@@ -12,9 +12,15 @@
         "allow" : ["broadcaster/0"],
         "alias" : []
       },
+      "style" : {
+        "allow" : ["broadcaster/0"],
+        "alias" : [],
+        "list" : {}
+      },
       "theme" : {
         "allow" : ["broadcaster/0"],
-        "alias" : []
+        "alias" : [],
+        "enable" : true
       }
     }
   },

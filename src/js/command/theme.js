@@ -19,6 +19,8 @@ var theme   = null;
  * @param {string[]} text 어절별로 분리된 메세지 문자열
  */
 methods.Execute = async function(text) {
+  if (config.Command.List.theme.enable !== true) { return; }
+  
   var uri = location.href.split("?");
   if (uri.length <= 1) { location.href = uri[0] + `?theme=${text[0]}`}
   else {
