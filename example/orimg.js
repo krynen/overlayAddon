@@ -10,7 +10,7 @@
   var key = "data/config/" + (document.scripts.length - 1);
   var value = { "Message" : { "Orimg" : {
     "Prefix"  : "~",
-    "UriBase" : "dat/orimgs/",
+    "UriBase" : "example/orimgs/",
     "Groups"  : {
       "type"   : "replace",
       "value"  : [
