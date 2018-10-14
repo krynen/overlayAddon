@@ -49,7 +49,7 @@ var value =
 
   "Theme"   : {
     // 테마 템플릿들의 상위 경로
-    "BaseUri"   : "./example/theme",
+    "BaseUri"   : "./example/theme/",
     // 테마 파일명
     "FileName"  : ""
   },
