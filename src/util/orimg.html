@@ -21,8 +21,8 @@
         margin:var(--space); padding:var(--space);
       }
       button { background:var(--right); color:var(--dark); font-size:1rem; cursor:pointer; }
-      .category { float:left; clear:left; }
-      p { float:left; clear:left; margin-bottom:0; }
+      .category { clear:left; float:left; }
+      p { clear:left; margin:0; }
       ul { list-style:none; margin:0; padding:0; vertical-align:middle; }
       input[type="text"] {
         background:none; color:var(--right);
@@ -46,6 +46,18 @@
         border:none;
       }
       select[disabled] { text-decoration:line-through; }
+      .invisible { display:none; }
+
+      body>label {
+        display:inline-block;
+        margin-top:var(--space);
+        clear:left; float:left;
+      }
+      body>label:after {
+        content:"?";
+        font-size:.8rem;
+      }
+      label:not(:hover) + .wrap:not(.active) p { display:none; }
 
       .chips { margin:calc(var(--space) / -4); }
       .chips:not(:hover) {
@@ -90,7 +102,7 @@
 
       #group,
       #image {
-        display:flex;
+        display:inline-flex;
         flex-wrap:wrap; align-items:flex-end;
       }
       #group>div,
@@ -723,85 +735,96 @@
   </head>
 
   <body>
-    <p>
-      전용이미지 유틸리티가 클라이언트와 다른 경로에 있을 경우
-      <br />클라이언트가 위치한 경로를 입력하면 정상작동합니다.
-    </p>
-    <div id="client" class="category">
-      <label>클라이언트 위치</label>
-      <input id="clientPath" type="text" style="min-width:2rem;" />
+    <label>* 클라이언트 위치</label>
+    <div class="wrap">
+      <p>
+        전용이미지 유틸리티가 클라이언트와 다른 경로에 있을 경우
+        <br />클라이언트가 위치한 경로를 입력하면 정상작동합니다.
+      </p>
+      <div id="client" class="category">
+        <label>클라이언트 위치</label>
+        <input id="clientPath" type="text" style="min-width:2rem;" />
+      </div>
     </div>
-    <p>
-      * 파일 불러오기 · 저장하기
-      <br />충돌을 방지하기 위해 하나의 파일만 불러올 수 있으므로
-      <br />다른 파일을 관리하고싶으실 땐 (저장 후) 새로고침하여 사용해주세요.
-    </p>
-    <div id="file" class="category">
-      <form>
-        <input type="file" accept=".json,.js" />
-        <label>파일 열기</label>
-      </form>
-      <span>─저장→</span>
-      <ul>
-        <li><button id="saveAsJson">JSON</button></li>
-        <li><button id="saveAsJs">JS</button></li>
+    <label>* 파일 불러오기 · 저장하기</label>
+    <div class="wrap">
+      <p>
+        충돌을 방지하기 위해 하나의 파일만 불러올 수 있으므로
+        <br />다른 파일을 관리하고싶으실 땐 (저장 후) 새로고침하여 사용해주세요.
+      </p>
+      <div id="file" class="category">
+        <form>
+          <input type="file" accept=".json,.js" />
+          <label>파일 열기</label>
+        </form>
+        <span>─저장→</span>
+        <ul>
+          <li><button id="saveAsJson">JSON</button></li>
+          <li><button id="saveAsJs">JS</button></li>
+        </ul>
+      </div>
+    </div>
+    <label>* 파일 설정</label>
+    <div class="wrap">
+      <p>
+        이미지 상위 경로는 클라이언트의 상대 경로, 혹은 절대 경로로 입력합니다.
+        <br />
+        <br />적용 방식은 여러 설정 파일과 전용 이미지 목록 파일을 사용할 때 이용되며
+        <br />추가로 설정하여 여러 목록 파일을 사용할 수도 있습니다.
+      </p>
+      <ul id="option" class="category">
+        <li>
+          <label>접두어</label>
+          <input id="prefix" type="text" style="min-width:1rem;" />
+        </li><li>
+          <label>이미지 상위 경로</label>
+          <input id="basePath" type="text" style="min-width:2rem;" />
+        </li><li>
+          <label>적용 방식</label>
+          <select id="groupsType">
+            <option data-id="replace">대체</option>
+            <option data-id="append">추가</option>
+          </select>
+          <label>→ 그룹</label>
+          <select id="imagesType">
+            <option data-id="replace">대체</option>
+            <option data-id="append">추가</option>
+          </select>
+          <label>→ 이미지</label>
+        </li><li>
+          <label>다른 설정 있음</label>
+          <form>
+            <input type="checkbox" id="otherOptionCheck" disabled="1"></input>
+            <label for="otherOptionCheck"></label>
+          </form>
+        </li>
       </ul>
     </div>
-    <p>
-      * 파일 설정
-      <br />이미지 상위 경로는 클라이언트의 상대 경로, 혹은 절대 경로로 입력합니다.
-      <br />
-      <br />적용 방식은 여러 설정 파일과 전용 이미지 목록 파일을 사용할 때 이용되며
-      <br />추가로 설정하여 여러 목록 파일을 사용할 수도 있습니다.
-    </p>
-    <ul id="option" class="category">
-      <li>
-        <label>접두어</label>
-        <input id="prefix" type="text" style="min-width:1rem;" />
-      </li><li>
-        <label>이미지 상위 경로</label>
-        <input id="basePath" type="text" style="min-width:2rem;" />
-      </li><li>
-        <label>적용 방식</label>
-        <select id="groupsType">
-          <option data-id="replace">대체</option>
-          <option data-id="append">추가</option>
-        </select>
-        <label>→ 그룹</label>
-        <select id="imagesType">
-          <option data-id="replace">대체</option>
-          <option data-id="append">추가</option>
-        </select>
-        <label>→ 이미지</label>
-      </li><li>
-        <label>다른 설정 있음</label>
-        <form>
-          <input type="checkbox" id="otherOptionCheck" disabled="1"></input>
-          <label for="otherOptionCheck"></label>
-        </form>
-      </li>
-    </ul>
-    <p>
-      * 이미지 그룹
-      <br />여러 전용 이미지를 묶어 관리할 수 있는 기능입니다.
-      <br />
-      <br />각 이미지를 직접 입력하거나 정규표현식으로 목록을 관리할 수 있으며
-      <br />기본 이름과 추가 이름 어느쪽으로 설정하여도 정상 작동합니다.
-      <br />
-      <br />선택 방법을 설정할 경우
-      <br />이미지 이름 대신 그룹 이름을 입력해서 전용 이미지를 표시할 수도 있습니다.
-    </p>
-    <ul id="group" class="category">
-      <button>+</button>
-    </ul>
-    <p>
-      * 전용 이미지
-      <br />키워드 입력으로 표시할 이미지의 목록입니다.
-      <br />기본 이름과 추가된 이름 모두 키워드로 사용되며 공백 문자로 구분됩니다.
-    </p>
-    <ul id="image" class="category">
-      <button>+</button>
-    </ul>
+    <label>* 이미지 그룹</label>
+    <div class="wrap">
+      <p>
+        여러 전용 이미지를 묶어 관리할 수 있는 기능입니다.
+        <br />
+        <br />각 이미지를 직접 입력하거나 정규표현식으로 목록을 관리할 수 있으며
+        <br />기본 이름과 추가 이름 어느쪽으로 설정하여도 정상 작동합니다.
+        <br />
+        <br />선택 방법을 설정할 경우
+        <br />이미지 이름 대신 그룹 이름을 입력해서 전용 이미지를 표시할 수도 있습니다.
+      </p>
+      <ul id="group" class="category">
+        <button>+</button>
+      </ul>
+    </div>
+    <label>* 전용 이미지</label>
+    <div class="wrap">
+      <p>
+        키워드 입력으로 표시할 이미지의 목록입니다.
+        <br />기본 이름과 추가된 이름 모두 키워드로 사용되며 공백 문자로 구분됩니다.
+      </p>
+      <ul id="image" class="category">
+        <button>+</button>
+      </ul>
+    </div>
 
     <!-- 이벤트를 등록 -->
     <script type="text/javascript">
@@ -855,6 +878,23 @@
         window.setWarn();
         window.addImage("", "", []);
       };
+
+      // wrap에 이벤트 등록
+      Array.from(document.getElementsByClassName("wrap")).forEach( function(el, ind) {
+        var input = document.createElement("input");
+        input.classList.add("invisible");
+        input.type = "checkbox";
+        input.id = `wrapCheckBox${ind}`;
+        document.body.appendChild(input);
+
+        var label = el;
+        while(label.nodeName !== "LABEL") { label = label.previousSibling; }
+        label.htmlFor = input.id;
+        input.addEventListener("change", function() {
+          if (el.classList.contains("active")) { el.classList.remove("active"); }
+          else { el.classList.add("active"); }
+        } );
+      } );
     </script>
   </body>
 </html>
