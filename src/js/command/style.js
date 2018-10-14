@@ -19,7 +19,7 @@ var message = null;
  */
 methods.Execute = async function(text) {
   for(var i=text.length-1; i>=0; --i) { 
-    if (text[i].match(/^\s*$/) !== null) { test.splice(i, 1); }
+    if (text[i].match(/^\s*$/) !== null) { text.splice(i, 1); }
   }
 
   if (text.length < 2) { return; }

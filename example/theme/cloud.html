@@ -1,0 +1,65 @@
+﻿<!-- 구현된 style 명령어 요소
+  font-size : 글씨 크기. px
+-->
+
+<template id="Description"></template>
+
+<template id="Style">
+  <style type="text/css">
+    .Message {
+      font-size:var(--font-size);
+      text-shadow:
+          #333  1px    0 1px, #333 -1px    0 1px,
+          #333    0  1px 1px, #333    0 -1px 1px,
+          #333 -1px -1px 1px, #333  1px -1px 1px,
+          #333 -1px  1px 1px, #333  1px  1px 1px;
+      color:white;
+      opacity:0.8;
+
+      position:fixed;
+      white-space:nowrap;
+      transform:translateX(-50%);
+      left:calc(var(--data-left) * 1%);
+      top:calc(var(--data-top) * 1% - 1em);
+    }
+
+    .Emote { max-height:26px; }
+    .CheerMote { max-height:1rem; }
+    .Orimg { max-height:52px; }
+  </style>
+</template>
+
+<template id="NormalRoot"><div theme-type="Root"></div></template>
+<template id="ErrorRoot"><div theme-type="Root"></div></template>
+
+<template id="NormalMessage">
+  <virtual theme-type="Root" theme-data='{
+      "left":["random", 0, 100, 1],
+      "top" :["random", 0, 100, 1]
+    }'
+  >
+    <span theme-type="Text" class="Message"></span>
+  </virtual>
+</template>
+
+<template id="ErrorMessage"></template>
+
+<template id="Emote">
+  <virtual theme-type="Root" class="Emote"><virtual theme-type="Image"></virtual></virtual>
+</template>
+
+<template id="CheerHead"></template>
+<template id="Cheermote">
+  <virtual theme-type="Root">
+    <virtual theme-type="Image" class="CheerMote"></virtual>
+  </virtual>
+</template>
+
+<template id="Orimg">
+  <virtual theme-type="Root" class="Orimg"><virtual theme-type="Image"></virtual></virtual>
+</template>
+
+<template id="TwipHead"></template>
+<template id="TwipText"><virtual theme-type="Text"></virtual></template>
+
+<template id="Video"><span>[클립]</span></template>

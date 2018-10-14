@@ -10,7 +10,8 @@ var methods = {};
 var data = {
   badges     : {}, // Connect()에서 재정의되어 뱃지 출력에 사용
   entryPoint : {}, // GetRootEntry()에서 사용
-  nodes      : {}  // Add()에서 사용
+  nodes      : {}, // Add()에서 사용
+  length     : {}  // data-sequence에 사용
 };
 
 // 포인터 정의
@@ -131,6 +132,7 @@ methods.AddSubElement = function(type, message) {
       } );
       break;
 
+    /*
     case "NormalMessage":
     case "ErrorMessage":
     case "CheerHead":
@@ -140,6 +142,7 @@ methods.AddSubElement = function(type, message) {
     case "TwipHead":
     case "TwipText":
     case "Video":
+    */
     default:
       // 생성
       var ret = [];
@@ -182,30 +185,88 @@ methods.AddSubElement = function(type, message) {
         } );
       }
 
-      // virtual element를 변환
-      ret.forEach( function(el) {
-        if (el.nodeName === "#text") { return; }
-        Array.from(el.getElementsByTagName("virtual")).forEach( function(child) {
-          if (child.nodeName === "VIRTUAL") {
-            var attrs = Array.from(child.attributes);
-            Array.from(child.childNodes).forEach( function(grandChild) {
-              // child elements를 text자리로 이동
-              child.parentElement.insertBefore(grandChild, child);
-              if (grandChild.nodeName === "#text") { return; }
+      // 데이터를 뽑아내어 설정함
+      var themeData = Array.from(message.parent.querySelectorAll("*[theme-data]"));
+      themeData.forEach( function(el) {
+        var value = JSON.parse(el.getAttribute("theme-data"));
+        Object.keys(value).forEach( function(key, ind) {
+          var datum = value[key];
+          if (datum[0] === "random") {
+            switch (datum.length) {
+              case 2: // ["random", size]
+                el.style.setProperty(`--data-${key}`, Math.random()*datum[1]);
+                break;
 
-              // attribute를 추가
-              attrs.forEach( function(attr) {
-                if (grandChild.getAttribute(attr.key) !== null) { return; }
-                grandChild.setAttribute(attr.name, attr.value);
-              } );
-            } );
+              case 3: // ["random", min, max]
+                el.style.setProperty(`--data-${key}`, Math.random()*(datum[3]-datum[2])+datum[2]);
+                break;
 
-            // text element를 제거
-            child.parentElement.removeChild(child);
+              case 4: // ["random", min, max, interval]
+                var size = Math.floor((datum[2]-datum[1]+datum[3])/datum[3]);
+                el.style.setProperty(`--data-${key}`, Math.floor(Math.random()*size)*datum[3]);
+                break;
+            }
+          } else if (datum[0] === "sequence") {
+            if (data.length[key] === undefined) { data.length[key] = 0; }
+            switch (datum.length) {
+              case 1: // ["sequence"]
+                el.style.setProperty(`--data-${key}`, data.length[key]++);
+                break;
+
+              case 2: // ["sequence", divisor]
+                el.style.setProperty(`--data-${key}`, data.length[key]);
+                data.length[key] = divisor % (data.length[key]+1);
+                break;
+
+              case 3: // ["sequence", from, to]
+                el.style.setProperty(`--data-${key}`, data.length[key] + from);
+                data.length[key] = (to - from) % (data.length[key]+1);
+                break;
+            }
           }
         } );
+
+        el.removeAttribute("theme-data");
       } );
-      return ret;
+
+      return ret.reduce( function(acc, cur) {
+        if (cur.nodeName === "#text") { return acc; }
+
+        // 자식 노드에서 virtual을 변환
+        Array.from(cur.getElementsByTagName("virtual")).forEach( function(el) {
+          var attrs = Array.from(el.attributes);
+
+          Array.from(el.childNodes).forEach( function(child) {
+            el.parentElement.insertBefore(child, el);
+            if (child.nodeName === "#text") { return; }
+
+            attrs.forEach( function(attr) {
+              if (child.getAttribute(attr.name) !== null) { return; }
+              child.setAttribute(attr.name, attr.value);
+            } );
+          } );
+          el.parentElement.removeChild(el);
+        } );
+
+        // 현재 노드에서 virtual을 변환
+        if (cur.nodeName === "VIRTUAL") {
+          var attrs = Array.from(cur.attributes);
+
+          Array.from(cur.childNodes).forEach( function(child) {
+            cur.parentElement.insertBefore(child, cur);
+            acc.push(child);
+
+            if (child.nodeName === "#text") { return };
+            attrs.forEach( function(attr) {
+              if (child.getAttribute(attr.name) !== null) { return; }
+              child.setAttribute(attr.name, attr.value);
+            } );
+          } );
+          cur.parentElement.removeChild(cur);
+        }
+
+        return acc;
+      }, [] );
   }
 };
 
@@ -260,14 +321,16 @@ var AddType = function(message, type, config) {
     setTimeout( function() {
       var index = data.nodes[capital].indexOf(elements);
       if (index >= 0) {
-        data.nodes[capital].splice(index, 1)[0].forEach( function(el) { root.removeChild(el); } );
+        data.nodes[capital].splice(index, 1)[0].forEach( function(el) {
+          el.parentElement.removeChild(el);
+        } );
       }
     }, config.Timeout * 1000);
   }
 
   // 메세지가 많을 경우 FIFO로 element를 제거
   if (data.nodes[capital].length > Math.min(config.Maximum, 100)) {
-    data.nodes[capital].shift().forEach( function(el) { root.removeChild(el); } );
+    data.nodes[capital].shift().forEach( function(el) { el.parentElement.removeChild(el); } );
   }
 };
 

@@ -1,5 +1,6 @@
 <!-- 구현된 style 명령어 요소
   zoom : 오버레이의 전체 배율. number
+  width : 오버레이드 가로 크기. size(px, %, ...)
 -->
 
 <template id="Description">
@@ -11,18 +12,15 @@
 <template id="Style">
   <!-- 스타일 -->
   <style type="text/css">
-    html {
-      /**
-       * style 명령어를 위한 변수 적용
-       * var(--name)과 html[-data-name]는 같은 값을 가짐
-       *
-       * zoom             : 오버레이 전체 배율. number
-       */
-    }
+    /* style 명령어 변수를 적용 */
+    #Root,
+    #ErrorRoot { width:100%; max-width:var(--width); }
+    #Root>*,
+    #ErrorRoot>* { zoom:var(--zoom); }
 
-    html { width:100%; height:100%; zoom:var(--zoom); }
-    #Root { position:absolute; bottom:0; left:0; right:0; }
-    #ErrorRoot { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.6); }
+    html { width:100%; height:100%; }
+    #Root { position:absolute; bottom:0; right:0; }
+    #ErrorRoot { position:absolute; top:0; right:0; background:rgba(0,0,0,.6); }
 
     .NormalMessage {
       margin:2px 0; padding:3px;
@@ -176,7 +174,7 @@
     Root  : 최상위 element. data-value="[후원 금액]"이 추가
     Name  : 후원한 유저 이름
   -->
-  <div theme-type="Root" class="Cheer">
+  <div theme-type="Root" class="Twip">
     ☆ <Virtual theme-type="Name"></Virtual>님
     <Virtual theme-type="Text"></Virtual>원 후원 감사합니다! ☆
   </div>

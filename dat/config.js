@@ -20,6 +20,8 @@ var value =
     "Prefix" : "!!",
     "List"   : {
       "clear" : {
+        // alias는 무조건 내용이 있어야 함
+        // 사용하지 않을 경우 allow를 비울 것
         "allow" : { "type":"replace", "value":["broadcaster/0", "moderator/0"] },
         "alias" : { "type":"replace", "value":["clear"] }
       },

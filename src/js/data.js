@@ -137,6 +137,15 @@ methods.ParseUri = function() {
         data.config.Key = value;
         break;
 
+      case "style":
+        if (((data.config.Command.List||{}).style||{}).list === undefined) { break; }
+        value.split(";").forEach( function(text) {
+          var val = text.split("%20");
+          var key = val.shift();
+          data.config.Command.List.style.list[key] = val.join(" ");
+        } );
+        break;
+
       case "theme":
         data.config.Theme.FileName = value;
         break;
@@ -158,6 +167,11 @@ methods.ParseUri = function() {
           default:
             data.config.Command.List.theme.enable = true;
         }
+        break;
+
+      case "timeout":
+        data.config.Message.Timeout = Number(value);
+        data.config.Error.Timeout = Math.min(Number(value), data.config.Error.Timeout);
         break;
 
       case "zoom":

@@ -11,9 +11,10 @@ var data = {
 };
 
 // 포인터 정의
-var api    = null;
-var config = null;
-var done   = null;
+var api     = null;
+var config  = null;
+var done    = null;
+var message = null;
 
 
 /**
@@ -33,13 +34,6 @@ methods.Parse = function(response) {
 
   // 최상위 template element 각각을 아이디에 따라 분류
   var length = element.content.children.length;
-  var someFunc = function(el)  {
-    if (el.nodeName !== "#text") { return true; }
-    if (el.nodeValue.match(/^\s*$/) === null) { return true; }
-
-    node.removeChild(el);
-    return false;
-  };
   for(var i=0; i<length; ++i) {
     var child = element.content.children[i];
     var node = child.content;
@@ -51,20 +45,22 @@ methods.Parse = function(response) {
       }
     }
     // template 안의 양끝단의 공백 텍스트노드를 제거
-    var spaces = Array.from(node.childNodes).reverse();
-    spaces.some(someFunc);
-    spaces.reverse().some(someFunc);
+    Array.from(node.childNodes).forEach( function(el) {
+      if (el.nodeName !== "#text") { return; }
+      if (el.nodeValue.match(/^\s*$/) === null) { return; }
+      if (el.previousSibling !== null && el.nextSibling !== null) { return; }
+
+      node.removeChild(el);
+    } );
 
     if (child.id !== undefined) { data.template[child.id] = node.childNodes; }
   }
 
   // 스타일 템플릿을 페이지에 추가
-  if (data.template["Style"] !== null) {
-    data.template["Style"].forEach( function(el) {
-      el.setAttribute("theme-type", "style");
-      document.head.appendChild(el);
-    } );
-  }
+  (data.template["Style"]||[]).forEach( function(el) {
+    el.setAttribute("theme-type", "style");
+    document.head.appendChild(el);
+  } );
 };
 
 
@@ -79,8 +75,10 @@ methods.Connect = async function() {
     methods.Parse(this.Module.Default);
   } else {
     var uri = theme.BaseUri + theme.FileName + ".html";
-    if (await api.Get("theme", uri) !== null ) {
+    var loaded = await api.Get("theme", uri);
+    if (Object.keys(data.template).length === 0) {
       // 로드 실패시 기본 테마 적용
+      message.Error("Data_Fail_Theme");
       methods.Parse(this.Module.Default);
     }
   }
@@ -96,8 +94,9 @@ methods.Connect = async function() {
 methods.Load = function(uniformData) { 
   done = uniformData.Done;
 
-  api    = uniformData.Data;
-  config = uniformData.Data.config;
+  api     = uniformData.Data;
+  config  = uniformData.Data.config;
+  message = uniformData.Message;
 };
 
 
