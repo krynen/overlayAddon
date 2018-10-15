@@ -12,6 +12,7 @@ var data = {
 };
 
 // 포인터 정의
+var command = null;
 var config  = null;
 var shared  = null;
 var message = null;
@@ -188,11 +189,12 @@ methods.Response = function(line) {
         return;
 
       case "CLEARCHAT":   // 채팅 전체삭제 혹은 유저 차단
-        if (subArguments["ban-reason"] === undefined) {
-
-        } else {
-
-        }
+        var target = (phrase[3]||" ").substring(1);
+        var prefix = (config.Command||{}).Prefix;
+        var name = ((config.Command||{}).List.clear||{}).alias[0];
+        
+        if (target === "") { command.Get(null, [prefix+name], true); }
+        else { command.Get(null, [prefix+name, target], true); }
         return;
 
       case "USERNOTICE":  // 유저 관련 메세지
@@ -237,6 +239,7 @@ methods.Response = function(line) {
  * @param {object} uniformData 메인 모듈 오브젝트
  */
 methods.Load = function(uniformData) {
+  command = uniformData.Command;
   config = uniformData.Data.config;
   shared = uniformData.Data.shared;
   message = uniformData.Message;

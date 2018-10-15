@@ -230,7 +230,10 @@ methods.AddSubElement = function(type, message) {
       } );
 
       return ret.reduce( function(acc, cur) {
-        if (cur.nodeName === "#text") { return acc; }
+        if (cur.nodeName === "#text") {
+          acc.push(cur);
+          return acc;
+        }
 
         // 자식 노드에서 virtual을 변환
         Array.from(cur.getElementsByTagName("virtual")).forEach( function(el) {
@@ -264,6 +267,7 @@ methods.AddSubElement = function(type, message) {
           } );
           cur.parentElement.removeChild(cur);
         }
+        else { acc.push(cur); }
 
         return acc;
       }, [] );

@@ -25,7 +25,7 @@ methods.Execute = function(text) {
     Object.keys(message.nodes).forEach( function(el) {
       while ((message.nodes[el]||[]).length > 0) {
         message.nodes[el].shift().forEach( function(node) {
-          message.entryPoint[el].removeChild(node);
+          node.parentElement.removeChild(node);
         } );
       }
     } );
@@ -36,12 +36,12 @@ methods.Execute = function(text) {
     text.forEach( function(el) {
       for (var i=0; i<(message.nodes["Normal"]||[]).length; ++i) {
         if (message.nodes["Normal"][i].some( function(node) {
-          var element = node.getAttribute("data-name") === el;
-          var children = node.querySelectorAll(`*[data-name=${el}]`).length > 0;
+          var element = node.getAttribute("data-name").toLowerCase() === el.toLowerCase();
+          var children = node.querySelectorAll(`*[data-name="${el}" i]`).length > 0;
           return element || children;
         } ) === true) {
           message.nodes["Normal"].splice(i--, 1)[0].forEach( function(node) {
-            message.entryPoint["Normal"].removeChild(node);
+            node.parentElement.removeChild(node);
           } );
         }
       }
