@@ -10,13 +10,14 @@
  */
 var REQUIRE_MODULES = new function() {
   this["Irc"] = require("./irc.js");
-  this["Message"]       = require("./message.js");
-  this["Message/Cheer"] = require("./message/cheer.js");
-  this["Message/Color"] = require("./message/color.js");
-  this["Message/Emote"] = require("./message/emote.js");
-  this["Message/Orimg"] = require("./message/orimg.js");
-  this["Message/Twip"]  = require("./message/twip.js");
-  this["Message/Link"]  = require("./message/link.js");
+  this["Message"]         = require("./message.js");
+  this["Message/Cheer"]   = require("./message/cheer.js");
+  this["Message/Subscrp"] = require("./message/subscrp.js");
+  this["Message/Color"]   = require("./message/color.js");
+  this["Message/Emote"]   = require("./message/emote.js");
+  this["Message/Orimg"]   = require("./message/orimg.js");
+  this["Message/Twip"]    = require("./message/twip.js");
+  this["Message/Link"]    = require("./message/link.js");
   this["Theme"]         = require("./theme.js");
   this["Theme/Default"] = require("../html/theme.html");
   this["Command"]       = require("./command.js");

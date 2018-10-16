@@ -135,6 +135,8 @@ methods.AddSubElement = function(type, message) {
     /*
     case "NormalMessage":
     case "ErrorMessage":
+    case "SubsHead":
+    case "GiftHead":
     case "CheerHead":
     case "Cheermote":
     case "Emote":
@@ -168,22 +170,21 @@ methods.AddSubElement = function(type, message) {
       } );
 
       // 루트포인트에서 위의 과정을 반복
-      if (message.root !== undefined) {
-        var rootPoints = Object.keys(message.root).reduce( function(acc, cur) {
-          acc[cur] = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
-          return acc;
-        }, {});
-        Object.keys(rootPoints).forEach( function(key) {
-          rootPoints[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
+      var rootPoints = Object.keys(message.root || {}).reduce( function(acc, cur) {
+        var value = Array.from(message.parent.querySelectorAll(`*[theme-type=${cur}]`));
+        if (value.length>0) { acc[cur] = value; }
+        return acc;
+      }, {});
+      Object.keys(rootPoints).forEach( function(key) {
+        rootPoints[key].forEach( function(el) { el.removeAttribute("theme-type"); } );
 
-          // message는 자신의 message대신 message.root[key]를 이용
-          rootPoints[key].forEach( function(el) {
-            var childMessage = message.root[key];
-            childMessage.parent = el;
-            methods.AddSubElement(key, childMessage);
-          } );
+        // 자신의 message대신 message.root[key]를 이용하여 재귀 호출
+        rootPoints[key].forEach( function(el) {
+          var childMessage = message.root[key];
+          childMessage.parent = el;
+          methods.AddSubElement(key, childMessage);
         } );
-      }
+      } );
 
       // 데이터를 뽑아내어 설정함
       var themeData = Array.from(message.parent.querySelectorAll("*[theme-data]"));
@@ -228,6 +229,16 @@ methods.AddSubElement = function(type, message) {
 
         el.removeAttribute("theme-data");
       } );
+
+      // 빈 텍스트를 출력하지 않음
+      var emptyCond1 = Object.keys(rootPoints).length === 0;
+      var emptyCond2 = String(message.text).match(/^\s*$/) !== null;
+      if (emptyCond1 && emptyCond2) {
+        ret.forEach( function(el) {
+          message.parent.removeChild(el);
+          return null;
+        } );
+      }
 
       return ret.reduce( function(acc, cur) {
         if (cur.nodeName === "#text") {
@@ -318,6 +329,7 @@ var AddType = function(message, type, config) {
     `${capital}Message`,
     Object.assign({ "parent":root }, message)
   );
+  if (elements === null) { return; }
 
   // 메세지 삭제시간을 적용
   data.nodes[capital].push(elements);
@@ -400,6 +412,16 @@ methods.Add = function(message) {
   delete message["emote-only"];
   this.Module.Emote.Replace(message.Emote, text, done);
   this.Module.Emote.Set(message.Emote, message);        // 이모티콘 처리
+
+  message.Subscrp = {
+    "subs" : message.months,
+    "gift" : message["recipient-display-name"],
+    "tier" : message["sub-plan"]
+  };
+  delete message.months;
+  delete message["recipient-display-name"];
+  delete message["subs-plan"];
+  this.Module.Subscrp.Set(message.Subscrp, message);    // (재)구독 및 구독 선물 처리
 
   message.Color = {
     "name"   : message.name,

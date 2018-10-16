@@ -147,6 +147,9 @@ methods.Response = function(line) {
           case "emote-only":  // 이모티콘만 포함된 메세지
           case "color":       // 유저별 (이름)색상
           case "bits":        // 응원이 포함된 메세지
+          case "msg-param-sub-plan":               // 구독 티어
+          case "msg-param-months":                 // 구독 개월 수
+          case "msg-param-recipient-display-name": // 구독 선물 수령자
           */
             acc[keyValue[0]] = keyValue[1];
             break;
@@ -156,6 +159,22 @@ methods.Response = function(line) {
       return acc;
     }, {});
 
+    var escape = function(text) { // message.text를 이스케이프
+      return String(text)
+              .replace(/&/g, '&amp;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+              .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    };
+    var list = function() { // subArguments에서 값을 꺼내 새 오브젝트로 만듬
+      return Array.from(arguments).reduce( function(acc, cur) {
+        if (cur.indexOf("msg-param-") === 0) {
+          acc[cur.substring(10)] = subArguments[cur];
+        }
+        else if (cur === "name") { acc[cur] = subArguments["display-name"]; }
+        else { acc[cur] = subArguments[cur]; }
+        return acc;
+      }, {});
+    };
     switch (phrase[1]) {
       case "ROOMSTATE":   // 채널 접속 혹은 방의 상태 변경
         if (subArguments["room-id"] !== undefined) {
@@ -166,24 +185,11 @@ methods.Response = function(line) {
 
       case "PRIVMSG":     // 일반 메세지
           message.Add( (function() {
-            // 기본 파라미터 설정
-            var text = phrase.splice(3, phrase.length).join(" ").substring(1);
-            text = String(text)
-              .replace(/&/g, '&amp;')
-              .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
-              .replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-            var ret = {
-              "name"   : subArguments["display-name"],
-              "badges" : subArguments["badges"],
-              "text"   : text,
-
-              // 하위 모듈에서 사용할 파라미터
-              "emotes"     : subArguments["emotes"],
-              "emote-only" : subArguments["emote-only"],
-              "color"      : subArguments["color"],
-              "bits"       : subArguments["bits"]
-            };
+            var ret = list(
+              "name", "badges",                       // 기본 파라미터
+              "emotes", "emote-only", "color", "bits" // 하위 모듈 파라미터
+            );
+            ret.text = escape(phrase.splice(3, phrase.length).join(" ").substring(1));
             return ret;
           })() );
         return;
@@ -201,9 +207,28 @@ methods.Response = function(line) {
         switch(subArguments["msg-id"]) {
           case "sub":
           case "resub":       // 신규 구독 및 재구독
+            message.Add( (function() {
+              var ret = list(
+                "name", "badges",                        // 기본 파라미터
+                "emotes", "emote-only", "color",         // 하위 모듈 파라미터
+                "msg-param-months", "msg-param-sub-plan" // 구독 하위 모듈 파라미터
+              );
+              ret.text = escape(phrase.splice(3, phrase.length).join(" ").substring(1));
+              return ret;
+            })() );
             return;
 
           case "subgift":     // 구독 선물
+            message.Add( (function() {
+              var ret = list(
+                "name", "badges",                   // 기본 파라미터
+                "emotes", "emote-only", "color",    // 하위 모듈 파라미터
+                "msg-param-recipient-display-name",
+                "msg-param-sub-plan"                // 구독 하위 모듈 파라미터
+              );
+              ret.text = "";
+              return ret;
+            })() );
             return;
 
           case "raid":        // 다른 채널에서 온 레이드

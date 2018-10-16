@@ -23,7 +23,7 @@
     #ErrorRoot { position:absolute; top:0; right:0; background:rgba(0,0,0,.6); }
 
     .NormalMessage {
-      margin:2px 0; padding:3px;
+      margin:2px; padding:3px;
       background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.6);
     }
     .ErrorMessage { margin:2px 0; padding:3px; }
@@ -53,8 +53,14 @@
     }
     .Text [nth:child(n+5)] { display:none; }
 
-
-    .Cheer {
+    @keyframes highlight {
+      0%, 65%, 75% { outline:none; }
+      60%, 70% { outline:2px solid white; }
+    }
+    [data-Subs], [data-Gift], [data-Cheer], [data-twip] {
+      animation:highlight step-end 2.5s 3;
+    }
+    .Subs, .Gift, .Cheer, .Twip {
       color:white; padding:3px; text-align:center;
     }
 
@@ -97,8 +103,8 @@
 <template id="NormalMessage">
   <!-- NormalRoot의 Root에 추가되는 일반 메세지 템플릿
     Root   : 최상위 element.
-      data-name="[이름]"이 추가
-      data-emote-only="1" data-color-chat="1" data-cheer="1"이 추가될 수 있음
+      data-name="[이름]" data-color-chat="[색채팅 사용시 1]"이 추가되며
+      Head에 따라서 attribute가 더 추가될 수 있음
     Name   : 유저 이름. 스타일 --data-color:"[유저 색상]"이 추가될 수 있음
     Badges : 뱃지 목록. 각 뱃지는 data-type="[이름]" data-tier="[등급]"이 포함된 img element
     Text   : 메세지 문자열. 처리된 이모티콘 등도 포함됨
@@ -108,6 +114,8 @@
       <span theme-type="Name" class="Name"></span>
       <span theme-type="Badges" class="Badges"></span>
     </div>
+    <virtual theme-type="SubsHead"></virtual>
+    <virtual theme-type="GiftHead"></virtual>
     <virtual theme-type="TwipHead"></virtual>
     <virtual theme-type="CheerHead"></virtual>
     <div theme-type="Text" class="Text"></div>
@@ -126,6 +134,7 @@
 
 <template id="Emote">
   <!-- NormalMessage의 Text 내부에 추가되는 일반, 구독자 전용 이모티콘 템플릿
+       NormalMessage의 Root에 data-emote="1"과 경우에 따라 data-emote-only="1"을 추가시킴
     Root  : 최상위 element. data-type="[이름]" date-id="[아이디]"가 추가
     Image : 이모티콘 이미지가 img element로 추가
     Text  : 이미지를 표현하지 않을 경우 사용. 변환 이전 문자열
@@ -135,15 +144,37 @@
   </virtual>
 </template>
 
+<template id="SubsHead">
+  <!-- NormalMessage의 SubsHead 내부에 추가되는 구독 메세지 헤더
+    Root  : 최상위 element. data-name="[티어]" data-value="[개월 수]"가 추가
+    Name  : 구독한 유저 이름
+    Text  : 구독 개월 수
+  -->
+  <div theme-type="Root" class="Subs"><span>
+    ☆ <virtual theme-type="Text"></virtual>개월 구독!! ☆
+  </span></div>
+</template>
+
+<template id="GiftHead">
+  <!-- NormalMessage의 SubsHead 내부에 추가되는 구독 선물 메세지 헤더
+    Root  : 최상위 element. data-name="[티어]" data-value="[선물 대상]"이 추가
+    Name  : 선물한 유저 이름
+    Text  : 선물 받는 유저 이름
+  -->
+  <div theme-type="Root" class="Gift"><span>
+    ☆ <virtual theme-type="Text"></virtual>님께 구독 선물!! ☆
+  </span></div>
+</template>
+
 <template id="CheerHead">
   <!-- NormalMessage의 CheerHead 내부에 추가되는 응원 메세지 헤더
+       NormalMessage의 Root에 data-cheer="1"을 추가시킴
     Root  : 최상위 element. data-value="[응원 금액]"이 추가
     Name  : 응원한 유저 이름
   -->
-  <div theme-type="Root" class="Cheer">
-    ☆ <Virtual theme-type="Name"></Virtual>님
-    <Virtual theme-type="Text"></Virtual>비트 후원 감사합니다! ☆
-  </div>
+  <div theme-type="Root" class="Cheer"><span>
+    ☆ <virtual theme-type="Text"></virtual>비트 후원!! ☆
+  </span></div>
 </template>
 
 <template id="Cheermote">
@@ -171,13 +202,14 @@
 
 <template id="TwipHead">
   <!-- NormalMessage의 TwipHead 내부에 추가되는 트윕 후원 메세지 헤더
+       NormalMessage의 Root에 data-twip="1"을 추가시킴
     Root  : 최상위 element. data-value="[후원 금액]"이 추가
     Name  : 후원한 유저 이름
+    Text  : 후원 금액 문자열
   -->
-  <div theme-type="Root" class="Twip">
-    ☆ <Virtual theme-type="Name"></Virtual>님
-    <Virtual theme-type="Text"></Virtual>원 후원 감사합니다! ☆
-  </div>
+  <div theme-type="Root" class="Twip"><span>
+    ☆ <virtual theme-type="Text"></virtual>원 후원!! ☆
+  </span></div>
 </template>
 
 <template id="TwipText">
