@@ -1,5 +1,5 @@
 {
-	"COPY_SOURCE_FILES" : ["./src/util/orimg.html"],
+	"COPY_SOURCE_FILES" : ["./src/util/orimg.html", "./src/util/config.html"],
 	"COPY_TARGET_DIRECTORY" : "./",
 	
 	"HTML_SOURCE_FILE" : "./src/html/client.html",
