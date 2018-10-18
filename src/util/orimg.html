@@ -631,7 +631,7 @@
         var imagesEnabled = !document.getElementById("imagesType").disabled;
 
         // 파일을 로드하지 않았을 경우
-        if (window.data === null) { window.data = { Message : { Orimg : {} } }; }
+        if (window.data === null) { window.data = { Message : { Orimg:{} } }; }
         // 전용 이미지 데이터가 없는 경우
         if (window.data.Message.Orimg === undefined) {
           window.data.Message.Orimg = {};
@@ -639,12 +639,12 @@
 
         // option 데이터 입력
         var prefix = document.getElementById("prefix");
-        if (prefix.value.match(/^\s*$/) !== null) {
+        if (prefix.value.match(/^\s*$/) === null) {
           window.data.Message.Orimg.Prefix = prefix.value;
         } else { delete window.data.Message.Orimg.Prefix; }
 
         var basePath = document.getElementById("basePath");
-        if (basePath.value.match(/^\s*$/) !== null) {
+        if (basePath.value.match(/^\s*$/) === null) {
           window.data.Message.Orimg.UriBase = basePath.value;
         } else { delete window.data.Message.Orimg.UriBase; }
 
@@ -706,16 +706,16 @@
         var blob = null;
 
         if (type === "json") {
-          output = JSON.stringify(window.data, null, 2).replace(/(?:^[\r])\n/g, "\r\n");
+          output = JSON.stringify(window.data, null, 2);
           blob = new Blob([output], { type: "application/json;charset=utf-8" });
         } else if (type === "js") {
           // 세션 등록부를 포함해 작성
-          output = `
-            (function() {
-              var key = "data/config/" + (document.scripts.length - 1);
-              var value = ${JSON.stringify(window.data)};
-              sessionStorage.setItem(key, JSON.stringify(value));
-            })();`;
+          output = 
+            `(function() {\n` +
+            `  var key = "data/config/" + (document.scripts.length - 1);\n` +
+            `  var value = ${JSON.stringify(window.data)};\n` +
+            `  sessionStorage.setItem(key, JSON.stringify(value));\n` +
+            `})();`;
           blob = new Blob([output], { type: "application/javascript;charset=utf-8" });
         } else { return; }
 
