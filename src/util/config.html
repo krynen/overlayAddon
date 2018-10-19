@@ -15,6 +15,14 @@
     <style type="text/css">
       html { --border:1px solid var(--right); }
       body { background:var(--dark); color:var(--right); padding:var(--space); margin:0; }
+      .invisible { display:none; }
+
+      body>label {
+        display:inline-block;
+        margin-top:var(--space);
+        clear:left; float:left;
+      }
+      .wrap:not(.active) { display:none; }
     </style>
 
     <title>설정 편집기</title>
@@ -45,5 +53,25 @@
     <label>* 추가 설정</label>
     <div class="wrap">
     </div>
+
+    <!-- 이벤트를 등록 -->
+    <script type="text/javascript">
+      // wrap에 이벤트 등록
+      Array.from(document.getElementsByClassName("wrap")).forEach( function(el, ind) {
+        var input = document.createElement("input");
+        input.classList.add("invisible");
+        input.type = "checkbox";
+        input.id = `wrapCheckBox${ind}`;
+        document.body.appendChild(input);
+
+        var label = el;
+        while(label.nodeName !== "LABEL") { label = label.previousSibling; }
+        label.htmlFor = input.id;
+        input.addEventListener("change", function() {
+          if (el.classList.contains("active")) { el.classList.remove("active"); }
+          else {el.classList.add("active"); }
+        } );
+      } );
+    </script>
   </body>
 </html>
