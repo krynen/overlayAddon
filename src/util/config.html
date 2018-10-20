@@ -15,15 +15,110 @@
     <style type="text/css">
       html { --border:1px solid var(--right); }
       body { background:var(--dark); color:var(--right); padding:var(--space); margin:0; }
+      button {
+        display:inline-block;
+        border:var(--border);
+        background:var(--right); color:var(--dark); font-size:1rem; cursor:pointer;
+      }
+      p { clear:left; margin:0; }
+      ul {
+        list-style:none;
+        border:var(--border);
+        margin:var(--space); padding:var(--space);
+      }
+      li { display:flex; }
+      li:not(:last-child) { margin-bottom:var(--space); }
+      input[type="text"] {
+        background:none; color:var(--right);
+        font-size:1rem; padding:0 var(--space); box-sizing:content-box;
+        border:none; border-bottom:var(--border);
+      }
       .invisible { display:none; }
 
-      body>label {
+      .wrap:not(.active) { display:none; }
+      body>label,
+      .wrap>ul {
         display:inline-block;
-        margin-top:var(--space);
         clear:left; float:left;
       }
-      .wrap:not(.active) { display:none; }
+      body>label { margin-top:var(--space); }
+      li>label { margin-right:.5em; flex-shrink:0; }
+      li>label:after { content:" : "; }
+      li>input { flex-grow:1; width:0; }
+
+      li>input[data-type="list"] { margin-right:.5em; }
+      .chips { display:flex; flex-direction:column; }
+      .chip {
+        display:flex;
+        border:var(--border);
+        padding:calc(var(--space) / 2);
+      }
+      .chip:not(:last-child) { margin:calc(var(--space) / 2) 0; }
+      .chip>label { flex-grow:1; }
+      .chip>button { flex-shrink:0; }
     </style>
+
+    <script type="text/javascript">
+      /**
+       * input type="text"의 너비를 조절
+       * span요소를 만들고 그 offsetWidth를 이용
+       */
+      window.fit = function(el) {
+        var span = document.createElement("span");
+        el.parentElement.appendChild(span);
+        span.innerText = el.value;
+        el.style.width = Math.max(
+          span.offsetWidth,
+          Number.parseFloat(getComputedStyle(el)["min-width"])
+        ) + "px";
+        el.parentElement.removeChild(span);
+      };
+
+      /**
+       * input with chips를 구현
+       */
+      window.addChipsInput = function(input, wrap) {
+        var event = function() {
+          if ((this.value||"").match(/^\s*$/) !== null) { return; }
+
+          var chips = Array.from(wrap.querySelectorAll("*[data-value]"));
+          var values = chips.reduce( function(acc, cur) {
+            acc.push(cur.getAttribute("data-value"));
+            return acc;
+          }, [] );
+
+          if (values.indexOf(this.value) === -1) {
+            // chip 생성
+            var div = document.createElement("div");
+            div.classList.add("chip");
+            div.setAttribute("data-value", this.value);
+            var label = document.createElement("label");
+            label.innerText = this.value;
+            div.appendChild(label);
+            var button = document.createElement("button");
+            button.onclick = function() { wrap.removeChild(div); };
+            button.innerText = "-";
+            div.appendChild(button);
+            wrap.appendChild(div);
+          }
+          this.value = "";
+          window.fit(this);
+        };
+        input.addEventListener("paste", event);
+        input.addEventListener("keyup", function(evt) {
+          if (evt.key === "Enter") { event.apply(input); }
+        } );
+        window.fit(input);
+
+        var button = document.createElement("button");
+        button.onclick = function() { event.apply(input); }
+        button.innerText = "+";
+        if (input.nextSibling !== null) {
+          input.parentElement.insertBefore(button, input.nextSibling);
+        }
+        else { input.parentElement.appendChild(button); }
+      };
+    </script>
 
     <title>설정 편집기</title>
     <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREAAAAAAAAREQAAAAAAEQAAEQAAAAARAAARAAAAABEAABEAAAAAEQAAEQAAAAARAAARAAAAABEAABEAAAAAABERAAAAAAAAEREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAOAHAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAA4AcAAP//AAD//wAA">
@@ -32,6 +127,24 @@
   <body>
     <label>* 종합 설정</label>
     <div class="wrap">
+      <p>
+        가장 기본적인 부분
+        <br />어플레이션 키는 응원 아이콘(Cheermote) 정보를 불러오는데 필요합니다.
+      </p>
+      <ul id="root">
+        <li>
+          <label>접속할 채널 아이디</label>
+          <input data-name="Channel" data-type="text" type="text">
+        </li>
+        <li>
+          <label>트위치 어플리케이션 키</label>
+          <input data-name="Key" data-type="text" type="text">
+        </li>
+        <li>
+          <label>외부 설정파일 경로</label>
+          <input data-name="Data.Uris" data-type="list" type="text">
+        </li>
+      </ul>
     </div>
 
     <label>* 명령어 설정</label>
@@ -72,6 +185,29 @@
           else {el.classList.add("active"); }
         } );
       } );
+
+      // input에 이벤트 등록
+      Array.from(document.getElementsByTagName("input")).forEach( function(el) {
+        if (el.type !== "text") { return; }
+        el.style.minWidth = "2rem";
+        window.fit(el);
+
+        var event = function() { window.fit(el); };
+        el.addEventListener("keyup", event);
+        el.addEventListener("paste", event);
+        el.addEventListener("change", event);
+      } );
+
+      // list div에 이벤트 등록
+      Array.from(document.querySelectorAll("*[data-type=list]")).forEach( function(el) {
+        var chips = document.createElement("li");
+        chips.classList.add("chips");
+
+        if (el.parentElement.nextSibling !== null) {
+          el.parentElement.parentElement.insertBefore(chips, el.parentElement.nextSibling); }
+        else { el.parentElement.parentElement.appendChild(chips); }
+        window.addChipsInput(el, chips);
+      })
     </script>
   </body>
 </html>
