@@ -72,15 +72,17 @@
       li>input { flex-grow:1; width:0; }
 
       li>input[data-type="list"] { margin-right:.5em; }
-      .chips { display:flex; flex-direction:column; }
+      .chips {
+        display:flex; flex-wrap:wrap;
+        margin:calc(var(--space) / -4);
+      }
       .chip {
         display:flex;
         border:var(--border);
         padding:calc(var(--space) / 2);
+        margin:calc(var(--space) / 4);
       }
-      .chip:not(:last-child) { margin:calc(var(--space) / 2) 0; }
-      .chip>label { flex-grow:1; }
-      .chip>button { flex-shrink:0; }
+      .chip>label { padding-right:calc(var(--space) / 2); }
 
       input[type="checkbox"] { width:0; margin:0; flex-grow:0; }
       input[type="checkbox"]+label:after {
