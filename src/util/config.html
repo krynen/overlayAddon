@@ -15,17 +15,16 @@
     <style type="text/css">
       html { --border:1px solid var(--right); }
       body { background:var(--dark); color:var(--right); padding:var(--space); margin:0; }
+      ul {
+        list-style:none;
+        margin:0; padding:0;
+      }
       button {
         display:inline-block;
         border:var(--border);
         background:var(--right); color:var(--dark); font-size:1rem; cursor:pointer;
       }
       p { clear:left; margin:0; }
-      ul {
-        list-style:none;
-        border:var(--border);
-        margin:var(--space); padding:var(--space);
-      }
       li { display:flex; }
       li:not(:last-child) { margin-bottom:var(--space); }
       input[type="text"] {
@@ -35,12 +34,38 @@
       }
       .invisible { display:none; }
 
+      .wrap>div {
+        display:inline-block;
+        margin:var(--space); padding:var(--space);
+        border:var(--border);
+      }
+      #file>*, #file li { display:inline-block; }
+      #file form {
+        position:relative;
+        border:var(--border); margin:var(--space); padding:var(--space);
+      }
+      #file form label { margin:calc(-1 * var(--space)); padding:var(--space); }
+      #file ul { margin:0; padding:0; border:none; }
+      #file li { margin:0; }
+      #file li button { margin:var(--space); padding:var(--space); }
+      input[type="file"] {
+        position:absolute; top:0; left:0;
+        width:100%; height:100%; opacity:0;
+      }
+      input[type="file"]+label { cursor:pointer; }
+      input[type="file"]+label.active { background:var(--right); color:var(--dark); }
+
       .wrap:not(.active) { display:none; }
-      body>label,
-      .wrap>ul {
+      body>label {
         display:inline-block;
         clear:left; float:left;
       }
+      .wrap ul {
+        display:inline-block;
+        border:var(--border);
+        margin:var(--space); padding:var(--space);
+      }
+      .wrap ul ul { flex-grow:1; }
       body>label { margin-top:var(--space); }
       li>label { margin-right:.5em; flex-shrink:0; }
       li>label:after { content:" : "; }
@@ -56,6 +81,15 @@
       .chip:not(:last-child) { margin:calc(var(--space) / 2) 0; }
       .chip>label { flex-grow:1; }
       .chip>button { flex-shrink:0; }
+
+      input[type="checkbox"] { width:0; margin:0; flex-grow:0; }
+      input[type="checkbox"]+label:after {
+        content:' '; display:inline-block;
+        width:1.2rem; height:1.2rem; line-height:1.2rem;
+        text-align:center; vertical-align:top;
+        border:var(--border);
+      }
+      input[type="checkbox"]:checked+label:after { content:'\2714'; }
     </style>
 
     <script type="text/javascript">
@@ -125,22 +159,39 @@
   </head>
 
   <body>
+    <label>* 파일 불러오기 · 저장하기</label>
+    <div class="wrap">
+      <p>
+        충돌을 방지하기 위해 하나의 파일만 불러올 수 있으므로
+        <br />다른 파일을 관리하고싶으실 땐 (저장 후) 새로고침하여 사용해주세요.
+      </p>
+      <div id="file">
+        <form>
+          <input type="file" accept=".json,.js" />
+          <label>파일 열기</label>
+        </form>
+        <span>─저장→</span>
+        <ul>
+          <li><button id="saveAsJson">JSON</button></li>
+          <li><button id="saveAsJs">JS</button></li>
+        </ul>
+      </div>
+    </div>
+
     <label>* 종합 설정</label>
     <div class="wrap">
       <p>
         가장 기본적인 부분
         <br />어플레이션 키는 응원 아이콘(Cheermote) 정보를 불러오는데 필요합니다.
       </p>
-      <ul id="root">
+      <ul>
         <li>
           <label>접속할 채널 아이디</label>
           <input data-name="Channel" data-type="text" type="text">
-        </li>
-        <li>
+        </li><li>
           <label>트위치 어플리케이션 키</label>
           <input data-name="Key" data-type="text" type="text">
-        </li>
-        <li>
+        </li><li>
           <label>외부 설정파일 경로</label>
           <input data-name="Data.Uris" data-type="list" type="text">
         </li>
@@ -149,22 +200,229 @@
 
     <label>* 명령어 설정</label>
     <div class="wrap">
+      <p>
+        어떤 문자열로 명령어를 작동시킬 지와 명령어 사용 권한을 정합니다.
+        <br />접두어는 명령어 앞에 쓸 문자로 권장값은 !, !! 등입니다.
+        <br />사용 권한은 명령어를 쓸 수 있는 뱃지의 목록으로 비워두면 비활성화됩니다.
+        <br />대표적 뱃지 목록 :
+        <br /><ul>
+          <li>subscriber/0 - 구독자 (0 대신 최소 개월수를 입력할 수 있음)</li>
+          <li>moderator/0 - 매니저(진은검)</li>
+          <li>broadcaster/0 - 스트리머</li>
+        </ul>
+      </p>
+      <ul data-category="Command">
+        <li>
+          <label>접두어</label>
+          <input data-name="Prefix" data-type="text" type="text">
+        </li><li>
+          <label>명령어별 설정</label>
+          <ul data-category="List">
+            <li data-category="clear">
+              <label>청소</label>
+              <ul>
+                <li>
+                  <label>명령어</label>
+                  <input data-name="alias" data-type="list" type="text">
+                </li><li>
+                  <label>사용 권한</label>
+                  <input data-name="allow" data-type="list" type="text">
+                </li>
+              </ul>
+            </li>
+            <li data-category="theme">
+              <label>테마 변경</label>
+              <ul>
+                <li>
+                  <label>명령어</label>
+                  <input data-name="alias" data-type="list" type="text">
+                </li><li>
+                  <label>사용 권한</label>
+                  <input data-name="allow" data-type="list" type="text">
+                </li>
+              </ul>
+            </li>
+            <li data-category="style">
+              <label>테마 세부조정</label>
+              <ul>
+                <li>
+                  <label>명령어</label>
+                  <input data-name="alias" data-type="list" type="text">
+                </li><li>
+                  <label>사용 권한</label>
+                  <input data-name="allow" data-type="list" type="text">
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
 
     <label>* 테마 설정</label>
     <div class="wrap">
+      <ul data-category="Theme">
+        <li>
+          <label>테마 목록 상위 경로</label>
+          <input data-name="BaseUri" data-type="text" type="text">
+        </li><li>
+          <label>사용할 테마 이름</label>
+          <input data-name="FileName" data-type="text" type="text">
+        </li><li>
+          <label>로고 표시</label>
+          <input data-name="-.Error.Module_Success_Connect" data-type="bool"
+                 type="checkbox" id="Error.Module_Success_Connect">
+          <label for="Error.Module_Success_Connect"></label>
+        </li>
+      </ul>
     </div>
 
     <label>* 메세지 설정</label>
     <div class="wrap">
+      <p>
+        표시할 메세지의 최대 수 범위는 100 이하만 적용됩니다.
+        <br />자동 삭제 시간은 초 단위이며, 0 입력시 자동으로 삭제되지 않습니다.
+        <br />색채팅 권한 역시 명령어 권한처럼 뱃지 이름을 받습니다.
+      </p>
+      <ul data-category="Message">
+        <li>
+          <label>최대 메세지 수</label>
+          <input data-name="Maximum" data-type="number" type="text">
+        </li><li>
+          <label>자동 삭제 시간</label>
+          <input data-name="Timeout" data-type="number" type="text">
+        </li><li>
+          <label>링크 처리 설정</label>
+        </li><li>
+          <p>
+            유뷰트, 트위치 다시보기, 트위치 클립 링크를 처리합니다.
+            <br />제목, 업로더, 섬네일이 표시됩니다.
+          </p>
+        </li><li>
+          <ul data-category="Link"><li>
+            <label>링크 처리 활성화</label>
+            <input data-name="Enable" data-type="bool"
+                   type="checkbox" id="Message.Link.Enable">
+            <label for="Message.Link.Enable"></label>
+          </li></ul>
+        </li><li>
+          <label>색 관련 설정</label>
+        </li><li>
+          <ul data-category="Color">
+            <li>
+              <label>이름 색, 색채팅 처리 활성화</label>
+              <input data-name="Enable" data-type="bool"
+                     type="checkbox" id="Message.Color.Enable">
+              <label for="Message.Color.Enable"></label>
+            </li>
+            <li>
+              <label>기본 이름 색 목록</label>
+              <input data-name="List" data-type="list" type="text">
+            </li>
+            <li>
+              <label>색 채팅 사용 가능 권한</label>
+              <input data-name="ColorChat" data-type="list" type="text">
+            </li>
+          </ul>
+        </li><li>
+          <label>트윕 관련 설정</label>
+        </li><li>
+          <p>
+            채팅창에 표시된 트윕 후원 메세지를 처리합니다.
+            <br />메세지 양식은 트윕의 후원 채팅 메시지를 복붙합니다.
+          </p>
+        </li><li>
+          <ul data-category="Twip">
+            <li>
+              <label>메세지 처리 활성화</label>
+              <input data-name="Enable" data-type="bool"
+                     type="checkbox" id="Message.Twip.Enable">
+              <label for="Message.Twip.Enable"></label>
+            </li>
+            <li>
+              <label>메세지 양식</label>
+              <input data-name="Format" data-type="text" type="text"
+                     onchange="this.value = this.value
+                      .replace(/\{닉네임\}/g, `{name}`)
+                      .replace(/\{금액\}/g, `{value}`)
+                      .replace(/\{메시지\}/g, `{text}`)">
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
 
     <label>* 오류 설정</label>
     <div class="wrap">
-    </div>
-
-    <label>* 추가 설정</label>
-    <div class="wrap">
+      <p></p>
+      <ul data-category="Error">
+        <li>
+          <label>최대 메세지 수</label>
+          <input data-name="Maximum" data-type="number" type="text">
+        </li><li>
+          <label>자동 삭제 시간</label>
+          <input data-name="Timeout" data-type="number" type="text">
+        </li><li>
+          <label>오류 메세지를 자세히 표시</label>
+          <input data-name="Detailed" data-type="bool"
+                 type="checkbox" id="Error.Detailed">
+          <label for="Error.Detailed"></label>
+        </li><li>
+          <label>각 경우의 오류 메세지</label>
+        </li><li>
+          <ul>
+            <li>
+              <label>뱃지 정보 로드 실패</label>
+              <input data-name="Message_Fail_Badge" data-type="text" type="text">
+            </li><li>
+              <label>응원 이모티콘(cheermote) 정보 로드 실패</label>
+              <input data-name="Message_Fail_Cheer" data-type="text" type="text">
+            </li><li>
+              <label>트위치 어플리케이션 키가 설정되지 않음</label>
+              <input data-name="Message_Wrong_Cheer" data-type="text" type="text">
+            </li>
+          </ul>
+        </li><li>
+          <ul>
+            <li>
+              <label>테마에 일반 메세지 최상위요소가 없음</label>
+              <input data-name="Message_No_NormalRoot" data-type="text" type="text">
+            </li><li>
+              <label>테마에 오류 메세지 최상위요소가 없음</label>
+              <input data-name="Message_No_ErrorRoot" data-type="text" type="text">
+            </li>
+          </ul>
+        </li><li>
+          <ul>
+            <li>
+              <label>설정 파일 로드 실패</label>
+              <input data-name="Data_Fail_Config" data-type="text" type="text">
+            </li><li>
+              <label>테마 템플릿 로드 실패</label>
+              <input data-name="Data_Fail_Theme" data-type="text" type="text">
+            </li>
+          </ul>
+        </li><li>
+          <ul>
+            <li>
+              <label>트위치 채팅 서버 이상</label>
+              <input data-name="Irc_Notice" data-type="text" type="text">
+            </li><li>
+              <label>잘못된 채널 아이디</label>
+              <input data-name="Irc_Wrong_Channel" data-type="text" type="text">
+            </li><li>
+              <label>트위치 채팅 서버 연결 실패</label>
+              <input data-name="Irc_Fail_Connect" data-type="text" type="text">
+            </li><li>
+              <label>트위치 채팅 서버와 연결 종료</label>
+              <input data-name="Irc_Close_Connect" data-type="text" type="text">
+            </li><li>
+              <label>그 외 트위치 채팅 서버 오류</label>
+              <input data-name="Irc_Wrong_Message" data-type="text" type="text">
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
 
     <!-- 이벤트를 등록 -->
