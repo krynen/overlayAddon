@@ -95,64 +95,187 @@
     </style>
 
     <script type="text/javascript">
+      window.data = null;
+
+      /**
+       * 페이지 벗어나기 전 경고를 추가
+       * setWarn()으로 window의 beforeunload 이벤트 리스너를 추가
+       * unsetWarn()으로 제거
+       */
+      window.warned = false;
+      window.warnLeave = function(evt) {evt.returnValue = ""; };
+      window.setWarn = function() {
+        if (window.warned === false) {
+          window.addEventListener("beforeunload", window.warnLeave);
+          window.warned = true;
+        }
+      };
+      window.unsetWarn = function() {
+        if (window.warned === true) {
+          window.removeEventListener("beforeunload", window.warnLeave);
+          window.warned = false;
+        }
+      };
+
       /**
        * input type="text"의 너비를 조절
        * span요소를 만들고 그 offsetWidth를 이용
        */
       window.fit = function(el) {
         var span = document.createElement("span");
-        el.parentElement.appendChild(span);
+        document.body.appendChild(span);
         span.innerText = el.value;
         el.style.width = Math.max(
           span.offsetWidth,
           Number.parseFloat(getComputedStyle(el)["min-width"])
         ) + "px";
-        el.parentElement.removeChild(span);
+        document.body.removeChild(span);
       };
 
       /**
        * input with chips를 구현
        */
+      window.addChip = function(value, wrap) {
+        if ((value||"").match(/^\s*$/) !== null) { return; }
+
+        var chips = Array.from(wrap.querySelectorAll("*[data-value]"));
+        var values = chips.reduce( function(acc, cur) {
+          acc.push(cur.getAttribute("data-value"));
+          return acc;
+        }, [] );
+
+        if (values.indexOf(value) === -1) {
+          // chip 생성
+          var div = document.createElement("div");
+          div.classList.add("chip");
+          div.setAttribute("data-value", value);
+          var label = document.createElement("label");
+          label.innerText = value;
+          div.appendChild(label);
+          var button = document.createElement("button");
+          button.onclick = function() { wrap.removeChild(div); };
+          button.innerText = "-";
+          div.appendChild(button);
+          wrap.appendChild(div);
+        }
+      };
       window.addChipsInput = function(input, wrap) {
         var event = function() {
-          if ((this.value||"").match(/^\s*$/) !== null) { return; }
-
-          var chips = Array.from(wrap.querySelectorAll("*[data-value]"));
-          var values = chips.reduce( function(acc, cur) {
-            acc.push(cur.getAttribute("data-value"));
-            return acc;
-          }, [] );
-
-          if (values.indexOf(this.value) === -1) {
-            // chip 생성
-            var div = document.createElement("div");
-            div.classList.add("chip");
-            div.setAttribute("data-value", this.value);
-            var label = document.createElement("label");
-            label.innerText = this.value;
-            div.appendChild(label);
-            var button = document.createElement("button");
-            button.onclick = function() { wrap.removeChild(div); };
-            button.innerText = "-";
-            div.appendChild(button);
-            wrap.appendChild(div);
-          }
-          this.value = "";
-          window.fit(this);
+          window.addChip(input.value, wrap);
+          input.value = "";
+          window.fit(input);
         };
         input.addEventListener("paste", event);
         input.addEventListener("keyup", function(evt) {
-          if (evt.key === "Enter") { event.apply(input); }
+          if (evt.key === "Enter") { event(); }
         } );
         window.fit(input);
 
         var button = document.createElement("button");
-        button.onclick = function() { event.apply(input); }
+        button.onclick = function() { event(); }
         button.innerText = "+";
         if (input.nextSibling !== null) {
           input.parentElement.insertBefore(button, input.nextSibling);
         }
         else { input.parentElement.appendChild(button); }
+      };
+
+      /**
+       * 파일 로드
+       * input 이벤트 리스너에 추가
+       */
+      window.loadFile = function(el) {
+        var file = el.files[0];
+        if (!file) { return; }
+
+        var type = "";
+        if (file.type.match(/json/g) !== null) { type = "json"; }
+        else if (file.type.match(/(javascript)|(js)/g) !== null) { type = "js"; }
+
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+          switch(type) {
+            case "json":
+              window.data = JSON.parse(this.result) || {};
+              break;
+
+            case "js":    // 세션 설정을 로드
+              eval(this.result);
+              Object.keys(sessionStorage).some( function(key) {
+                if (key.match("data/config") !== null) {
+                  window.data = JSON.parse(sessionStorage.getItem(key));
+                  sessionStorage.removeItem(key);
+                  return true;
+                }
+              } );
+              break;
+
+            default: return;
+          }
+          [document.getElementById("file")].forEach( function(el) {
+            el.getElementsByTagName("label")[0].innerText = file.name;
+            el.getElementsByTagName("form")[0].removeChild(
+              el.getElementsByTagName("input")[0]
+            );
+          } );
+
+          // 불러온 데이터를 각 요소에 적용
+          Array.from(document.querySelectorAll("*[data-name]")).forEach( function(el) {
+            var name = el.getAttribute("data-name") || ""; 
+            if (name.length === 0) { return; }
+
+            // 요소에 대응되는 데이터 트리를 찾음
+            var tree = (function() {
+              var ret = [];
+              var element = el;
+              while (element !== null) {
+                var category = element.getAttribute("data-category");
+                if ((category||"").length > 0) { ret.unshift(category); }
+                element = element.parentElement;
+              }
+              return ret;
+            })();
+
+            tree = tree.concat(name.split("."));
+            tree.forEach( function(branch, ind) {
+              if (branch === "-") {
+                if (ind == 0) { tree.shift(); }
+                else { tree.splice(ind-1, 2); }
+              }
+            } );
+            
+            // 트리로부터 데이터를 추출
+            var data = tree.reduce( function(acc, cur) {
+              return acc[cur];
+            }, window.data );
+
+            // 타입에 맞추어 데이터를 등록
+            switch (el.getAttribute("data-type")) {
+              case "number":
+              case "text":
+                el.value = data;
+                el.dispatchEvent(new Event("change"));
+                break;
+
+              case "bool":
+                el.checked = data;
+                el.dispatchEvent(new Event("click"));
+                break;
+
+              case "list":
+                var type = data.type;
+                var chips = document.getElementById(el.getAttribute("data-chips-id"));
+                data.value.forEach( function(chip) {
+                  window.addChip(chip, chips);
+                } );
+                break;
+
+              default:
+                break;
+            }
+          } );
+        };
+        reader.readAsText(file);
       };
     </script>
 
@@ -162,7 +285,7 @@
 
   <body>
     <label>* 파일 불러오기 · 저장하기</label>
-    <div class="wrap">
+    <div class="wrap active">
       <p>
         충돌을 방지하기 위해 하나의 파일만 불러올 수 있으므로
         <br />다른 파일을 관리하고싶으실 땐 (저장 후) 새로고침하여 사용해주세요.
@@ -429,6 +552,21 @@
 
     <!-- 이벤트를 등록 -->
     <script type="text/javascript">
+      // file에 이벤트를 등록
+      [document.getElementById("file")].forEach( function(el) {
+        el = el.getElementsByTagName("form")[0];
+        var input = el.getElementsByTagName("input")[0];
+        var label = el.getElementsByTagName("label")[0];
+
+        input.ondragenter = function() { label.classList.add("active"); }
+        input.ondragleave = function() { label.classList.remove("active"); }
+        input.addEventListener("input", function() {
+          label.classList.remove("active");
+          window.setWarn();
+          window.loadFile(input);
+        });
+      } );
+
       // wrap에 이벤트 등록
       Array.from(document.getElementsByClassName("wrap")).forEach( function(el, ind) {
         var input = document.createElement("input");
@@ -460,8 +598,11 @@
 
       // list div에 이벤트 등록
       Array.from(document.querySelectorAll("*[data-type=list]")).forEach( function(el) {
+        var id = `chips_${Math.random().toString(36).substr(2, 9)}`;
+        el.setAttribute("data-chips-id", id);
         var chips = document.createElement("li");
         chips.classList.add("chips");
+        chips.id = id;
 
         if (el.parentElement.nextSibling !== null) {
           el.parentElement.parentElement.insertBefore(chips, el.parentElement.nextSibling); }
