@@ -559,7 +559,7 @@
           } );
 
           // 다른 설정 존재여부 적용
-          if (Object.keys(data).length>1 || Object.keys(data.Message).length>1) {
+          if (Object.keys(window.data).length>1 || Object.keys(window.data.Message).length>1) {
             document.getElementById("otherOptionCheck").checked = true;
           } else {
             document.getElementById("otherOptionCheck").checked = false;
@@ -853,7 +853,7 @@
         el.addEventListener("change", event);
       } );
 
-      //cleint와 basePath에 이벤트를 등록
+      // client와 basePath에 이벤트를 등록
       [
         document.getElementById("basePath"),
         document.getElementById("clientPath")
