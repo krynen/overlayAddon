@@ -56,6 +56,7 @@
       input[type="file"]+label.active { background:var(--right); color:var(--dark); }
 
       .wrap:not(.active) { display:none; }
+      .wrap { clear:left; }
       body>label {
         display:inline-block;
         clear:left; float:left;
@@ -65,10 +66,9 @@
         border:var(--border);
         margin:var(--space); padding:var(--space);
       }
-      .wrap ul ul { flex-grow:1; }
       body>label { margin-top:var(--space); }
-      li>label { margin-right:.5em; flex-shrink:0; }
-      li>label:after { content:" : "; }
+      li>label:not(:last-child) { margin-right:.5em; }
+      li>label:not(:last-child):after { content:" : "; }
       li>input { flex-grow:1; width:0; }
 
       li>input[data-type="list"] { margin-right:.5em; }
@@ -263,7 +263,7 @@
                 break;
 
               case "list":
-                var type = data.type;
+                el.setAttribute("data-list-type", data.type);
                 var chips = document.getElementById(el.getAttribute("data-chips-id"));
                 data.value.forEach( function(chip) {
                   window.addChip(chip, chips);
@@ -276,6 +276,109 @@
           } );
         };
         reader.readAsText(file);
+      };
+
+      /**
+       * 파일 저장
+       * button의 click 이벤트 리스너에 추가
+       */
+      window.saveFile = function(type) {
+        if (window.data === null) { window.data = {}; }
+
+        // 각 요소에서 데이터를 적용
+        Array.from(document.querySelectorAll("*[data-name]")).forEach( function(el) {
+          var name = el.getAttribute("data-name") || ""; 
+          if (name.length === 0) { return; }
+
+          // 타입에 맞추어 데이터를 변환
+          var data = null;
+          switch (el.getAttribute("data-type")) {
+            case "number":
+              // NaN이 되는 경우는 제외
+              if (!Number(el.value)) { data = Number(el.value); }
+              else { data = Number(el.getAttribute("data-default")); }
+              break;
+
+            case "text":
+              data = el.value;
+              break;
+
+            case "bool":
+              data = el.checked;
+              break;
+
+            case "list":
+              var chips = document.getElementById(el.getAttribute("data-chips-id"));
+              data = {
+                "type"  : el.getAttribute("data-list-type") || "replace",
+                "value" : Array.from(chips.querySelectorAll("*[data-value]"))
+                  .reduce( function(acc, cur) {
+                    acc.push(cur.getAttribute("data-value"));
+                    return acc;
+                  }, [] )
+              };
+              break;
+
+            default:
+              break;
+          }
+
+          // 요소에 대응되는 데이터 트리를 찾음
+          var tree = (function() {
+            var ret = [];
+            var element = el;
+            while (element !== null) {
+              var category = element.getAttribute("data-category");
+              if ((category||"").length > 0) { ret.unshift(category); }
+              element = element.parentElement;
+            }
+            return ret;
+          })();
+
+          tree = tree.concat(name.split("."));
+          tree.forEach( function(branch, ind) {
+            if (branch === "-") {
+              if (ind == 0) { tree.shift(); }
+              else { tree.splice(ind-1, 2); }
+            }
+          } );
+          
+          // 트리를 이용해 데이터를 등록
+          name = tree.pop();
+          tree.reduce( function(acc, cur) {
+            if (acc[cur] === undefined) { acc[cur] = {}; }
+            return acc[cur];
+          }, window.data )[name] = data;
+        } );
+
+        // 파일을 출력
+        var fileName = document.getElementById("file").getElementsByTagName("label")[0]
+          .innerText.split(".").slice(0, -1).join(".");
+        var output = "";
+        var blob = null;
+
+        if (type === "json") {
+          output = JSON.stringify(window.data, null, 2);
+          blob = new Blob([output], { type: "application/json;charset=utf-8" });
+        } else if (type === "js") {
+          // 세션 등록부를 포함해 작성
+          output = 
+            `(function() {\n` +
+            `  var key = "data/config/" + (document.scripts.length - 1);\n` +
+            `  var value = ${JSON.stringify(window.data)};\n` +
+            `  sessionStorage.setItem(key, JSON.stringify(value));\n` +
+            `})();`;
+          blob = new Blob([output], { type: "application/javascript;charset=utf-8" });
+        } else { return; }
+
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.click();
+
+        // 페이지 이탈 경고를 제거
+        window.unsetWarn();
       };
     </script>
 
@@ -343,9 +446,10 @@
         </li><li>
           <label>명령어별 설정</label>
           <ul data-category="List">
-            <li data-category="clear">
+            <li>
               <label>청소</label>
-              <ul>
+            </li><li>
+              <ul data-category="clear">
                 <li>
                   <label>명령어</label>
                   <input data-name="alias" data-type="list" type="text">
@@ -355,9 +459,10 @@
                 </li>
               </ul>
             </li>
-            <li data-category="theme">
+            <li>
               <label>테마 변경</label>
-              <ul>
+            </li><li>
+              <ul data-category="theme">
                 <li>
                   <label>명령어</label>
                   <input data-name="alias" data-type="list" type="text">
@@ -367,9 +472,10 @@
                 </li>
               </ul>
             </li>
-            <li data-category="style">
+            <li>
               <label>테마 세부조정</label>
-              <ul>
+            </li><li>
+              <ul data-category="style">
                 <li>
                   <label>명령어</label>
                   <input data-name="alias" data-type="list" type="text">
@@ -412,10 +518,10 @@
       <ul data-category="Message">
         <li>
           <label>최대 메세지 수</label>
-          <input data-name="Maximum" data-type="number" type="text">
+          <input data-name="Maximum" data-type="number" data-default="100" type="text">
         </li><li>
           <label>자동 삭제 시간</label>
-          <input data-name="Timeout" data-type="number" type="text">
+          <input data-name="Timeout" data-type="number" data-default="0" type="text">
         </li><li>
           <label>링크 처리 설정</label>
         </li><li>
@@ -483,10 +589,10 @@
       <ul data-category="Error">
         <li>
           <label>최대 메세지 수</label>
-          <input data-name="Maximum" data-type="number" type="text">
+          <input data-name="Maximum" data-type="number" data-default="100" type="text">
         </li><li>
           <label>자동 삭제 시간</label>
-          <input data-name="Timeout" data-type="number" type="text">
+          <input data-name="Timeout" data-type="number" data-default="0" type="text">
         </li><li>
           <label>오류 메세지를 자세히 표시</label>
           <input data-name="Detailed" data-type="bool"
@@ -566,6 +672,10 @@
           window.loadFile(input);
         });
       } );
+
+      // 버튼에 이벤트를 등록
+      document.getElementById("saveAsJs").onclick = function() { window.saveFile("js"); };
+      document.getElementById("saveAsJson").onclick = function() { window.saveFile("json"); };
 
       // wrap에 이벤트 등록
       Array.from(document.getElementsByClassName("wrap")).forEach( function(el, ind) {
