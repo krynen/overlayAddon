@@ -133,6 +133,20 @@
       };
 
       /**
+       * 경로를 최적화
+       * 윈도우식 경로가 입력되면 웹식으로 변경
+       */
+      window.pathReplace = function(el) {
+        if (el.value === "") { el.value = "./"; }
+        if (el.value.indexOf("\\") !== -1) {
+          el.value = el.value
+            .replace(/([A-Za-z]):\\(\\)?/, "file:///$1://")
+            .replace(/\\/g, "/");
+        }
+        if (el.value.length !== el.value.lastIndexOf("/") + 1) { el.value = el.value + "/"; }
+      };
+
+      /**
        * input with chips를 구현
        */
       window.addChip = function(value, wrap) {
@@ -252,6 +266,7 @@
             // 타입에 맞추어 데이터를 등록
             switch (el.getAttribute("data-type")) {
               case "number":
+              case "path":
               case "text":
                 el.value = data;
                 el.dispatchEvent(new Event("change"));
@@ -295,10 +310,12 @@
           switch (el.getAttribute("data-type")) {
             case "number":
               // NaN이 되는 경우는 제외
-              if (!Number(el.value)) { data = Number(el.value); }
+              if ((!Number(el.value)===false) && (el.value!=="")) { data = Number(el.value); }
               else { data = Number(el.getAttribute("data-default")); }
               break;
 
+            case "path":
+              if (el.value === "") { el.value = "./"; }
             case "text":
               data = el.value;
               break;
@@ -435,8 +452,8 @@
         <br />대표적 뱃지 목록 :
         <br /><ul>
           <li>subscriber/0 - 구독자 (0 대신 최소 개월수를 입력할 수 있음)</li>
-          <li>moderator/0 - 매니저(진은검)</li>
-          <li>broadcaster/0 - 스트리머</li>
+          <li>moderator/1 - 매니저(진은검)</li>
+          <li>broadcaster/1 - 스트리머</li>
         </ul>
       </p>
       <ul data-category="Command">
@@ -464,6 +481,11 @@
             </li><li>
               <ul data-category="theme">
                 <li>
+                  <label>활성화</label>
+                  <input data-name="enable" data-type="bool"
+                         type="checkbox" id="Message.Link.Enable">
+                  <label for="Message.Link.Enable"></label>
+                </li><li>
                   <label>명령어</label>
                   <input data-name="alias" data-type="list" type="text">
                 </li><li>
@@ -495,7 +517,7 @@
       <ul data-category="Theme">
         <li>
           <label>테마 목록 상위 경로</label>
-          <input data-name="BaseUri" data-type="text" type="text">
+          <input data-name="BaseUri" data-type="path" type="text">
         </li><li>
           <label>사용할 테마 이름</label>
           <input data-name="FileName" data-type="text" type="text">
@@ -592,7 +614,7 @@
           <input data-name="Maximum" data-type="number" data-default="100" type="text">
         </li><li>
           <label>자동 삭제 시간</label>
-          <input data-name="Timeout" data-type="number" data-default="0" type="text">
+          <input data-name="Timeout" data-type="number" data-default="5" type="text">
         </li><li>
           <label>오류 메세지를 자세히 표시</label>
           <input data-name="Detailed" data-type="bool"
@@ -706,6 +728,14 @@
         el.addEventListener("change", event);
       } );
 
+      // path input에 이벤트 등록
+      Array.from(document.querySelectorAll("*[data-type=path]")).forEach( function(el) {
+        window.pathReplace(el);
+
+        var event = function() { window.pathReplace(el); };
+        el.addEventListener("paste", event);
+        el.addEventListener("change", event);
+      } );
       // list div에 이벤트 등록
       Array.from(document.querySelectorAll("*[data-type=list]")).forEach( function(el) {
         var id = `chips_${Math.random().toString(36).substr(2, 9)}`;
@@ -718,7 +748,7 @@
           el.parentElement.parentElement.insertBefore(chips, el.parentElement.nextSibling); }
         else { el.parentElement.parentElement.appendChild(chips); }
         window.addChipsInput(el, chips);
-      })
+      } );
     </script>
   </body>
 </html>

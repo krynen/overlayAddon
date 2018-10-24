@@ -22,7 +22,7 @@ methods.Execute = async function(text) {
   if (config.Command.List.theme.enable !== true) { return; }
   
   var uri = location.href.split("?");
-  if (uri.length <= 1) { location.href = uri[0] + `?theme=${text[0]}`}
+  if (uri.length === 1) { location.href = uri[0] + `?theme=${text[0]}`}
   else {
     if (uri[1].match(/theme=([^&]*)/) !== null) {
       uri[1] = uri[1].replace(/theme=([^&]*)/, `theme=${text[0]}`)

@@ -25,7 +25,7 @@ var parent = null;
  * @param {Object} parentMessage parent.AddSubElement()의 message
  */
 methods.Set = function(message, parentMessage) {
-  if (config.Message.Twip.Enable && message.isTwip !== true) { return; }
+  if ((config.Message.Twip.Enable && message.isTwip) !== true) { return; }
 
   if (parentMessage.attr === undefined) { parentMessage.attr = {}; }
   parentMessage.attr["twip"] = "1";

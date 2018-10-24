@@ -11,7 +11,7 @@ var value =
  ******************************************/
 {
   // 접속할 채널 아이디
-  "Channel" : "ninja",
+  "Channel" : "",
   // 트위치 어플리케이션 클라이언트 아이디
   "Key"     : "",
 
@@ -49,7 +49,7 @@ var value =
 
   "Theme"   : {
     // 테마 템플릿들의 상위 경로
-    "BaseUri"   : "./example/theme/",
+    "BaseUri"   : "./data/theme/",
     // 테마 파일명
     "FileName"  : ""
   },

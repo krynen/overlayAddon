@@ -35,7 +35,7 @@ var send = function(text) {
 methods.Connect = function() {
   // 채널이름이 제대로 되었는지 파싱
   var channel = config.Channel;
-  if (typeof channel !=="string" || channel.match(/\W/) !== null) {
+  if (typeof channel!=="string" || channel==="" || channel.match(/\W/)!==null) {
     message.Error("Irc_Wrong_Channel");
   }
 

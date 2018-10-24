@@ -45,8 +45,8 @@ methods.Replace = async function(message, text, done) {
       if (youtube[1].split("&").some( function(el) {
         if ((el.split("=")||[])[0] !== "v") { return false; }
         else {
-          var id = el.split("=")[1];
-          var type = "youtube";
+          id = el.split("=")[1];
+          type = "youtube";
           return true;
         };
       } ) === false) { continue; }
@@ -104,7 +104,7 @@ methods.Connect = function() {
 
     data[el].uri = dat.uri;
     data[el].regExp = new RegExp(dat.regExp);
-    if (dat.replacer) { data[el].replacer = dat.replacer; }
+    if (dat.replacer) { data[el].replacer = new RegExp(dat.replacer); }
   } );
 };
 
