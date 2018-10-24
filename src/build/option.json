@@ -4,6 +4,7 @@
 	
 	"HTML_SOURCE_FILE" : "./src/html/client.html",
 	"HTML_TARGET_FILE" : "./client.html",
+	"HTML_TEST_FILE" : "./tester.html",
 
 	"BUILD_START_ENTRANCE_FILE" : "./src/js/main.js",
 	"BUILD_DEBUG_ENTRANCE_FILE" : "./src/js/debug.js",

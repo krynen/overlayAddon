@@ -61,7 +61,7 @@ methods.Replace = function(message, text, done) {
     var value = Number(match[2]);
     if (value === 0) { return; }                      // cheer0 등 허위 어절을 무시
     var index = data.list[prefix].reduce( function(acc, cur, ind) {
-      if (cur["min_bits"] < value) { return ind; }
+      if (cur["min_bits"] <= value) { return ind; }
       return acc;
     }, 0);
 

@@ -38,7 +38,7 @@ var CopyScript = function() {
  * @param {string} entrace 진입점 파일의 경로
  * return {bool}
  */
-var WriteScript = function(entrance, isUglify) {
+var WriteScript = function(entrance, isUglify, targetPath) {
   // 진입점으로부터 browserify를 이용해 스크립트 생성
   return new Promise( function(resolve, reject) {
     // 제대로 읽을 수 없는 확장자를 읽기 위해 transform을 구현
@@ -80,7 +80,7 @@ var WriteScript = function(entrance, isUglify) {
       // uglify된 스크립트를 html에 끼워넣기
       var html = fs.readFileSync(BUILD_OPTION.HTML_SOURCE_FILE, "utf8").split("</body>");
       html[html.length-2] += "<script>" + script + "</script>";
-      fs.writeFileSync(BUILD_OPTION.HTML_TARGET_FILE, html.join("</body>"));
+      fs.writeFileSync(targetPath, html.join("</body>"));
 
       resolve(null);
     } );
@@ -142,13 +142,15 @@ var ExecuteBrowser = function() {
   switch (process.argv[2]) {
     case "debug":
       CopyScript();
-      WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, false)
+      WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, false, BUILD_OPTION.HTML_TARGET_FILE)
         .then( ExecuteBrowser, console.log );
       break;
 
     case "start":
       CopyScript();
-      WriteScript(BUILD_OPTION.BUILD_START_ENTRANCE_FILE, true)
+      WriteScript(BUILD_OPTION.BUILD_DEBUG_ENTRANCE_FILE, true, BUILD_OPTION.HTML_TEST_FILE)
+        .then( ()=>{}, console.log );
+      WriteScript(BUILD_OPTION.BUILD_START_ENTRANCE_FILE, true, BUILD_OPTION.HTML_TARGET_FILE)
         .then( ()=>{}, console.log );
       break;
 
