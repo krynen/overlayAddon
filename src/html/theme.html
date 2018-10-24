@@ -57,10 +57,10 @@
       0%, 65%, 75% { outline:none; }
       60%, 70% { outline:2px solid white; }
     }
-    [data-Subs], [data-Gift], [data-Cheer], [data-twip] {
+    [data-Subs], [data-Gift], [data-Raid], [data-Cheer], [data-twip] {
       animation:highlight step-end 2.5s 3;
     }
-    .Subs, .Gift, .Cheer, .Twip {
+    .Subs, .Gift, .Raid, .Cheer, .Twip {
       color:white; padding:3px; text-align:center;
     }
 
@@ -116,6 +116,7 @@
     </div>
     <virtual theme-type="SubsHead"></virtual>
     <virtual theme-type="GiftHead"></virtual>
+    <virtual theme-type="RaidHead"></virtual>
     <virtual theme-type="TwipHead"></virtual>
     <virtual theme-type="CheerHead"></virtual>
     <div theme-type="Text" class="Text"></div>
@@ -156,7 +157,7 @@
 </template>
 
 <template id="GiftHead">
-  <!-- NormalMessage의 SubsHead 내부에 추가되는 구독 선물 메세지 헤더
+  <!-- NormalMessage의 GiftHead 내부에 추가되는 구독 선물 메세지 헤더
     Root  : 최상위 element. data-name="[티어]" data-value="[선물 대상]"이 추가
     Name  : 선물한 유저 이름
     Text  : 선물 받는 유저 이름
@@ -174,6 +175,17 @@
   -->
   <div theme-type="Root" class="Cheer"><span>
     ☆ <virtual theme-type="Text"></virtual>비트 후원!! ☆
+  </span></div>
+</template>
+
+<template id="RaidHead">
+  <!-- NormalMessage의 RaidHead 내부에 추가되는 레이드 메세지 헤더
+       NormalMessage의 Root에 data-raid="1"을 추가시킴
+    Root  : 최상위 element. data-value="[레이드 인원]"이 추가
+    Name  : 응원한 유저 이름
+  -->
+  <div theme-type="Root" class="Raid"><span>
+    ☆ <virtaul theme-type="Text"></virtaul>명 레이드!! ☆
   </span></div>
 </template>
 

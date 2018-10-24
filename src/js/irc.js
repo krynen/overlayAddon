@@ -78,7 +78,7 @@ methods.Connect = function() {
  */
 methods.Response = function(line) {
   // 공백으로 각 구문을 구분
-  var phrase = line.split(/\s/);
+  var phrase = line.split(" ");
 
   // 핑에 자동응답하여 접속을 유지
   if (phrase[0] === "PING") {
@@ -150,6 +150,7 @@ methods.Response = function(line) {
           case "msg-param-sub-plan":               // 구독 티어
           case "msg-param-months":                 // 구독 개월 수
           case "msg-param-recipient-display-name": // 구독 선물 수령자
+          case "msg-type-viewerCount": // 레이드 인원
           */
             acc[keyValue[0]] = keyValue[1];
             break;
@@ -232,6 +233,15 @@ methods.Response = function(line) {
             return;
 
           case "raid":        // 다른 채널에서 온 레이드
+            message.Add( (function() {
+              var ret = list(
+                "name", "badges",                   // 기본 파라미터                 
+                "color",                            // 하위 모듈 파라미터
+                "msg-param-viewerCount"             // 레이드 하위 모듈 파라미터
+              );
+              ret.text = "";
+              return ret;
+            })() );
             return;
 
           case "ritual":      // 채널에 처음 온 시청자

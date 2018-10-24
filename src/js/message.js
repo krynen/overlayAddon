@@ -136,6 +136,7 @@ methods.AddSubElement = function(type, message) {
     case "NormalMessage":
     case "ErrorMessage":
     case "SubsHead":
+    case "RaidHead":
     case "GiftHead":
     case "CheerHead":
     case "Cheermote":
@@ -422,6 +423,12 @@ methods.Add = function(message) {
   delete message["recipient-display-name"];
   delete message["subs-plan"];
   this.Module.Subscrp.Set(message.Subscrp, message);    // (재)구독 및 구독 선물 처리
+
+  message.Raid = {
+    "count" : message["viewerCount"]
+  };
+  delete message["viewerCount"];
+  this.Module.Raid.Set(message.Raid, message);          // 레이드 처리
 
   message.Color = {
     "name"   : message.name,
