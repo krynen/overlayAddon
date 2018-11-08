@@ -11,9 +11,9 @@ var value =
  ******************************************/
 {
   // 접속할 채널 아이디
-  "Channel" : "",
+  "Channel" : "ninja",
   // 트위치 어플리케이션 클라이언트 아이디
-  "Key"     : "",
+  "Key"     : "j5yp2e0sel6hwn400npfomjkebl1zf",
 
   "Command" : {
     // 명령어 문자(열). 공백이 없을 것
@@ -56,9 +56,9 @@ var value =
 
   "Message" : {
     // 표시할 메세지의 최대 갯수 (0-100)
-    "Maximum" : 10,
+    "Maximum" : 20,
     // 메세지 자동 삭제 시간(초). 0으로 무제한
-    "Timeout" : 20,
+    "Timeout" : 0,
 
     "Color"   : {
       // 이름 색, 색채팅 등을 사용할지 여부
