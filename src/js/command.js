@@ -48,7 +48,7 @@ methods.Get = function(message, text, master) {
       var tier = Number(el.split("/")[1]);
       var name = el.split("/")[0];
 
-      // 각 유저 뱃지가 색채팅 권한 설정에 포함되어있는지 확인
+      // 각 유저 뱃지가 명령어 권한 설정에 포함되어있는지 확인
       return message.badges.some( function(badge) {
         var badgeName = badge.split("/")[0];
         if (badgeName !== name) { return false; }
