@@ -43,12 +43,16 @@ methods.Replace = async function(message, text, done) {
     // 각 경우 정보 추출
     if (youtube !== null) {
       if (youtube[1].split("&").some( function(el) {
-        if ((el.split("=")||[])[0] !== "v") { return false; }
+        // query key==v
+        if ((el.split("=")||[])[0] === "v") { id = el.split("=")[1]; }
         else {
-          id = el.split("=")[1];
-          type = "youtube";
-          return true;
-        };
+          // just path, not query
+          if ((el.split("=")||[])[1] === undefined) { id = el; }
+          // other queries
+          else { return false; }
+        }
+        type = "youtube";
+        return true;
       } ) === false) { continue; }
     }
     else if (clip !== null) {

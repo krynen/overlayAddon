@@ -70,7 +70,7 @@ debugData.Test.list = [
   "@badges=;color=;display-name=클립테스트2;emotes=;flags=;subscriber=0;turbo=0;user-id=0;user-type= :TESTER!TESTER@TESTER.tmi.twitch.tv PRIVMSG #BROADCASTER :https://clips.twitch.tv/IgnorantSpikyPiePoooound?tt_content=video_title",
   [
     "@badges=broadcaster/1;color=#FFFFFF;display-name=클립테스트3;emotes=;flags=;subscriber=0;turbo=0;user-id=0;user-type= :TESTER!TESTER@TESTER.tmi.twitch.tv PRIVMSG #BROADCASTER :https://clips.twitch.tv/SomeWrongClip 틀린 링크는 표시가 안 돼요",
-    "@badges=broadcaster/1;color=#FFFFFF;display-name=클립테스트3;emotes=;flags=;subscriber=0;turbo=0;user-id=0;user-type= :TESTER!TESTER@TESTER.tmi.twitch.tv PRIVMSG #BROADCASTER :하긴 틀린 링크니까 당연한가 이거나 보세요 https://clips.twitch.tv/TsundereBovineBubbleteaSaltBae"
+    "@badges=broadcaster/1;color=#FFFFFF;display-name=클립테스트3;emotes=;flags=;subscriber=0;turbo=0;user-id=0;user-type= :TESTER!TESTER@TESTER.tmi.twitch.tv PRIVMSG #BROADCASTER :하긴 틀린 링크니까 당연한가 이거나 보세요 https://www.twitch.tv/silverstream9173/clip/ArborealSuccessfulEagleSuperVinlin?filter=clips&range=all&sort=time"
   ],
   "@badges=;color=#8A2BE2;display-name=유튜브테스트;emotes=;flags=;mod=0;subscriber=0;turbo=0;user-id=0;user-type= :TESTER!TESTER@TESTER.tmi.twitch.tv PRIVMSG #BROADCASTER :이건 보고 트위치하고계십니까 https://www.youtube.com/watch?v=2bVgU2Tje84 J.E.B는 진리야"
 ];
