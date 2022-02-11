@@ -29,7 +29,7 @@
     "Link"   : {
       "youtube" : {
         "uri"      : "https://noembed.com/embed?url=http://youtu.be/{id}",
-        "regExp"   : "^(?:https?:\\/\\/)?(?:www\\.)?youtu(?:(?:be\\.com\/)|(?:\\.be\/))([\\w\\-=&]+)",
+        "regExp"   : "^(?:https?:\\/\\/)?(?:www\\.)?youtu(?:(?:be\\.com\\/)|(?:\\.be\\/))([\\w\\-=&]+)",
         "replacer" : "(attribution_link[^/]*\\/)|(embed\\/)|(watch(?:\/|\\?))|(v\/)"
       },
       "clip"    : {
